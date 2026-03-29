@@ -23,6 +23,8 @@ export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PropertyFormValues>({
     resolver: zodResolver(propertyFormSchema),
@@ -64,6 +66,24 @@ export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
         },
   });
 
+  function slugify(text: string) {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  const [autoSlug, setAutoSlug] = useState(mode === "create");
+
+  function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (autoSlug) {
+      setValue("slug", slugify(e.target.value));
+    }
+  }
+
   async function onSubmit(values: PropertyFormValues) {
     setServerError(null);
     const result =
@@ -92,12 +112,12 @@ export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
       <div className="admin-form-grid">
         <label>
           <span>Title</span>
-          <input {...register("title")} placeholder="Sea View Penthouse" />
+          <input {...register("title", { onChange: handleTitleChange })} placeholder="Sea View Penthouse" />
           {errors.title && <span className="field-error">{errors.title.message}</span>}
         </label>
         <label>
-          <span>Slug</span>
-          <input {...register("slug")} placeholder="sea-view-penthouse" />
+          <span>Slug {autoSlug && <span className="muted" style={{ fontSize: "0.8rem" }}>(auto)</span>}</span>
+          <input {...register("slug", { onChange: () => setAutoSlug(false) })} placeholder="sea-view-penthouse" />
           {errors.slug && <span className="field-error">{errors.slug.message}</span>}
         </label>
         <label>

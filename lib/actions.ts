@@ -9,6 +9,16 @@ export type ActionResult =
   | { success: true; id?: string }
   | { success: false; error: string };
 
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 // ── Property CRUD ──────────────────────────────────────────────
 
 export async function createProperty(data: unknown): Promise<ActionResult> {
@@ -16,6 +26,7 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
   const { latitude, longitude, price, ...rest } = parsed.data;
+  rest.slug = slugify(rest.slug);
 
   const property = await db.property.create({
     data: {
@@ -38,6 +49,7 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
   const { latitude, longitude, price, ...rest } = parsed.data;
+  rest.slug = slugify(rest.slug);
 
   await db.property.update({
     where: { id },
