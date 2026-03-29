@@ -3,6 +3,8 @@ import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllProperties } from "@/lib/site-data";
 import { PropertyActions } from "@/components/admin/property-actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPropertiesPage() {
   const properties = await getAllProperties();
 

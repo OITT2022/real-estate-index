@@ -1,6 +1,8 @@
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getDashboardStats } from "@/lib/site-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();
 

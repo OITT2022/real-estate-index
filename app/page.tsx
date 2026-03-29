@@ -7,6 +7,8 @@ import {
   getDistinctPropertyTypes,
 } from "@/lib/site-data";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };

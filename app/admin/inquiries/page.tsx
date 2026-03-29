@@ -1,6 +1,8 @@
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminInquiriesPage() {
   const inquiries = await db.inquiry.findMany({
     include: { property: { select: { title: true, slug: true } } },

@@ -3,6 +3,8 @@ import { PropertyForm } from "@/components/forms/property-form";
 import { ImageManager } from "@/components/admin/image-manager";
 import { getPropertyById } from "@/lib/site-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const property = await getPropertyById(id);

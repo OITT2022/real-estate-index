@@ -7,6 +7,8 @@ import { PropertyGallery } from "@/components/property/property-gallery";
 import { VideoEmbed } from "@/components/property/video-embed";
 import { getPropertyBySlug, getRelatedProperties } from "@/lib/site-data";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
