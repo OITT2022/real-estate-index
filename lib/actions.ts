@@ -277,10 +277,58 @@ export async function createInquiry(data: unknown): Promise<ActionResult> {
   const parsed = inquirySchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
-  const property = await db.property.findUnique({ where: { id: parsed.data.propertyId } });
+  const property = await db.property.findUnique({ where: { id: parsed.data.propertyId }, include: { project: true } });
   if (!property) return { success: false, error: "Property not found" };
 
-  await db.inquiry.create({ data: parsed.data });
+  await db.inquiry.create({
+    data: {
+      ...parsed.data,
+      projectId: property.projectId,
+    },
+  });
+  return { success: true };
+}
+
+export async function updateInquiryStatus(id: string, status: string): Promise<ActionResult> {
+  await db.inquiry.update({ where: { id }, data: { status } });
+  revalidatePath(`/admin/inquiries/${id}`);
+  revalidatePath("/admin/inquiries");
+  return { success: true };
+}
+
+export async function addInquiryNote(inquiryId: string, content: string): Promise<ActionResult> {
+  await db.inquiryNote.create({ data: { inquiryId, content } });
+  revalidatePath(`/admin/inquiries/${inquiryId}`);
+  return { success: true };
+}
+
+export async function addAppointment(inquiryId: string, dateTime: string, summary: string): Promise<ActionResult> {
+  await db.appointment.create({ data: { inquiryId, dateTime: new Date(dateTime), summary } });
+  revalidatePath(`/admin/inquiries/${inquiryId}`);
+  return { success: true };
+}
+
+export async function updateAppointmentStatus(id: string, status: string): Promise<ActionResult> {
+  const apt = await db.appointment.findUnique({ where: { id } });
+  if (!apt) return { success: false, error: "Appointment not found" };
+  await db.appointment.update({ where: { id }, data: { status } });
+  revalidatePath(`/admin/inquiries/${apt.inquiryId}`);
+  return { success: true };
+}
+
+export async function sendInquiryEmail(inquiryId: string, subject: string, body: string): Promise<ActionResult> {
+  const inquiry = await db.inquiry.findUnique({ where: { id: inquiryId } });
+  if (!inquiry) return { success: false, error: "Inquiry not found" };
+
+  const { sendEmail } = await import("@/lib/email");
+  const result = await sendEmail(inquiry.email, subject, body);
+  if (!result.success) return { success: false, error: result.error ?? "Failed to send email" };
+
+  await db.emailLog.create({
+    data: { inquiryId, subject, body, sentTo: inquiry.email },
+  });
+
+  revalidatePath(`/admin/inquiries/${inquiryId}`);
   return { success: true };
 }
 

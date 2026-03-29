@@ -6,7 +6,10 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminInquiriesPage() {
   const inquiries = await db.inquiry.findMany({
-    include: { property: { select: { title: true, slug: true } } },
+    include: {
+      property: { select: { title: true } },
+      project: { select: { title: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -15,6 +18,8 @@ export default async function AdminInquiriesPage() {
     fullName: inq.fullName,
     email: inq.email,
     propertyTitle: inq.property.title,
+    projectTitle: inq.project?.title ?? null,
+    status: inq.status,
     date: inq.createdAt.toLocaleDateString(),
     message: inq.message,
   }));

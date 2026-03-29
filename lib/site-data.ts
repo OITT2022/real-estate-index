@@ -169,6 +169,21 @@ export async function getAllProjectsForSelect() {
   });
 }
 
+// ── Inquiries CRM ──────────────────────────────────────────────
+
+export async function getInquiryById(id: string) {
+  return db.inquiry.findUnique({
+    where: { id },
+    include: {
+      property: { select: { title: true, slug: true } },
+      project: { select: { title: true, slug: true } },
+      notes: { orderBy: { createdAt: "desc" } },
+      appointments: { orderBy: { dateTime: "desc" } },
+      emails: { orderBy: { sentAt: "desc" } },
+    },
+  });
+}
+
 // ── Admin Users ────────────────────────────────────────────────
 
 export async function getAllAdminUsers() {

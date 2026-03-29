@@ -653,6 +653,44 @@ textarea.inquiry-input {
   flex-shrink: 0;
 }
 
+/* CRM Timeline */
+.crm-timeline {
+  display: grid;
+  gap: 0;
+  margin-top: 12px;
+}
+.crm-timeline-item {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 12px;
+  padding: 12px 0;
+  border-left: 2px solid var(--line);
+  margin-left: 9px;
+  padding-left: 20px;
+  position: relative;
+}
+.crm-dot {
+  position: absolute;
+  left: -7px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid white;
+}
+.crm-dot-inquiry { background: var(--muted); }
+.crm-dot-note { background: #3b82f6; }
+.crm-dot-appointment { background: #f59e0b; }
+.crm-dot-email { background: var(--accent); }
+.crm-timeline-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.crm-timeline-content {
+  min-width: 0;
+}
+
 .tile-layer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

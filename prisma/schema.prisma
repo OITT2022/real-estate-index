@@ -117,6 +117,7 @@ model Project {
   images            ProjectImage[]
   documents         ProjectDocument[]
   properties        Property[]
+  inquiries         Inquiry[]
 
   @@index([city])
   @@index([published, status])
@@ -152,14 +153,57 @@ model ProjectImage {
 model Inquiry {
   id         String   @id @default(cuid())
   propertyId String
+  projectId  String?
   fullName   String
   email      String
   phone      String?
   message    String
+  status     String   @default("new")
   createdAt  DateTime @default(now())
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  notes      InquiryNote[]
+  appointments Appointment[]
+  emails     EmailLog[]
 
   @@index([propertyId, createdAt])
+  @@index([projectId])
+  @@index([status])
+}
+
+model InquiryNote {
+  id         String   @id @default(cuid())
+  inquiryId  String
+  content    String
+  createdBy  String?
+  createdAt  DateTime @default(now())
+  inquiry    Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+
+  @@index([inquiryId, createdAt])
+}
+
+model Appointment {
+  id         String   @id @default(cuid())
+  inquiryId  String
+  dateTime   DateTime
+  summary    String
+  status     String   @default("scheduled")
+  createdAt  DateTime @default(now())
+  inquiry    Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+
+  @@index([inquiryId, dateTime])
+}
+
+model EmailLog {
+  id         String   @id @default(cuid())
+  inquiryId  String
+  subject    String
+  body       String
+  sentTo     String
+  sentAt     DateTime @default(now())
+  inquiry    Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+
+  @@index([inquiryId, sentAt])
 }
 
 model HeroImage {
