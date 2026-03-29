@@ -44,6 +44,7 @@ model Property {
   parking           Boolean         @default(false)
   balcony           Boolean         @default(false)
   videoUrl          String?
+  websiteUrl        String?
   sellerName        String
   sellerEmail       String
   sellerPhone       String

@@ -20,6 +20,7 @@ export const propertyFormSchema = z.object({
   parking: z.boolean(),
   balcony: z.boolean(),
   videoUrl: z.string().optional().or(z.literal("")),
+  websiteUrl: z.string().optional().or(z.literal("")),
   sellerName: z.string().min(2, "Seller name is required"),
   sellerEmail: z.string().email("Valid email required"),
   sellerPhone: z.string().min(5, "Phone is required"),

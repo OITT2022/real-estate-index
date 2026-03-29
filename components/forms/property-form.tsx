@@ -49,6 +49,7 @@ export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
           parking: property.parking,
           balcony: property.balcony,
           videoUrl: property.videoUrl ?? "",
+          websiteUrl: property.websiteUrl ?? "",
           sellerName: property.sellerName,
           sellerEmail: property.sellerEmail,
           sellerPhone: property.sellerPhone,
@@ -198,6 +199,11 @@ export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
       <label>
         <span>Video URL</span>
         <input {...register("videoUrl")} placeholder="https://example.com/video" />
+      </label>
+
+      <label>
+        <span>Website URL</span>
+        <input {...register("websiteUrl")} placeholder="https://example.com" />
       </label>
 
       <div className="admin-form-grid">
