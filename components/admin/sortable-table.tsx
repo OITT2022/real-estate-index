@@ -60,18 +60,22 @@ export function SortableTable<T>({ data, columns, getKey, gridTemplate, actions,
   return (
     <div className="card">
       <div className="st-row st-header muted" style={{ gridTemplateColumns: tpl }}>
-        {columns.map((col) => (
-          <div
-            key={col.key}
-            className="sortable-header"
-            onClick={() => handleSort(col.key)}
-          >
-            {col.label}
-            {sortKey === col.key && (
-              <span className="sort-arrow">{sortDir === "asc" ? " ▲" : " ▼"}</span>
-            )}
-          </div>
-        ))}
+        {columns.map((col) =>
+          col.label ? (
+            <div
+              key={col.key}
+              className="sortable-header"
+              onClick={() => handleSort(col.key)}
+            >
+              {col.label}
+              {sortKey === col.key && (
+                <span className="sort-arrow">{sortDir === "asc" ? " ▲" : " ▼"}</span>
+              )}
+            </div>
+          ) : (
+            <div key={col.key} />
+          )
+        )}
         {actions && <div>Actions</div>}
       </div>
 
