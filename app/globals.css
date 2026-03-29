@@ -305,11 +305,15 @@ button { cursor: pointer; }
   gap: 12px;
   align-items: center;
 }
+.st-row > div {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .st-header {
   padding-bottom: 8px;
 }
 .st-row + .st-row {
-  padding-top: 14px;
   border-top: 1px solid var(--line);
 }
 .st-row:not(.st-header) {
