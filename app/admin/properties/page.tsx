@@ -15,6 +15,7 @@ export default async function AdminPropertiesPage() {
     price: Number(p.price),
     published: p.published,
     projectTitle: p.project?.title ?? null,
+    imageUrl: p.images.find((img) => img.isPrimary)?.url ?? p.images[0]?.url ?? null,
   }));
 
   return (

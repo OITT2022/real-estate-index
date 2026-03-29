@@ -11,6 +11,7 @@ type Row = {
   price: number;
   published: boolean;
   projectTitle: string | null;
+  imageUrl: string | null;
 };
 
 export function AdminPropertyTable({ rows }: { rows: Row[] }) {
@@ -18,9 +19,15 @@ export function AdminPropertyTable({ rows }: { rows: Row[] }) {
     <SortableTable
       data={rows}
       getKey={(r) => r.id}
-      gridTemplate="2fr 1fr 1fr 1fr 1fr"
+      gridTemplate="48px 2fr 1fr 1fr 1fr 1fr"
       emptyMessage="No properties yet. Create your first listing."
       columns={[
+        {
+          key: "image", label: "", getValue: () => "",
+          render: (r) => r.imageUrl
+            ? <img src={r.imageUrl} alt="" className="admin-thumb" />
+            : <div className="admin-thumb admin-thumb-empty" />,
+        },
         { key: "title", label: "Title", getValue: (r) => r.title },
         { key: "city", label: "City", getValue: (r) => r.city },
         { key: "price", label: "Price", getValue: (r) => r.price, render: (r) => <span>€{r.price.toLocaleString()}</span> },

@@ -15,6 +15,7 @@ export default async function AdminProjectsPage() {
     developerName: p.developerName,
     units: p._count.properties,
     published: p.published,
+    imageUrl: p.images.find((img) => img.isPrimary)?.url ?? p.images[0]?.url ?? null,
   }));
 
   return (

@@ -10,9 +10,7 @@ export function AdminSidebar() {
       <nav>
         <Link href="/admin/dashboard">Dashboard</Link>
         <Link href="/admin/properties">Properties</Link>
-        <Link href="/admin/properties/new">Add property</Link>
         <Link href="/admin/projects">Projects</Link>
-        <Link href="/admin/projects/new">Add project</Link>
         <Link href="/admin/inquiries">Inquiries</Link>
         <Link href="/admin/maps">Maps</Link>
         <button
