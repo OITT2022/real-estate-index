@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { projectFormSchema, type ProjectFormValues } from "@/lib/validations";
 import { createProject, updateProject } from "@/lib/actions";
+import { LocationPicker } from "@/components/map/location-picker";
 import type { Project } from "@prisma/client";
 
 type SerializedProject = Omit<Project, "createdAt" | "updatedAt"> & { createdAt?: unknown; updatedAt?: unknown };
@@ -24,6 +25,7 @@ export function ProjectForm({ mode, project, onCreated }: ProjectFormProps) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
@@ -113,18 +115,19 @@ export function ProjectForm({ mode, project, onCreated }: ProjectFormProps) {
           {errors.address && <span className="field-error">{errors.address.message}</span>}
         </label>
         <label>
-          <span>Latitude</span>
-          <input {...register("latitude")} type="number" step="any" placeholder="34.9056" />
-        </label>
-        <label>
-          <span>Longitude</span>
-          <input {...register("longitude")} type="number" step="any" placeholder="33.6232" />
-        </label>
-        <label>
           <span>Total Units</span>
           <input {...register("totalUnits")} type="number" placeholder="48" />
         </label>
       </div>
+
+      <LocationPicker
+        lat={watch("latitude") || 34.9056}
+        lng={watch("longitude") || 33.6232}
+        onLatChange={(v) => setValue("latitude", v)}
+        onLngChange={(v) => setValue("longitude", v)}
+      />
+      <input {...register("latitude")} type="hidden" />
+      <input {...register("longitude")} type="hidden" />
 
       <label>
         <span>Short Description</span>

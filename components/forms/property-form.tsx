@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { propertyFormSchema, type PropertyFormValues } from "@/lib/validations";
 import { createProperty, updateProperty } from "@/lib/actions";
+import { LocationPicker } from "@/components/map/location-picker";
 import type { Property } from "@prisma/client";
 
 type SerializedProperty = Omit<Property, "price"> & { price: number };
@@ -164,14 +165,19 @@ export function PropertyForm({ mode, property, projects, onCreated }: PropertyFo
           <span>Floor</span>
           <input {...register("floor")} placeholder="3rd" />
         </label>
-        <label>
-          <span>Latitude</span>
-          <input {...register("latitude")} type="number" step="any" placeholder="34.9056" />
-        </label>
-        <label>
-          <span>Longitude</span>
-          <input {...register("longitude")} type="number" step="any" placeholder="33.6232" />
-        </label>
+      </div>
+
+      <LocationPicker
+        lat={watch("latitude") || 34.9056}
+        lng={watch("longitude") || 33.6232}
+        onLatChange={(v) => setValue("latitude", v)}
+        onLngChange={(v) => setValue("longitude", v)}
+      />
+
+      <input {...register("latitude")} type="hidden" />
+      <input {...register("longitude")} type="hidden" />
+
+      <div className="admin-form-grid">
         <label>
           <span>Seller name</span>
           <input {...register("sellerName")} placeholder="Sales Office" />
