@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PropertyCard } from "@/components/property/property-card";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { PropertyMap } from "@/components/map/property-map";
+import { InquiryForm } from "@/components/forms/inquiry-form";
 import { VideoEmbed } from "@/components/property/video-embed";
 import { getProjectBySlug } from "@/lib/site-data";
 import { getMapSettings } from "@/lib/settings";
@@ -109,6 +110,12 @@ export default async function ProjectDetailPage({ params }: Props) {
               tileAttribution={mapSettings.tileAttribution}
               label={project.title}
             />
+            {project.properties.length > 0 && (
+              <InquiryForm
+                propertyId={project.properties[0].id}
+                propertyTitle={project.title}
+              />
+            )}
           </div>
         </div>
 
