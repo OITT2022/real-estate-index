@@ -16,6 +16,7 @@ export default async function AdminPropertiesPage() {
     published: p.published,
     projectTitle: p.project?.title ?? null,
     imageUrl: p.images.find((img) => img.isPrimary)?.url ?? p.images[0]?.url ?? null,
+    apiEnabled: p.apiEnabled,
   }));
 
   return (

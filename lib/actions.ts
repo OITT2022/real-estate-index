@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { deleteImage } from "@/lib/upload";
-import { propertyFormSchema, projectFormSchema, inquirySchema } from "@/lib/validations";
+import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema } from "@/lib/validations";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
 
 export type ActionResult =
   | { success: true; id?: string }
@@ -306,5 +308,87 @@ export async function saveMapSettings(data: {
   }
 
   revalidatePath("/");
+  return { success: true };
+}
+
+// ── API Clients ────────────────────────────────────────────────
+
+export async function createApiClient(data: unknown): Promise<ActionResult & { token?: string }> {
+  const parsed = apiClientFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  const token = crypto.randomBytes(48).toString("hex");
+  const tokenPrefix = token.substring(0, 8);
+  const tokenHash = await bcrypt.hash(token, 10);
+
+  const client = await db.apiClient.create({
+    data: {
+      name: parsed.data.name,
+      description: parsed.data.description || null,
+      tokenHash,
+      tokenPrefix,
+      active: parsed.data.active,
+      allowedPropertyFields: parsed.data.allowedPropertyFields,
+      allowedProjectFields: parsed.data.allowedProjectFields,
+      includeImages: parsed.data.includeImages,
+      includeDocuments: parsed.data.includeDocuments,
+    },
+  });
+
+  revalidatePath("/admin/api");
+  return { success: true, id: client.id, token };
+}
+
+export async function updateApiClient(id: string, data: unknown): Promise<ActionResult> {
+  const parsed = apiClientFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  await db.apiClient.update({
+    where: { id },
+    data: {
+      name: parsed.data.name,
+      description: parsed.data.description || null,
+      active: parsed.data.active,
+      allowedPropertyFields: parsed.data.allowedPropertyFields,
+      allowedProjectFields: parsed.data.allowedProjectFields,
+      includeImages: parsed.data.includeImages,
+      includeDocuments: parsed.data.includeDocuments,
+    },
+  });
+
+  revalidatePath("/admin/api");
+  revalidatePath(`/admin/api/${id}`);
+  return { success: true };
+}
+
+export async function regenerateApiClientToken(id: string): Promise<ActionResult & { token?: string }> {
+  const token = crypto.randomBytes(48).toString("hex");
+  const tokenPrefix = token.substring(0, 8);
+  const tokenHash = await bcrypt.hash(token, 10);
+
+  await db.apiClient.update({ where: { id }, data: { tokenHash, tokenPrefix } });
+
+  revalidatePath("/admin/api");
+  return { success: true, token };
+}
+
+export async function deleteApiClient(id: string): Promise<ActionResult> {
+  await db.apiClient.delete({ where: { id } });
+  revalidatePath("/admin/api");
+  return { success: true };
+}
+
+export async function toggleApiEnabled(type: "property" | "project", id: string): Promise<ActionResult> {
+  if (type === "property") {
+    const item = await db.property.findUnique({ where: { id } });
+    if (!item) return { success: false, error: "Property not found" };
+    await db.property.update({ where: { id }, data: { apiEnabled: !item.apiEnabled } });
+    revalidatePath("/admin/properties");
+  } else {
+    const item = await db.project.findUnique({ where: { id } });
+    if (!item) return { success: false, error: "Project not found" };
+    await db.project.update({ where: { id }, data: { apiEnabled: !item.apiEnabled } });
+    revalidatePath("/admin/projects");
+  }
   return { success: true };
 }

@@ -64,3 +64,15 @@ export const inquirySchema = z.object({
 });
 
 export type InquiryFormValues = z.infer<typeof inquirySchema>;
+
+export const apiClientFormSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  description: z.string().optional().or(z.literal("")),
+  allowedPropertyFields: z.array(z.string()),
+  allowedProjectFields: z.array(z.string()),
+  includeImages: z.boolean(),
+  includeDocuments: z.boolean(),
+  active: z.boolean(),
+});
+
+export type ApiClientFormValues = z.infer<typeof apiClientFormSchema>;

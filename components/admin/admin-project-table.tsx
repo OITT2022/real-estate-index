@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ProjectActions } from "@/components/admin/project-actions";
+import { ApiToggle } from "@/components/admin/api-toggle";
 import { SortableTable } from "@/components/admin/sortable-table";
 
 type Row = {
@@ -12,6 +13,7 @@ type Row = {
   units: number;
   published: boolean;
   imageUrl: string | null;
+  apiEnabled: boolean;
 };
 
 export function AdminProjectTable({ rows }: { rows: Row[] }) {
@@ -19,7 +21,7 @@ export function AdminProjectTable({ rows }: { rows: Row[] }) {
     <SortableTable
       data={rows}
       getKey={(r) => r.id}
-      gridTemplate="48px 2fr 1fr 1fr 1fr 1fr"
+      gridTemplate="48px 2fr 1fr 1fr 1fr 1fr 60px"
       emptyMessage="No projects yet. Create your first project."
       columns={[
         {
@@ -33,6 +35,10 @@ export function AdminProjectTable({ rows }: { rows: Row[] }) {
         { key: "developer", label: "Developer", getValue: (r) => r.developerName },
         { key: "units", label: "Properties", getValue: (r) => r.units },
         { key: "status", label: "Status", getValue: (r) => r.published ? "Published" : "Draft" },
+        {
+          key: "api", label: "API", getValue: (r) => r.apiEnabled ? "On" : "Off",
+          render: (r) => <ApiToggle type="project" id={r.id} enabled={r.apiEnabled} />,
+        },
       ]}
       actions={(r) => (
         <>

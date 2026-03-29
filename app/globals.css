@@ -323,6 +323,42 @@ button { cursor: pointer; }
 .sortable-header:hover {
   color: var(--accent);
 }
+.api-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.api-badge-on {
+  background: #dcfce7;
+  color: #166534;
+}
+.api-badge-off {
+  background: #f1f5f9;
+  color: #64748b;
+}
+.field-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px;
+}
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.field-checkbox:hover {
+  background: var(--surface-alt);
+}
 .admin-thumb {
   width: 48px;
   height: 36px;

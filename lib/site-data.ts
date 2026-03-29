@@ -169,6 +169,16 @@ export async function getAllProjectsForSelect() {
   });
 }
 
+// ── API Clients ────────────────────────────────────────────────
+
+export async function getAllApiClients() {
+  return db.apiClient.findMany({ orderBy: { createdAt: "desc" } });
+}
+
+export async function getApiClientById(id: string) {
+  return db.apiClient.findUnique({ where: { id } });
+}
+
 // ── Dashboard ──────────────────────────────────────────────────
 
 export async function getDashboardStats() {

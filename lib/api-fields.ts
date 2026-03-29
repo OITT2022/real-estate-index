@@ -1,0 +1,48 @@
+export const PROPERTY_API_FIELDS = [
+  { key: "title", label: "Title" },
+  { key: "slug", label: "Slug" },
+  { key: "shortDescription", label: "Short Description" },
+  { key: "description", label: "Description" },
+  { key: "price", label: "Price" },
+  { key: "currency", label: "Currency" },
+  { key: "city", label: "City" },
+  { key: "neighborhood", label: "Neighborhood" },
+  { key: "address", label: "Address" },
+  { key: "latitude", label: "Latitude" },
+  { key: "longitude", label: "Longitude" },
+  { key: "propertyType", label: "Property Type" },
+  { key: "bedrooms", label: "Bedrooms" },
+  { key: "bathrooms", label: "Bathrooms" },
+  { key: "areaSqm", label: "Area (sqm)" },
+  { key: "floor", label: "Floor" },
+  { key: "parking", label: "Parking" },
+  { key: "balcony", label: "Balcony" },
+  { key: "videoUrl", label: "Video URL" },
+  { key: "websiteUrl", label: "Website URL" },
+  { key: "sellerName", label: "Seller Name" },
+  { key: "sellerEmail", label: "Seller Email" },
+  { key: "sellerPhone", label: "Seller Phone" },
+  { key: "status", label: "Status" },
+  { key: "featured", label: "Featured" },
+] as const;
+
+export const PROJECT_API_FIELDS = [
+  { key: "title", label: "Title" },
+  { key: "slug", label: "Slug" },
+  { key: "shortDescription", label: "Short Description" },
+  { key: "description", label: "Description" },
+  { key: "city", label: "City" },
+  { key: "address", label: "Address" },
+  { key: "latitude", label: "Latitude" },
+  { key: "longitude", label: "Longitude" },
+  { key: "developerName", label: "Developer Name" },
+  { key: "completionDate", label: "Completion Date" },
+  { key: "totalUnits", label: "Total Units" },
+  { key: "videoUrl", label: "Video URL" },
+  { key: "websiteUrl", label: "Website URL" },
+  { key: "status", label: "Status" },
+  { key: "featured", label: "Featured" },
+] as const;
+
+export const ALL_PROPERTY_FIELD_KEYS = PROPERTY_API_FIELDS.map((f) => f.key);
+export const ALL_PROJECT_FIELD_KEYS = PROJECT_API_FIELDS.map((f) => f.key);

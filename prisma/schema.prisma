@@ -58,6 +58,7 @@ model Property {
   status            PropertyStatus  @default(DRAFT)
   published         Boolean         @default(false)
   featured          Boolean         @default(false)
+  apiEnabled        Boolean         @default(false)
   metaTitle         String?
   metaDescription   String?
   projectId         String?
@@ -71,6 +72,7 @@ model Property {
   @@index([published, status])
   @@index([featured])
   @@index([projectId])
+  @@index([apiEnabled, published, status])
 }
 
 model PropertyImage {
@@ -104,6 +106,7 @@ model Project {
   status            ProjectStatus  @default(DRAFT)
   published         Boolean        @default(false)
   featured          Boolean        @default(false)
+  apiEnabled        Boolean        @default(false)
   metaTitle         String?
   metaDescription   String?
   createdAt         DateTime       @default(now())
@@ -114,6 +117,7 @@ model Project {
 
   @@index([city])
   @@index([published, status])
+  @@index([apiEnabled, published, status])
 }
 
 model ProjectDocument {
@@ -121,7 +125,7 @@ model ProjectDocument {
   projectId   String
   url         String
   fileName    String
-  fileType    String   // "plan", "brochure", "other"
+  fileType    String
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -153,6 +157,21 @@ model Inquiry {
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@index([propertyId, createdAt])
+}
+
+model ApiClient {
+  id                    String   @id @default(cuid())
+  name                  String
+  description           String?
+  tokenHash             String   @unique
+  tokenPrefix           String
+  active                Boolean  @default(true)
+  allowedPropertyFields Json
+  allowedProjectFields  Json
+  includeImages         Boolean  @default(false)
+  includeDocuments      Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
 
 model SiteSetting {
