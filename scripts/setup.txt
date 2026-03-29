@@ -1,0 +1,13 @@
+1. Open the folder in VS Code
+2. Open Claude Code in the repo
+3. Ask Claude Code to read:
+   - README.md
+   - docs/PRODUCT_SPEC.md
+   - docs/PHASE_PLAN.md
+   - CLAUDE.md
+4. Run Phase 1 prompt from docs/CLAUDE_PROMPTS.md
+5. Install missing dependencies
+6. Configure .env
+7. Run Prisma generate and migration
+8. Run seed
+9. Continue phase by phase

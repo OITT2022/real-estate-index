@@ -1,0 +1,210 @@
+REAL ESTATE INDEX - IMPLEMENTATION INSTRUCTIONS
+==============================================
+
+Goal
+----
+Build and continue a real-estate index in VS Code using Claude Code.
+The project already includes a working scaffold with:
+- public home page
+- property details page
+- admin pages scaffold
+- Prisma schema
+- seed script
+- validation layer
+- demo data
+
+Recommended local environment
+-----------------------------
+1. Install Node.js 20 LTS or newer.
+2. Install PostgreSQL 15 or newer.
+3. Install VS Code.
+4. Install Git.
+5. Install Claude Code in VS Code and sign in.
+
+Step 1 - Open the project
+------------------------
+1. Extract the ZIP.
+2. Open the extracted folder in VS Code.
+3. Open the integrated terminal in VS Code.
+
+Step 2 - Install dependencies
+-----------------------------
+Run:
+
+npm install
+
+Optional packages for the next implementation phases:
+
+npm install react-hook-form @hookform/resolvers
+npm install leaflet react-leaflet
+npm install cloudinary resend
+
+Step 3 - Create environment file
+--------------------------------
+Copy the environment template:
+
+copy .env.example .env
+
+If you use macOS/Linux:
+
+cp .env.example .env
+
+Then update these values inside .env:
+- DATABASE_URL
+- NEXTAUTH_SECRET
+- NEXTAUTH_URL
+- ADMIN_SEED_EMAIL
+- ADMIN_SEED_PASSWORD
+
+Example DATABASE_URL:
+postgresql://postgres:postgres@localhost:5432/real_estate_index
+
+Step 4 - Create the database
+----------------------------
+Create a PostgreSQL database named:
+
+real_estate_index
+
+Example in psql:
+
+CREATE DATABASE real_estate_index;
+
+Step 5 - Generate Prisma client and migrate
+-------------------------------------------
+Run:
+
+npx prisma generate
+npx prisma migrate dev --name init
+
+Step 6 - Seed demo data
+-----------------------
+Run:
+
+npm run seed
+
+This creates:
+- an admin user
+- demo properties
+- demo property images
+
+Step 7 - Run the app
+--------------------
+Run:
+
+npm run dev
+
+Open:
+- Public site: http://localhost:3000
+- Admin login: http://localhost:3000/admin/login
+- Admin dashboard: http://localhost:3000/admin/dashboard
+
+Current implementation status
+-----------------------------
+Already included:
+- homepage gallery of properties
+- property page with gallery, specs, video section, map placeholder, and seller contact form
+- admin dashboard scaffold
+- admin property list
+- new/edit property form scaffold
+- Prisma schema
+- validation schemas
+- seed script
+
+Still meant to be completed with Claude Code:
+- real authentication flow
+- protected admin routes
+- database-backed CRUD actions
+- real media upload
+- real inquiry persistence API and email notification
+- interactive map integration
+- search filters connected to database
+- SEO polish and sitemap
+
+Recommended implementation order inside Claude Code
+---------------------------------------------------
+Paste this request to Claude Code first:
+
+Read README.md, CLAUDE.md, docs/PRODUCT_SPEC.md, docs/PHASE_PLAN.md and docs/CLAUDE_PROMPTS.md.
+Then inspect the current codebase and continue from the existing scaffold instead of rebuilding from scratch.
+Start by implementing database-backed property CRUD, inquiry saving, and protected admin routes.
+Keep the architecture simple and production-oriented.
+
+Then continue phase by phase:
+
+Phase A - Authentication
+- Implement NextAuth credentials login for admin users.
+- Protect all /admin routes.
+- Redirect unauthenticated users to /admin/login.
+
+Phase B - Property CRUD
+- Build server actions or route handlers for create, update, delete.
+- Load property list from Prisma instead of demo data.
+- Use Zod validation.
+
+Phase C - Inquiry flow
+- Save inquiry form submissions to the Inquiry table.
+- Add success and error states.
+- Add an admin inquiries page.
+
+Phase D - Media
+- Add local upload first.
+- Then prepare Cloudinary integration.
+- Support multiple images, sort order, and primary image.
+
+Phase E - Map and search
+- Add Leaflet.
+- Add home page filters wired to query params and DB search.
+
+Phase F - Production polish
+- Add metadata generation.
+- Add robots.txt and sitemap.
+- Add loading.tsx and error.tsx where useful.
+
+Suggested Claude Code prompts
+-----------------------------
+1. Authentication prompt
+Implement NextAuth credentials authentication using the existing AdminUser Prisma model. Protect all admin routes and add a logout button.
+
+2. CRUD prompt
+Implement Prisma-backed CRUD for Property. Use the existing propertyFormSchema. Update admin list, create, and edit pages to save and read from the database.
+
+3. Inquiry prompt
+Implement an inquiry submission endpoint or server action that validates with inquirySchema and stores submissions in the Inquiry table.
+
+4. Upload prompt
+Add a local file-upload flow for property images under public/uploads, store metadata in PropertyImage, and support selecting a primary image.
+
+5. Map prompt
+Add Leaflet to the property page and show the property marker using latitude and longitude.
+
+6. Search prompt
+Add search filters on the home page for city, property type, bedrooms, and price range using URL query params and Prisma queries.
+
+Deployment suggestion
+---------------------
+Recommended first deployment stack:
+- Vercel for the app
+- Supabase or Railway for PostgreSQL
+- Cloudinary for media
+- Resend for inquiry emails
+
+Before deployment:
+- replace demo URLs
+- set production environment variables
+- switch admin password
+- test all admin forms
+- run npm run build
+
+Useful commands
+---------------
+npm install
+npx prisma generate
+npx prisma migrate dev --name init
+npm run seed
+npm run dev
+npm run build
+
+Final note
+----------
+This project is prepared as a strong implementation base for Claude Code in VS Code.
+It is not just a document pack anymore; it now includes a concrete scaffold you can continue building directly.

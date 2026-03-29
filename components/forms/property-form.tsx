@@ -1,0 +1,208 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { propertyFormSchema, type PropertyFormValues } from "@/lib/validations";
+import { createProperty, updateProperty } from "@/lib/actions";
+import type { Property } from "@prisma/client";
+
+type SerializedProperty = Omit<Property, "price"> & { price: number };
+
+type PropertyFormProps = {
+  mode: "create" | "edit";
+  property?: SerializedProperty | null;
+};
+
+export function PropertyForm({ mode, property }: PropertyFormProps) {
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<PropertyFormValues>({
+    resolver: zodResolver(propertyFormSchema),
+    defaultValues: property
+      ? {
+          title: property.title,
+          slug: property.slug,
+          shortDescription: property.shortDescription ?? "",
+          description: property.description,
+          price: Number(property.price),
+          currency: property.currency,
+          city: property.city,
+          neighborhood: property.neighborhood ?? "",
+          address: property.address,
+          latitude: property.latitude,
+          longitude: property.longitude,
+          propertyType: property.propertyType ?? "",
+          bedrooms: property.bedrooms ?? undefined,
+          bathrooms: property.bathrooms ?? undefined,
+          areaSqm: property.areaSqm ?? undefined,
+          floor: property.floor ?? "",
+          parking: property.parking,
+          balcony: property.balcony,
+          videoUrl: property.videoUrl ?? "",
+          sellerName: property.sellerName,
+          sellerEmail: property.sellerEmail,
+          sellerPhone: property.sellerPhone,
+          published: property.published,
+          featured: property.featured,
+          metaTitle: property.metaTitle ?? "",
+          metaDescription: property.metaDescription ?? "",
+        }
+      : {
+          published: false,
+          featured: false,
+          parking: false,
+          balcony: false,
+          currency: "EUR",
+        },
+  });
+
+  async function onSubmit(values: PropertyFormValues) {
+    setServerError(null);
+    const result =
+      mode === "create"
+        ? await createProperty(values)
+        : await updateProperty(property!.id, values);
+
+    if (!result.success) {
+      setServerError(result.error);
+      return;
+    }
+
+    if (mode === "create" && result.id) {
+      router.push(`/admin/properties/${result.id}`);
+    } else {
+      router.push("/admin/properties");
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="admin-form card">
+      {serverError && <p className="form-error">{serverError}</p>}
+
+      <div className="admin-form-grid">
+        <label>
+          <span>Title</span>
+          <input {...register("title")} placeholder="Sea View Penthouse" />
+          {errors.title && <span className="field-error">{errors.title.message}</span>}
+        </label>
+        <label>
+          <span>Slug</span>
+          <input {...register("slug")} placeholder="sea-view-penthouse" />
+          {errors.slug && <span className="field-error">{errors.slug.message}</span>}
+        </label>
+        <label>
+          <span>City</span>
+          <input {...register("city")} placeholder="Larnaca" />
+          {errors.city && <span className="field-error">{errors.city.message}</span>}
+        </label>
+        <label>
+          <span>Price</span>
+          <input {...register("price")} type="number" placeholder="820000" />
+          {errors.price && <span className="field-error">{errors.price.message}</span>}
+        </label>
+        <label>
+          <span>Property type</span>
+          <input {...register("propertyType")} placeholder="Apartment" />
+        </label>
+        <label>
+          <span>Bedrooms</span>
+          <input {...register("bedrooms")} type="number" placeholder="3" />
+        </label>
+        <label>
+          <span>Bathrooms</span>
+          <input {...register("bathrooms")} type="number" placeholder="2" />
+        </label>
+        <label>
+          <span>Area sqm</span>
+          <input {...register("areaSqm")} type="number" placeholder="146" />
+        </label>
+        <label>
+          <span>Address</span>
+          <input {...register("address")} placeholder="Skala Area, Larnaca" />
+          {errors.address && <span className="field-error">{errors.address.message}</span>}
+        </label>
+        <label>
+          <span>Neighborhood</span>
+          <input {...register("neighborhood")} placeholder="Optional" />
+        </label>
+        <label>
+          <span>Floor</span>
+          <input {...register("floor")} placeholder="3rd" />
+        </label>
+        <label>
+          <span>Latitude</span>
+          <input {...register("latitude")} type="number" step="any" placeholder="34.9056" />
+        </label>
+        <label>
+          <span>Longitude</span>
+          <input {...register("longitude")} type="number" step="any" placeholder="33.6232" />
+        </label>
+        <label>
+          <span>Seller name</span>
+          <input {...register("sellerName")} placeholder="Sales Office" />
+          {errors.sellerName && <span className="field-error">{errors.sellerName.message}</span>}
+        </label>
+        <label>
+          <span>Seller email</span>
+          <input {...register("sellerEmail")} type="email" placeholder="sales@example.com" />
+          {errors.sellerEmail && <span className="field-error">{errors.sellerEmail.message}</span>}
+        </label>
+        <label>
+          <span>Seller phone</span>
+          <input {...register("sellerPhone")} placeholder="+357-99-123456" />
+          {errors.sellerPhone && <span className="field-error">{errors.sellerPhone.message}</span>}
+        </label>
+      </div>
+
+      <label>
+        <span>Short description</span>
+        <input {...register("shortDescription")} placeholder="Brief summary for cards" />
+      </label>
+
+      <label>
+        <span>Description</span>
+        <textarea {...register("description")} placeholder="Full property description" rows={6} />
+        {errors.description && <span className="field-error">{errors.description.message}</span>}
+      </label>
+
+      <label>
+        <span>Video URL</span>
+        <input {...register("videoUrl")} placeholder="https://example.com/video" />
+      </label>
+
+      <div className="admin-form-grid">
+        <label>
+          <span>Meta title (SEO)</span>
+          <input {...register("metaTitle")} placeholder="Optional SEO title" />
+        </label>
+        <label>
+          <span>Meta description (SEO)</span>
+          <input {...register("metaDescription")} placeholder="Optional SEO description" />
+        </label>
+      </div>
+
+      <div className="checkbox-row">
+        <label><input type="checkbox" {...register("published")} /> Published</label>
+        <label><input type="checkbox" {...register("featured")} /> Featured</label>
+        <label><input type="checkbox" {...register("parking")} /> Parking</label>
+        <label><input type="checkbox" {...register("balcony")} /> Balcony</label>
+      </div>
+
+      <div className="admin-actions">
+        <button type="submit" className="button-primary" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : mode === "create" ? "Create property" : "Save changes"}
+        </button>
+        <button type="button" className="button-secondary" onClick={() => router.back()}>
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}

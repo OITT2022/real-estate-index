@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PropertyStatus {
+  DRAFT
+  ACTIVE
+  SOLD
+  ARCHIVED
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Property {
+  id                String          @id @default(cuid())
+  title             String
+  slug              String          @unique
+  shortDescription  String?
+  description       String
+  price             Decimal         @db.Decimal(14, 2)
+  currency          String          @default("EUR")
+  city              String
+  neighborhood      String?
+  address           String
+  latitude          Float
+  longitude         Float
+  propertyType      String?
+  bedrooms          Int?
+  bathrooms         Int?
+  areaSqm           Float?
+  floor             String?
+  parking           Boolean         @default(false)
+  balcony           Boolean         @default(false)
+  videoUrl          String?
+  sellerName        String
+  sellerEmail       String
+  sellerPhone       String
+  status            PropertyStatus  @default(DRAFT)
+  published         Boolean         @default(false)
+  featured          Boolean         @default(false)
+  metaTitle         String?
+  metaDescription   String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  images            PropertyImage[]
+  inquiries         Inquiry[]
+
+  @@index([city])
+  @@index([published, status])
+  @@index([featured])
+}
+
+model PropertyImage {
+  id          String   @id @default(cuid())
+  propertyId  String
+  url         String
+  altText     String?
+  sortOrder   Int      @default(0)
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, sortOrder])
+}
+
+model Inquiry {
+  id         String   @id @default(cuid())
+  propertyId String
+  fullName   String
+  email      String
+  phone      String?
+  message    String
+  createdAt  DateTime @default(now())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, createdAt])
+}
