@@ -2,11 +2,30 @@ import Link from "next/link";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllProperties } from "@/lib/site-data";
 import { PropertyActions } from "@/components/admin/property-actions";
+import { SortableTable } from "@/components/admin/sortable-table";
 
 export const dynamic = "force-dynamic";
 
+type Row = {
+  id: string;
+  title: string;
+  city: string;
+  price: number;
+  published: boolean;
+  projectTitle: string | null;
+};
+
 export default async function AdminPropertiesPage() {
   const properties = await getAllProperties();
+
+  const rows: Row[] = properties.map((p) => ({
+    id: p.id,
+    title: p.title,
+    city: p.city,
+    price: Number(p.price),
+    published: p.published,
+    projectTitle: p.project?.title ?? null,
+  }));
 
   return (
     <main className="admin-shell">
@@ -20,32 +39,25 @@ export default async function AdminPropertiesPage() {
           <Link href="/admin/properties/new" className="button-primary">Add property</Link>
         </div>
 
-        <div className="card">
-          <div className="admin-header-row muted">
-            <div>Title</div>
-            <div>City</div>
-            <div>Price</div>
-            <div>Status</div>
-            <div>Actions</div>
-          </div>
-          {properties.length === 0 && (
-            <div className="table-row">
-              <div className="muted">No properties yet. Create your first listing.</div>
-            </div>
+        <SortableTable
+          data={rows}
+          getKey={(r) => r.id}
+          gridTemplate="2fr 1fr 1fr 1fr 1fr"
+          emptyMessage="No properties yet. Create your first listing."
+          columns={[
+            { key: "title", label: "Title", getValue: (r) => r.title },
+            { key: "city", label: "City", getValue: (r) => r.city },
+            { key: "price", label: "Price", getValue: (r) => r.price, render: (r) => <span>€{r.price.toLocaleString()}</span> },
+            { key: "project", label: "Project", getValue: (r) => r.projectTitle, render: (r) => <span className={r.projectTitle ? "" : "muted"}>{r.projectTitle ?? "—"}</span> },
+            { key: "status", label: "Status", getValue: (r) => r.published ? "Published" : "Draft" },
+          ]}
+          actions={(r) => (
+            <>
+              <Link href={`/admin/properties/${r.id}`} className="button-secondary">Edit</Link>
+              <PropertyActions propertyId={r.id} published={r.published} />
+            </>
           )}
-          {properties.map((property) => (
-            <div key={property.id} className="table-row">
-              <div>{property.title}</div>
-              <div>{property.city}</div>
-              <div>€{Number(property.price).toLocaleString()}</div>
-              <div>{property.published ? "Published" : "Draft"}</div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <Link href={`/admin/properties/${property.id}`} className="button-secondary">Edit</Link>
-                <PropertyActions propertyId={property.id} published={property.published} />
-              </div>
-            </div>
-          ))}
-        </div>
+        />
       </section>
     </main>
   );

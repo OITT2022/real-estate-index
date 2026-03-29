@@ -300,6 +300,23 @@ button { cursor: pointer; }
   padding: 14px 0;
   border-top: 1px solid var(--line);
 }
+.sortable-header-row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 8px;
+}
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+.sortable-header:hover {
+  color: var(--accent);
+}
+.sort-arrow {
+  font-size: 0.7rem;
+}
 .admin-form {
   display: grid;
   gap: 16px;
