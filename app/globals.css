@@ -335,14 +335,25 @@ button { cursor: pointer; }
   color: #dc2626;
   font-size: 0.85rem;
 }
-.website-btn {
-  display: inline-flex;
+.website-banner {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  white-space: nowrap;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: white;
+  border-radius: 18px;
   font-weight: 600;
-  font-size: 1rem;
-  height: fit-content;
+  font-size: 1.05rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.25);
+}
+.website-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.35);
+}
+.website-banner-arrow {
+  font-size: 1.4rem;
 }
 .property-card-image {
   aspect-ratio: 16 / 10;

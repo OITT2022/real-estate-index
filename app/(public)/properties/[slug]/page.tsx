@@ -42,25 +42,25 @@ export default async function PropertyPage({ params }: Props) {
             <h1>{property.title}</h1>
             <p className="muted">{property.address}</p>
           </div>
-          <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
-            <div className="card">
-              <p className="muted">Asking price</p>
-              <div className="price-line">€{Number(property.price).toLocaleString()}</div>
-            </div>
-            {property.websiteUrl && (
-              <a
-                href={property.websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="button-primary website-btn"
-              >
-                Visit Website
-              </a>
-            )}
+          <div className="card">
+            <p className="muted">Asking price</p>
+            <div className="price-line">€{Number(property.price).toLocaleString()}</div>
           </div>
         </div>
 
         <PropertyGallery title={property.title} images={property.images} />
+
+        {property.websiteUrl && (
+          <a
+            href={property.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="website-banner"
+          >
+            <span className="website-banner-text">Visit Property Website</span>
+            <span className="website-banner-arrow">&#8599;</span>
+          </a>
+        )}
 
         <div className="details-grid">
           <section className="card">
