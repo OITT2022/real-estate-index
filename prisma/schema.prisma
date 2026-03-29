@@ -159,6 +159,17 @@ model Inquiry {
   @@index([propertyId, createdAt])
 }
 
+model HeroImage {
+  id        String   @id @default(cuid())
+  url       String
+  altText   String?
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([active, sortOrder])
+}
+
 model ApiClient {
   id                    String   @id @default(cuid())
   name                  String

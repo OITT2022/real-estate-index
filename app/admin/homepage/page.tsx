@@ -1,0 +1,26 @@
+import { AdminSidebar } from "@/components/layout/admin-sidebar";
+import { HeroImageManager } from "@/components/admin/hero-image-manager";
+import { getAllHeroImages } from "@/lib/site-data";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminHomepagePage() {
+  const images = await getAllHeroImages();
+
+  return (
+    <main className="admin-shell">
+      <AdminSidebar />
+      <section className="admin-content">
+        <h1>Home Page</h1>
+        <p className="muted">
+          Manage the hero image on the right side of the homepage.
+          Upload multiple images and toggle which ones are active.
+          If multiple images are active, they will rotate as a slideshow.
+        </p>
+        <div style={{ marginTop: 20 }}>
+          <HeroImageManager images={images} />
+        </div>
+      </section>
+    </main>
+  );
+}

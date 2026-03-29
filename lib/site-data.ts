@@ -169,6 +169,19 @@ export async function getAllProjectsForSelect() {
   });
 }
 
+// ── Hero Images ────────────────────────────────────────────────
+
+export async function getAllHeroImages() {
+  return db.heroImage.findMany({ orderBy: { sortOrder: "asc" } });
+}
+
+export async function getActiveHeroImages() {
+  return db.heroImage.findMany({
+    where: { active: true },
+    orderBy: { sortOrder: "asc" },
+  });
+}
+
 // ── API Clients ────────────────────────────────────────────────
 
 export async function getAllApiClients() {

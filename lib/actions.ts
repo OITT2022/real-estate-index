@@ -311,6 +311,27 @@ export async function saveMapSettings(data: {
   return { success: true };
 }
 
+// ── Hero Images ────────────────────────────────────────────────
+
+export async function toggleHeroImageActive(id: string): Promise<ActionResult> {
+  const img = await db.heroImage.findUnique({ where: { id } });
+  if (!img) return { success: false, error: "Image not found" };
+  await db.heroImage.update({ where: { id }, data: { active: !img.active } });
+  revalidatePath("/admin/homepage");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function removeHeroImage(id: string): Promise<ActionResult> {
+  const img = await db.heroImage.findUnique({ where: { id } });
+  if (!img) return { success: false, error: "Image not found" };
+  await deleteImage(img.url);
+  await db.heroImage.delete({ where: { id } });
+  revalidatePath("/admin/homepage");
+  revalidatePath("/");
+  return { success: true };
+}
+
 // ── API Clients ────────────────────────────────────────────────
 
 export async function createApiClient(data: unknown): Promise<ActionResult & { token?: string }> {

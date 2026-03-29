@@ -1,9 +1,11 @@
 import { PropertyCard } from "@/components/property/property-card";
 import { ProjectCard } from "@/components/project/project-card";
 import { FilterBar } from "@/components/property/filter-bar";
+import { HeroSlideshow } from "@/components/property/hero-slideshow";
 import {
   getFeaturedProperties,
   getPublishedProjects,
+  getActiveHeroImages,
   searchProperties,
   getDistinctCities,
   getDistinctPropertyTypes,
@@ -26,10 +28,11 @@ export default async function HomePage({ searchParams }: Props) {
 
   const hasFilters = city || propertyType || bedrooms || minPrice || maxPrice;
 
-  const [properties, featured, projects, cities, propertyTypes] = await Promise.all([
+  const [properties, featured, projects, heroImages, cities, propertyTypes] = await Promise.all([
     searchProperties({ city, propertyType, bedrooms, minPrice, maxPrice }),
     hasFilters ? Promise.resolve([]) : getFeaturedProperties(),
     hasFilters ? Promise.resolve([]) : getPublishedProjects(),
+    getActiveHeroImages(),
     getDistinctCities(),
     getDistinctPropertyTypes(),
   ]);
@@ -63,11 +66,15 @@ export default async function HomePage({ searchParams }: Props) {
           </div>
 
           <aside className="hero-side hero-image-side">
-            <img
-              src="https://images.unsplash.com/photo-1580137189272-c9379f8864fd?w=800&q=80"
-              alt="Cyprus coastline with crystal clear sea"
-              className="hero-cover"
-            />
+            {heroImages.length > 0 ? (
+              <HeroSlideshow images={heroImages} />
+            ) : (
+              <img
+                src="https://images.unsplash.com/photo-1580137189272-c9379f8864fd?w=800&q=80"
+                alt="Cyprus coastline with crystal clear sea"
+                className="hero-cover"
+              />
+            )}
           </aside>
         </div>
       </section>

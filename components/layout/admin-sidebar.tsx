@@ -9,6 +9,7 @@ export function AdminSidebar() {
       <p className="eyebrow">Admin</p>
       <nav>
         <Link href="/admin/dashboard">Dashboard</Link>
+        <Link href="/admin/homepage">Home Page</Link>
         <Link href="/admin/properties">Properties</Link>
         <Link href="/admin/projects">Projects</Link>
         <Link href="/admin/inquiries">Inquiries</Link>

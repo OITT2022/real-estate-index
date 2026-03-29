@@ -17,14 +17,29 @@ export async function POST(req: NextRequest) {
   const file = formData.get("file") as File | null;
   const propertyId = formData.get("propertyId") as string | null;
   const projectId = formData.get("projectId") as string | null;
-  const documentType = formData.get("documentType") as string | null; // "plan" | "brochure" | "other"
+  const documentType = formData.get("documentType") as string | null;
+  const heroImage = formData.get("heroImage") as string | null;
 
-  if (!file || (!propertyId && !projectId)) {
-    return NextResponse.json({ error: "File and propertyId or projectId required" }, { status: 400 });
+  if (!file || (!propertyId && !projectId && !heroImage)) {
+    return NextResponse.json({ error: "File and target required" }, { status: 400 });
   }
 
   if (file.size > 20 * 1024 * 1024) {
     return NextResponse.json({ error: "File must be under 20MB" }, { status: 400 });
+  }
+
+  // Hero image upload
+  if (heroImage) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 });
+    }
+    const url = await uploadFile(file);
+    const maxOrder = await db.heroImage.aggregate({ _max: { sortOrder: true } });
+    const nextOrder = (maxOrder._max.sortOrder ?? -1) + 1;
+    const img = await db.heroImage.create({
+      data: { url, altText: file.name.replace(/\.[^.]+$/, ""), active: true, sortOrder: nextOrder },
+    });
+    return NextResponse.json(img);
   }
 
   // Document upload for projects (PDFs + images)
