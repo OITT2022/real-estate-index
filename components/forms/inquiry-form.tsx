@@ -36,43 +36,51 @@ export function InquiryForm({ propertyId, propertyTitle }: InquiryFormProps) {
 
   if (submitted) {
     return (
-      <div className="card inquiry-form">
-        <h3>Thank you!</h3>
-        <p className="muted">Your inquiry about {propertyTitle} has been sent. The seller will contact you soon.</p>
+      <div className="inquiry-card">
+        <div className="inquiry-success">
+          <div className="inquiry-success-icon">&#10003;</div>
+          <h3>Message sent!</h3>
+          <p>Your inquiry about <strong>{propertyTitle}</strong> has been delivered. The seller will contact you soon.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="card inquiry-form">
+    <form onSubmit={handleSubmit(onSubmit)} className="inquiry-card">
       <input type="hidden" {...register("propertyId")} />
-      <h3>Contact seller</h3>
-      <p className="muted">Ask about {propertyTitle}</p>
+      <div className="inquiry-header">
+        <div className="inquiry-icon">&#9993;</div>
+        <div>
+          <h3 style={{ margin: 0 }}>Interested in this property?</h3>
+          <p className="muted" style={{ margin: "4px 0 0" }}>Get in touch with the seller about {propertyTitle}</p>
+        </div>
+      </div>
+
       {serverError && <p className="form-error">{serverError}</p>}
 
-      <div className="admin-form-grid">
-        <label>
-          <span>Full name</span>
-          <input {...register("fullName")} placeholder="Your full name" />
-          {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
+      <div className="inquiry-fields">
+        <div className="inquiry-row">
+          <label className="inquiry-label">
+            <input {...register("fullName")} placeholder="Full name *" className="inquiry-input" />
+            {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
+          </label>
+          <label className="inquiry-label">
+            <input {...register("email")} type="email" placeholder="Email address *" className="inquiry-input" />
+            {errors.email && <span className="field-error">{errors.email.message}</span>}
+          </label>
+        </div>
+        <label className="inquiry-label">
+          <input {...register("phone")} placeholder="Phone number (optional)" className="inquiry-input" />
         </label>
-        <label>
-          <span>Email</span>
-          <input {...register("email")} type="email" placeholder="you@example.com" />
-          {errors.email && <span className="field-error">{errors.email.message}</span>}
-        </label>
-        <label>
-          <span>Phone</span>
-          <input {...register("phone")} placeholder="Optional" />
+        <label className="inquiry-label">
+          <textarea {...register("message")} placeholder="Hi, I'm interested in this property and would like to know more..." rows={4} className="inquiry-input" />
+          {errors.message && <span className="field-error">{errors.message.message}</span>}
         </label>
       </div>
-      <label>
-        <span>Message</span>
-        <textarea {...register("message")} placeholder="I would like more information about this property." rows={5} />
-        {errors.message && <span className="field-error">{errors.message.message}</span>}
-      </label>
-      <button type="submit" className="button-primary" disabled={isSubmitting}>
-        {isSubmitting ? "Sending..." : "Send inquiry"}
+
+      <button type="submit" className="inquiry-submit" disabled={isSubmitting}>
+        {isSubmitting ? "Sending..." : "Send Message"}
       </button>
     </form>
   );

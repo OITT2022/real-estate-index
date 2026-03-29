@@ -335,6 +335,113 @@ button { cursor: pointer; }
   color: #dc2626;
   font-size: 0.85rem;
 }
+/* Inquiry form */
+.inquiry-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+.inquiry-header {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.inquiry-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: white;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.inquiry-fields {
+  display: grid;
+  gap: 14px;
+}
+.inquiry-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.inquiry-label {
+  display: grid;
+  gap: 4px;
+}
+.inquiry-input {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  background: var(--surface-alt);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.inquiry-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+.inquiry-input::placeholder {
+  color: #94a3b8;
+}
+textarea.inquiry-input {
+  resize: vertical;
+  min-height: 100px;
+}
+.inquiry-submit {
+  width: 100%;
+  margin-top: 8px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+}
+.inquiry-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.3);
+}
+.inquiry-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.inquiry-success {
+  text-align: center;
+  padding: 20px 0;
+}
+.inquiry-success-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 16px;
+}
+.inquiry-success h3 {
+  margin: 0 0 8px;
+}
+.inquiry-success p {
+  color: var(--muted);
+  margin: 0;
+}
+
 .website-banner {
   display: flex;
   align-items: center;
@@ -593,6 +700,9 @@ button { cursor: pointer; }
   .admin-sidebar {
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+  .inquiry-row {
+    grid-template-columns: 1fr;
   }
   .lightbox-prev { left: 8px; }
   .lightbox-next { right: 8px; }
