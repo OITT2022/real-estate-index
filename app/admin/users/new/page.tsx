@@ -1,6 +1,8 @@
 import { AdminUserForm } from "@/components/forms/admin-user-form";
+import { checkPageAccess } from "@/lib/check-access";
 
-export default function NewUserPage() {
+export default async function NewUserPage() {
+  await checkPageAccess("users");
   return (
     <main className="section">
       <div className="container">

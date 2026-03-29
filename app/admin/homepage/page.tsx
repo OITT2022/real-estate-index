@@ -1,10 +1,12 @@
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { HeroImageManager } from "@/components/admin/hero-image-manager";
 import { getAllHeroImages } from "@/lib/site-data";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminHomepagePage() {
+  await checkPageAccess("homepage");
   const images = await getAllHeroImages();
 
   return (

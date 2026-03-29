@@ -2,10 +2,12 @@ import Link from "next/link";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllProperties } from "@/lib/site-data";
 import { AdminPropertyTable } from "@/components/admin/admin-property-table";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPropertiesPage() {
+  await checkPageAccess("properties");
   const properties = await getAllProperties();
 
   const rows = properties.map((p) => ({

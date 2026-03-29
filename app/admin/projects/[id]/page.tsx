@@ -4,10 +4,12 @@ import { ProjectImageManager } from "@/components/admin/project-image-manager";
 import { ProjectPropertiesManager } from "@/components/admin/project-properties-manager";
 import { ProjectDocumentManager } from "@/components/admin/project-document-manager";
 import { getProjectById, getAllProperties } from "@/lib/site-data";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
+  await checkPageAccess("projects");
   const { id } = await params;
   const [project, allProperties] = await Promise.all([
     getProjectById(id),

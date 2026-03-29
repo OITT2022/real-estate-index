@@ -1,9 +1,11 @@
 import { CreatePropertyFlow } from "@/components/admin/create-property-flow";
 import { getAllProjectsForSelect } from "@/lib/site-data";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewPropertyPage() {
+  await checkPageAccess("properties");
   const projects = await getAllProjectsForSelect();
 
   return (

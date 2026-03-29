@@ -1,6 +1,8 @@
 import { CreateProjectFlow } from "@/components/admin/create-project-flow";
+import { checkPageAccess } from "@/lib/check-access";
 
-export default function NewProjectPage() {
+export default async function NewProjectPage() {
+  await checkPageAccess("projects");
   return (
     <main className="section">
       <div className="container">

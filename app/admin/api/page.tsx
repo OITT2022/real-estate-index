@@ -2,10 +2,12 @@ import Link from "next/link";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllApiClients } from "@/lib/site-data";
 import { AdminApiClientTable } from "@/components/admin/admin-api-client-table";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminApiPage() {
+  await checkPageAccess("api");
   const clients = await getAllApiClients();
 
   const rows = clients.map((c) => ({

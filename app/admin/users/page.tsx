@@ -2,10 +2,12 @@ import Link from "next/link";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllAdminUsers } from "@/lib/site-data";
 import { AdminUserTable } from "@/components/admin/admin-user-table";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
+  await checkPageAccess("users");
   const users = await getAllAdminUsers();
 
   const rows = users.map((u) => ({

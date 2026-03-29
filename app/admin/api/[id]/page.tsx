@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { ApiClientForm } from "@/components/forms/api-client-form";
 import { getApiClientById } from "@/lib/site-data";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditApiClientPage({ params }: { params: Promise<{ id: string }> }) {
+  await checkPageAccess("api");
   const { id } = await params;
   const client = await getApiClientById(id);
 

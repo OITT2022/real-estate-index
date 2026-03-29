@@ -2,10 +2,12 @@ import { notFound } from "next/navigation";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getInquiryById } from "@/lib/site-data";
 import { InquiryCrm } from "@/components/admin/inquiry-crm";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function InquiryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await checkPageAccess("inquiries");
   const { id } = await params;
   const inquiry = await getInquiryById(id);
 

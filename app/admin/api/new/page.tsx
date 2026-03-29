@@ -1,6 +1,8 @@
 import { ApiClientForm } from "@/components/forms/api-client-form";
+import { checkPageAccess } from "@/lib/check-access";
 
-export default function NewApiClientPage() {
+export default async function NewApiClientPage() {
+  await checkPageAccess("api");
   return (
     <main className="section">
       <div className="container" style={{ maxWidth: 800 }}>

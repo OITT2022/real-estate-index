@@ -1,9 +1,11 @@
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getDashboardStats } from "@/lib/site-data";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
+  await checkPageAccess("dashboard");
   const stats = await getDashboardStats();
 
   return (

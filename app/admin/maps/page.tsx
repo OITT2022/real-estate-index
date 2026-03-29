@@ -1,10 +1,12 @@
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { MapSettingsForm } from "@/components/admin/map-settings-form";
 import { getMapSettings, MAP_TILE_LAYERS } from "@/lib/settings";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminMapsPage() {
+  await checkPageAccess("maps");
   const settings = await getMapSettings();
 
   return (

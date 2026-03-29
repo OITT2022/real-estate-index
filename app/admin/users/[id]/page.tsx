@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { AdminUserForm } from "@/components/forms/admin-user-form";
 import { getAdminUserById } from "@/lib/site-data";
+import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  await checkPageAccess("users");
   const { id } = await params;
   const user = await getAdminUserById(id);
 
