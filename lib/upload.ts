@@ -1,20 +1,12 @@
+import { put, del } from "@vercel/blob";
 import path from "path";
 import fs from "fs/promises";
-import { v2 as cloudinary } from "cloudinary";
 
-const useCloudinary = Boolean(process.env.CLOUDINARY_CLOUD_NAME);
-
-if (useCloudinary) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-}
+const useVercelBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
 export async function uploadImage(file: File): Promise<string> {
-  if (useCloudinary) {
-    return uploadToCloudinary(file);
+  if (useVercelBlob) {
+    return uploadToVercelBlob(file);
   }
   return uploadToLocal(file);
 }
@@ -33,21 +25,17 @@ async function uploadToLocal(file: File): Promise<string> {
   return `/uploads/${filename}`;
 }
 
-async function uploadToCloudinary(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
-
-  const result = await cloudinary.uploader.upload(base64, {
-    folder: "real-estate-index",
+async function uploadToVercelBlob(file: File): Promise<string> {
+  const blob = await put(file.name, file, {
+    access: "public",
+    addRandomSuffix: true,
   });
-
-  return result.secure_url;
+  return blob.url;
 }
 
 export async function deleteImage(url: string): Promise<void> {
-  if (useCloudinary && url.includes("cloudinary")) {
-    const publicId = url.split("/").slice(-2).join("/").replace(/\.[^.]+$/, "");
-    await cloudinary.uploader.destroy(publicId);
+  if (useVercelBlob && url.includes("vercel-storage.com")) {
+    await del(url);
   } else if (url.startsWith("/uploads/")) {
     const filepath = path.join(process.cwd(), "public", url);
     await fs.unlink(filepath).catch(() => {});

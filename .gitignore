@@ -5,3 +5,5 @@ node_modules/
 public/uploads/
 
 .vercel
+.env*.local
+.env.production

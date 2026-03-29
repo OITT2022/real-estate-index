@@ -1,4 +1,4 @@
-import { PropertyForm } from "@/components/forms/property-form";
+import { CreatePropertyFlow } from "@/components/admin/create-property-flow";
 
 export default function NewPropertyPage() {
   return (
@@ -6,8 +6,7 @@ export default function NewPropertyPage() {
       <div className="container">
         <p className="eyebrow">Admin</p>
         <h1>Create property</h1>
-        <p className="muted">Fill in the details and save. You will be redirected to upload images.</p>
-        <PropertyForm mode="create" />
+        <CreatePropertyFlow />
       </div>
     </main>
   );

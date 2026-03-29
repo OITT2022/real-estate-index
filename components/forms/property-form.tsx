@@ -13,9 +13,10 @@ type SerializedProperty = Omit<Property, "price"> & { price: number };
 type PropertyFormProps = {
   mode: "create" | "edit";
   property?: SerializedProperty | null;
+  onCreated?: (id: string) => void;
 };
 
-export function PropertyForm({ mode, property }: PropertyFormProps) {
+export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -75,7 +76,9 @@ export function PropertyForm({ mode, property }: PropertyFormProps) {
       return;
     }
 
-    if (mode === "create" && result.id) {
+    if (mode === "create" && result.id && onCreated) {
+      onCreated(result.id);
+    } else if (mode === "create" && result.id) {
       router.push(`/admin/properties/${result.id}`);
     } else {
       router.push("/admin/properties");
