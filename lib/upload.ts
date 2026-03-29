@@ -4,6 +4,13 @@ import fs from "fs/promises";
 
 const useVercelBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
+export async function uploadFile(file: File): Promise<string> {
+  if (useVercelBlob) {
+    return uploadToVercelBlob(file);
+  }
+  return uploadToLocal(file);
+}
+
 export async function uploadImage(file: File): Promise<string> {
   if (useVercelBlob) {
     return uploadToVercelBlob(file);

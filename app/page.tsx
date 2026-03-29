@@ -1,7 +1,9 @@
 import { PropertyCard } from "@/components/property/property-card";
+import { ProjectCard } from "@/components/project/project-card";
 import { FilterBar } from "@/components/property/filter-bar";
 import {
   getFeaturedProperties,
+  getPublishedProjects,
   searchProperties,
   getDistinctCities,
   getDistinctPropertyTypes,
@@ -24,9 +26,10 @@ export default async function HomePage({ searchParams }: Props) {
 
   const hasFilters = city || propertyType || bedrooms || minPrice || maxPrice;
 
-  const [properties, featured, cities, propertyTypes] = await Promise.all([
+  const [properties, featured, projects, cities, propertyTypes] = await Promise.all([
     searchProperties({ city, propertyType, bedrooms, minPrice, maxPrice }),
     hasFilters ? Promise.resolve([]) : getFeaturedProperties(),
+    hasFilters ? Promise.resolve([]) : getPublishedProjects(),
     getDistinctCities(),
     getDistinctPropertyTypes(),
   ]);
@@ -76,6 +79,19 @@ export default async function HomePage({ searchParams }: Props) {
             <div className="grid grid-3">
               {featured.map((property) => (
                 <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {projects.length > 0 && !hasFilters && (
+        <section className="section">
+          <div className="container">
+            <p className="eyebrow">Development projects</p>
+            <div className="grid grid-3">
+              {projects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
               ))}
             </div>
           </div>

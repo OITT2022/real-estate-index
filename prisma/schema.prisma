@@ -109,10 +109,24 @@ model Project {
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   images            ProjectImage[]
+  documents         ProjectDocument[]
   properties        Property[]
 
   @@index([city])
   @@index([published, status])
+}
+
+model ProjectDocument {
+  id          String   @id @default(cuid())
+  projectId   String
+  url         String
+  fileName    String
+  fileType    String   // "plan", "brochure", "other"
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sortOrder])
 }
 
 model ProjectImage {

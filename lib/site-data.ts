@@ -131,6 +131,7 @@ export async function getProjectBySlug(slug: string) {
     where: { slug, published: true, status: "ACTIVE" },
     include: {
       images: { orderBy: { sortOrder: "asc" } },
+      documents: { orderBy: { sortOrder: "asc" } },
       properties: {
         where: { published: true, status: "ACTIVE" },
         include: { images: { orderBy: { sortOrder: "asc" } } },
@@ -152,6 +153,7 @@ export async function getProjectById(id: string) {
     where: { id },
     include: {
       images: { orderBy: { sortOrder: "asc" } },
+      documents: { orderBy: { sortOrder: "asc" } },
       properties: {
         include: { images: { orderBy: { sortOrder: "asc" } } },
         orderBy: { createdAt: "desc" },

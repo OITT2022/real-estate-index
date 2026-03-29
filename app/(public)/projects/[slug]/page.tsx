@@ -75,6 +75,29 @@ export default async function ProjectDetailPage({ params }: Props) {
                 <VideoEmbed url={project.videoUrl} />
               </div>
             )}
+
+            {project.documents.length > 0 && (
+              <div style={{ marginTop: 20 }}>
+                <p className="eyebrow">Downloads</p>
+                <div className="doc-grid">
+                  {project.documents.map((doc) => (
+                    <a
+                      key={doc.id}
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="doc-card"
+                    >
+                      <span className="doc-icon">{doc.fileName.endsWith(".pdf") ? "📄" : "🖼️"}</span>
+                      <div>
+                        <strong>{doc.fileType === "plan" ? "Floor Plan" : doc.fileType === "brochure" ? "Brochure" : "Document"}</strong>
+                        <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>{doc.fileName}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           <div className="grid">

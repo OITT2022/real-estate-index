@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ProjectForm } from "@/components/forms/project-form";
 import { ProjectImageManager } from "@/components/admin/project-image-manager";
 import { ProjectPropertiesManager } from "@/components/admin/project-properties-manager";
+import { ProjectDocumentManager } from "@/components/admin/project-document-manager";
 import { getProjectById, getAllProperties } from "@/lib/site-data";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           <h1>Edit project</h1>
         </div>
         <ProjectImageManager projectId={project.id} images={project.images} />
+        <ProjectDocumentManager projectId={project.id} documents={project.documents} />
         <ProjectPropertiesManager
           projectId={project.id}
           linkedProperties={linkedProperties}

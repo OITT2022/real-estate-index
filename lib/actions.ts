@@ -255,6 +255,20 @@ export async function removeProjectImage(imageId: string): Promise<ActionResult>
   return { success: true };
 }
 
+// ── Project Documents ─────────────────────────────────────────
+
+export async function removeProjectDocument(docId: string): Promise<ActionResult> {
+  const doc = await db.projectDocument.findUnique({ where: { id: docId } });
+  if (!doc) return { success: false, error: "Document not found" };
+
+  await deleteImage(doc.url);
+  await db.projectDocument.delete({ where: { id: docId } });
+
+  revalidatePath(`/admin/projects/${doc.projectId}`);
+  revalidatePath("/projects");
+  return { success: true };
+}
+
 // ── Inquiries ──────────────────────────────────────────────────
 
 export async function createInquiry(data: unknown): Promise<ActionResult> {
