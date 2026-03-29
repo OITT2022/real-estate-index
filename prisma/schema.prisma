@@ -87,3 +87,9 @@ model Inquiry {
 
   @@index([propertyId, createdAt])
 }
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

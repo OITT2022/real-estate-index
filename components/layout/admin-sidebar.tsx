@@ -12,6 +12,7 @@ export function AdminSidebar() {
         <Link href="/admin/properties">Properties</Link>
         <Link href="/admin/properties/new">Add property</Link>
         <Link href="/admin/inquiries">Inquiries</Link>
+        <Link href="/admin/maps">Maps</Link>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}

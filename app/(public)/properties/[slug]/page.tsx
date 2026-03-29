@@ -6,6 +6,7 @@ import { PropertyCard } from "@/components/property/property-card";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { VideoEmbed } from "@/components/property/video-embed";
 import { getPropertyBySlug, getRelatedProperties } from "@/lib/site-data";
+import { getMapSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,10 @@ export default async function PropertyPage({ params }: Props) {
 
   if (!property) return notFound();
 
-  const related = await getRelatedProperties(property.slug, property.city);
+  const [related, mapSettings] = await Promise.all([
+    getRelatedProperties(property.slug, property.city),
+    getMapSettings(),
+  ]);
 
   return (
     <main className="section">
@@ -74,7 +78,14 @@ export default async function PropertyPage({ params }: Props) {
           </section>
 
           <div className="grid">
-            <PropertyMap lat={property.latitude} lng={property.longitude} />
+            <PropertyMap
+              lat={property.latitude}
+              lng={property.longitude}
+              zoom={mapSettings.defaultZoom}
+              tileUrl={mapSettings.tileUrl}
+              tileAttribution={mapSettings.tileAttribution}
+              label={property.title}
+            />
             <InquiryForm propertyId={property.id} propertyTitle={property.title} />
           </div>
         </div>

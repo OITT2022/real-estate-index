@@ -169,3 +169,30 @@ export async function createInquiry(data: unknown): Promise<ActionResult> {
 
   return { success: true };
 }
+
+// ── Settings ───────────────────────────────────────────────────
+
+export async function saveMapSettings(data: {
+  tileLayer: string;
+  defaultZoom: number;
+  defaultLat: number;
+  defaultLng: number;
+}): Promise<ActionResult> {
+  const settings = [
+    { key: "map_tile_layer", value: data.tileLayer },
+    { key: "map_default_zoom", value: String(data.defaultZoom) },
+    { key: "map_default_lat", value: String(data.defaultLat) },
+    { key: "map_default_lng", value: String(data.defaultLng) },
+  ];
+
+  for (const s of settings) {
+    await db.siteSetting.upsert({
+      where: { key: s.key },
+      update: { value: s.value },
+      create: { key: s.key, value: s.value },
+    });
+  }
+
+  revalidatePath("/");
+  return { success: true };
+}
