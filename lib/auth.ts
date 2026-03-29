@@ -17,12 +17,18 @@ export const authOptions: NextAuthOptions = {
         const user = await db.adminUser.findUnique({
           where: { email: credentials.email },
         });
-        if (!user) return null;
+        if (!user || !user.active) return null;
 
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!valid) return null;
 
-        return { id: user.id, email: user.email, name: user.name };
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          isSuperAdmin: user.isSuperAdmin,
+          allowedPages: user.allowedPages as string[],
+        };
       },
     }),
   ],
@@ -30,11 +36,20 @@ export const authOptions: NextAuthOptions = {
   pages: { signIn: "/admin/login" },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.id = user.id;
+      if (user) {
+        token.id = user.id;
+        token.isSuperAdmin = (user as { isSuperAdmin?: boolean }).isSuperAdmin;
+        token.allowedPages = (user as { allowedPages?: string[] }).allowedPages;
+      }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) (session.user as { id?: string }).id = token.id as string;
+      if (session.user) {
+        const u = session.user as { id?: string; isSuperAdmin?: boolean; allowedPages?: string[] };
+        u.id = token.id as string;
+        u.isSuperAdmin = token.isSuperAdmin as boolean;
+        u.allowedPages = token.allowedPages as string[];
+      }
       return session;
     },
   },

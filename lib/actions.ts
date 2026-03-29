@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { deleteImage } from "@/lib/upload";
-import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema } from "@/lib/validations";
+import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema, adminUserFormSchema } from "@/lib/validations";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 
@@ -308,6 +308,67 @@ export async function saveMapSettings(data: {
   }
 
   revalidatePath("/");
+  return { success: true };
+}
+
+// ── Admin Users ───────────────────────────────────────────────
+
+export async function createAdminUser(data: unknown): Promise<ActionResult> {
+  const parsed = adminUserFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  if (!parsed.data.password) return { success: false, error: "Password is required for new users" };
+
+  const existing = await db.adminUser.findUnique({ where: { email: parsed.data.email } });
+  if (existing) return { success: false, error: "A user with this email already exists" };
+
+  const passwordHash = await bcrypt.hash(parsed.data.password, 10);
+
+  await db.adminUser.create({
+    data: {
+      name: parsed.data.name,
+      email: parsed.data.email,
+      passwordHash,
+      isSuperAdmin: parsed.data.isSuperAdmin,
+      allowedPages: parsed.data.allowedPages,
+      active: parsed.data.active,
+    },
+  });
+
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
+export async function updateAdminUser(id: string, data: unknown): Promise<ActionResult> {
+  const parsed = adminUserFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  const updateData: Record<string, unknown> = {
+    name: parsed.data.name,
+    email: parsed.data.email,
+    isSuperAdmin: parsed.data.isSuperAdmin,
+    allowedPages: parsed.data.allowedPages,
+    active: parsed.data.active,
+  };
+
+  if (parsed.data.password) {
+    updateData.passwordHash = await bcrypt.hash(parsed.data.password, 10);
+  }
+
+  await db.adminUser.update({ where: { id }, data: updateData });
+
+  revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${id}`);
+  return { success: true };
+}
+
+export async function deleteAdminUser(id: string): Promise<ActionResult> {
+  const user = await db.adminUser.findUnique({ where: { id } });
+  if (!user) return { success: false, error: "User not found" };
+  if (user.isSuperAdmin) return { success: false, error: "Cannot delete a super admin" };
+
+  await db.adminUser.delete({ where: { id } });
+  revalidatePath("/admin/users");
   return { success: true };
 }
 

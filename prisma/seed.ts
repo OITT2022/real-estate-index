@@ -8,11 +8,12 @@ async function main() {
 
   await prisma.adminUser.upsert({
     where: { email: process.env.ADMIN_SEED_EMAIL || "admin@example.com" },
-    update: {},
+    update: { isSuperAdmin: true },
     create: {
       email: process.env.ADMIN_SEED_EMAIL || "admin@example.com",
       name: "Admin",
       passwordHash,
+      isSuperAdmin: true,
     },
   });
 

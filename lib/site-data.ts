@@ -169,6 +169,16 @@ export async function getAllProjectsForSelect() {
   });
 }
 
+// ── Admin Users ────────────────────────────────────────────────
+
+export async function getAllAdminUsers() {
+  return db.adminUser.findMany({ orderBy: { createdAt: "desc" } });
+}
+
+export async function getAdminUserById(id: string) {
+  return db.adminUser.findUnique({ where: { id } });
+}
+
 // ── Hero Images ────────────────────────────────────────────────
 
 export async function getAllHeroImages() {

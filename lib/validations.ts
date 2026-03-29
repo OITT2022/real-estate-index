@@ -76,3 +76,14 @@ export const apiClientFormSchema = z.object({
 });
 
 export type ApiClientFormValues = z.infer<typeof apiClientFormSchema>;
+
+export const adminUserFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Valid email required"),
+  password: z.string().optional().or(z.literal("")),
+  isSuperAdmin: z.boolean(),
+  allowedPages: z.array(z.string()),
+  active: z.boolean(),
+});
+
+export type AdminUserFormValues = z.infer<typeof adminUserFormSchema>;
