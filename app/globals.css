@@ -322,6 +322,30 @@ button { cursor: pointer; }
 .sortable-header:hover {
   color: var(--accent);
 }
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.icon-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #f0fdf4;
+}
+.icon-btn-danger:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fef2f2;
+}
 .api-badge {
   display: inline-block;
   padding: 4px 10px;
