@@ -28,9 +28,32 @@ export const propertyFormSchema = z.object({
   featured: z.boolean(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
+  projectId: z.string().optional().or(z.literal("")),
 });
 
 export type PropertyFormValues = z.infer<typeof propertyFormSchema>;
+
+export const projectFormSchema = z.object({
+  title: z.string().min(2, "Title is required"),
+  slug: z.string().min(2, "Slug is required"),
+  shortDescription: z.string().optional(),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  city: z.string().min(2, "City is required"),
+  address: z.string().min(2, "Address is required"),
+  latitude: z.coerce.number(),
+  longitude: z.coerce.number(),
+  developerName: z.string().min(2, "Developer name is required"),
+  completionDate: z.string().optional().or(z.literal("")),
+  totalUnits: z.coerce.number().int().nonnegative().optional(),
+  videoUrl: z.string().optional().or(z.literal("")),
+  websiteUrl: z.string().optional().or(z.literal("")),
+  published: z.boolean(),
+  featured: z.boolean(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+});
+
+export type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
 export const inquirySchema = z.object({
   fullName: z.string().min(2, "Name is required"),

@@ -4,7 +4,11 @@ import { useState } from "react";
 import { PropertyForm } from "@/components/forms/property-form";
 import { ImageManager } from "@/components/admin/image-manager";
 
-export function CreatePropertyFlow() {
+type Props = {
+  projects?: { id: string; title: string }[];
+};
+
+export function CreatePropertyFlow({ projects }: Props) {
   const [createdId, setCreatedId] = useState<string | null>(null);
 
   if (createdId) {
@@ -27,5 +31,5 @@ export function CreatePropertyFlow() {
     );
   }
 
-  return <PropertyForm mode="create" onCreated={(id) => setCreatedId(id)} />;
+  return <PropertyForm mode="create" projects={projects} onCreated={(id) => setCreatedId(id)} />;
 }

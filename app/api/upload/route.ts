@@ -13,9 +13,10 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
   const propertyId = formData.get("propertyId") as string | null;
+  const projectId = formData.get("projectId") as string | null;
 
-  if (!file || !propertyId) {
-    return NextResponse.json({ error: "File and propertyId required" }, { status: 400 });
+  if (!file || (!propertyId && !projectId)) {
+    return NextResponse.json({ error: "File and propertyId or projectId required" }, { status: 400 });
   }
 
   if (!file.type.startsWith("image/")) {
@@ -27,24 +28,25 @@ export async function POST(req: NextRequest) {
   }
 
   const url = await uploadImage(file);
+  const altText = file.name.replace(/\.[^.]+$/, "");
 
-  const maxOrder = await db.propertyImage.aggregate({
-    where: { propertyId },
-    _max: { sortOrder: true },
-  });
+  if (projectId) {
+    const maxOrder = await db.projectImage.aggregate({ where: { projectId }, _max: { sortOrder: true } });
+    const nextOrder = (maxOrder._max.sortOrder ?? -1) + 1;
+    const existingCount = await db.projectImage.count({ where: { projectId } });
+
+    const image = await db.projectImage.create({
+      data: { projectId, url, altText, sortOrder: nextOrder, isPrimary: existingCount === 0 },
+    });
+    return NextResponse.json(image);
+  }
+
+  const maxOrder = await db.propertyImage.aggregate({ where: { propertyId: propertyId! }, _max: { sortOrder: true } });
   const nextOrder = (maxOrder._max.sortOrder ?? -1) + 1;
-
-  const existingCount = await db.propertyImage.count({ where: { propertyId } });
+  const existingCount = await db.propertyImage.count({ where: { propertyId: propertyId! } });
 
   const image = await db.propertyImage.create({
-    data: {
-      propertyId,
-      url,
-      altText: file.name.replace(/\.[^.]+$/, ""),
-      sortOrder: nextOrder,
-      isPrimary: existingCount === 0,
-    },
+    data: { propertyId: propertyId!, url, altText, sortOrder: nextOrder, isPrimary: existingCount === 0 },
   });
-
   return NextResponse.json(image);
 }

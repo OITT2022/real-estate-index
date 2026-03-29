@@ -23,6 +23,11 @@ export default async function AdminDashboardPage() {
             <p className="muted">Visible on the public site</p>
           </div>
           <div className="card">
+            <p className="eyebrow">Projects</p>
+            <strong>{stats.projects}</strong>
+            <p className="muted">Development projects</p>
+          </div>
+          <div className="card">
             <p className="eyebrow">Inquiries</p>
             <strong>{stats.inquiries}</strong>
             <p className="muted">Contact requests received</p>

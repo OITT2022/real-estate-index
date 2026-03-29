@@ -1,13 +1,16 @@
 import { notFound } from "next/navigation";
 import { PropertyForm } from "@/components/forms/property-form";
 import { ImageManager } from "@/components/admin/image-manager";
-import { getPropertyById } from "@/lib/site-data";
+import { getPropertyById, getAllProjectsForSelect } from "@/lib/site-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const property = await getPropertyById(id);
+  const [property, projects] = await Promise.all([
+    getPropertyById(id),
+    getAllProjectsForSelect(),
+  ]);
 
   if (!property) return notFound();
 
@@ -19,7 +22,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
           <h1>Edit property</h1>
         </div>
         <ImageManager propertyId={property.id} images={property.images} />
-        <PropertyForm mode="edit" property={{ ...property, price: Number(property.price) }} />
+        <PropertyForm mode="edit" property={{ ...property, price: Number(property.price) }} projects={projects} />
       </div>
     </main>
   );

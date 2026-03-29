@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { deleteImage } from "@/lib/upload";
-import { propertyFormSchema, inquirySchema } from "@/lib/validations";
+import { propertyFormSchema, projectFormSchema, inquirySchema } from "@/lib/validations";
 
 export type ActionResult =
   | { success: true; id?: string }
@@ -25,7 +25,7 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
   const parsed = propertyFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
-  const { latitude, longitude, price, ...rest } = parsed.data;
+  const { latitude, longitude, price, projectId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
   const property = await db.property.create({
@@ -34,6 +34,7 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
       latitude,
       longitude,
       price,
+      projectId: projectId || null,
       sellerName: rest.sellerName ?? "",
       status: rest.published ? "ACTIVE" : "DRAFT",
     },
@@ -48,7 +49,7 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
   const parsed = propertyFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
-  const { latitude, longitude, price, ...rest } = parsed.data;
+  const { latitude, longitude, price, projectId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
   await db.property.update({
@@ -58,6 +59,7 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
       latitude,
       longitude,
       price,
+      projectId: projectId || null,
       status: rest.published ? "ACTIVE" : "DRAFT",
     },
   });
@@ -70,7 +72,6 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
 
 export async function deleteProperty(id: string): Promise<ActionResult> {
   await db.property.delete({ where: { id } });
-
   revalidatePath("/admin/properties");
   revalidatePath("/");
   return { success: true };
@@ -83,10 +84,7 @@ export async function togglePropertyPublish(id: string): Promise<ActionResult> {
   const published = !property.published;
   await db.property.update({
     where: { id },
-    data: {
-      published,
-      status: published ? "ACTIVE" : "DRAFT",
-    },
+    data: { published, status: published ? "ACTIVE" : "DRAFT" },
   });
 
   revalidatePath("/admin/properties");
@@ -94,21 +92,94 @@ export async function togglePropertyPublish(id: string): Promise<ActionResult> {
   return { success: true };
 }
 
-// ── Images ─────────────────────────────────────────────────────
+// ── Project CRUD ──────────────────────────────────────────────
+
+export async function createProject(data: unknown): Promise<ActionResult> {
+  const parsed = projectFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  const { latitude, longitude, ...rest } = parsed.data;
+  rest.slug = slugify(rest.slug);
+
+  const project = await db.project.create({
+    data: { ...rest, latitude, longitude, status: rest.published ? "ACTIVE" : "DRAFT" },
+  });
+
+  revalidatePath("/admin/projects");
+  revalidatePath("/projects");
+  revalidatePath("/");
+  return { success: true, id: project.id };
+}
+
+export async function updateProject(id: string, data: unknown): Promise<ActionResult> {
+  const parsed = projectFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  const { latitude, longitude, ...rest } = parsed.data;
+  rest.slug = slugify(rest.slug);
+
+  await db.project.update({
+    where: { id },
+    data: { ...rest, latitude, longitude, status: rest.published ? "ACTIVE" : "DRAFT" },
+  });
+
+  revalidatePath("/admin/projects");
+  revalidatePath(`/admin/projects/${id}`);
+  revalidatePath("/projects");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function deleteProject(id: string): Promise<ActionResult> {
+  await db.project.delete({ where: { id } });
+  revalidatePath("/admin/projects");
+  revalidatePath("/projects");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function toggleProjectPublish(id: string): Promise<ActionResult> {
+  const project = await db.project.findUnique({ where: { id } });
+  if (!project) return { success: false, error: "Project not found" };
+
+  const published = !project.published;
+  await db.project.update({
+    where: { id },
+    data: { published, status: published ? "ACTIVE" : "DRAFT" },
+  });
+
+  revalidatePath("/admin/projects");
+  revalidatePath("/projects");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function linkPropertyToProject(propertyId: string, projectId: string): Promise<ActionResult> {
+  await db.property.update({ where: { id: propertyId }, data: { projectId } });
+  revalidatePath(`/admin/projects/${projectId}`);
+  revalidatePath("/admin/properties");
+  return { success: true };
+}
+
+export async function unlinkPropertyFromProject(propertyId: string): Promise<ActionResult> {
+  const property = await db.property.findUnique({ where: { id: propertyId } });
+  if (!property) return { success: false, error: "Property not found" };
+
+  await db.property.update({ where: { id: propertyId }, data: { projectId: null } });
+  revalidatePath(`/admin/projects/${property.projectId}`);
+  revalidatePath("/admin/properties");
+  return { success: true };
+}
+
+// ── Property Images ───────────────────────────────────────────
 
 export async function setImagePrimary(imageId: string): Promise<ActionResult> {
   const image = await db.propertyImage.findUnique({ where: { id: imageId } });
   if (!image) return { success: false, error: "Image not found" };
 
   await db.$transaction([
-    db.propertyImage.updateMany({
-      where: { propertyId: image.propertyId },
-      data: { isPrimary: false },
-    }),
-    db.propertyImage.update({
-      where: { id: imageId },
-      data: { isPrimary: true },
-    }),
+    db.propertyImage.updateMany({ where: { propertyId: image.propertyId }, data: { isPrimary: false } }),
+    db.propertyImage.update({ where: { id: imageId }, data: { isPrimary: true } }),
   ]);
 
   revalidatePath(`/admin/properties/${image.propertyId}`);
@@ -116,16 +187,10 @@ export async function setImagePrimary(imageId: string): Promise<ActionResult> {
   return { success: true };
 }
 
-export async function reorderImages(
-  propertyId: string,
-  orderedIds: string[]
-): Promise<ActionResult> {
+export async function reorderImages(propertyId: string, orderedIds: string[]): Promise<ActionResult> {
   await db.$transaction(
-    orderedIds.map((id, index) =>
-      db.propertyImage.update({ where: { id }, data: { sortOrder: index } })
-    )
+    orderedIds.map((id, index) => db.propertyImage.update({ where: { id }, data: { sortOrder: index } }))
   );
-
   revalidatePath(`/admin/properties/${propertyId}`);
   revalidatePath("/");
   return { success: true };
@@ -139,20 +204,54 @@ export async function removeImage(imageId: string): Promise<ActionResult> {
   await db.propertyImage.delete({ where: { id: imageId } });
 
   if (image.isPrimary) {
-    const next = await db.propertyImage.findFirst({
-      where: { propertyId: image.propertyId },
-      orderBy: { sortOrder: "asc" },
-    });
-    if (next) {
-      await db.propertyImage.update({
-        where: { id: next.id },
-        data: { isPrimary: true },
-      });
-    }
+    const next = await db.propertyImage.findFirst({ where: { propertyId: image.propertyId }, orderBy: { sortOrder: "asc" } });
+    if (next) await db.propertyImage.update({ where: { id: next.id }, data: { isPrimary: true } });
   }
 
   revalidatePath(`/admin/properties/${image.propertyId}`);
   revalidatePath("/");
+  return { success: true };
+}
+
+// ── Project Images ────────────────────────────────────────────
+
+export async function setProjectImagePrimary(imageId: string): Promise<ActionResult> {
+  const image = await db.projectImage.findUnique({ where: { id: imageId } });
+  if (!image) return { success: false, error: "Image not found" };
+
+  await db.$transaction([
+    db.projectImage.updateMany({ where: { projectId: image.projectId }, data: { isPrimary: false } }),
+    db.projectImage.update({ where: { id: imageId }, data: { isPrimary: true } }),
+  ]);
+
+  revalidatePath(`/admin/projects/${image.projectId}`);
+  revalidatePath("/projects");
+  return { success: true };
+}
+
+export async function reorderProjectImages(projectId: string, orderedIds: string[]): Promise<ActionResult> {
+  await db.$transaction(
+    orderedIds.map((id, index) => db.projectImage.update({ where: { id }, data: { sortOrder: index } }))
+  );
+  revalidatePath(`/admin/projects/${projectId}`);
+  revalidatePath("/projects");
+  return { success: true };
+}
+
+export async function removeProjectImage(imageId: string): Promise<ActionResult> {
+  const image = await db.projectImage.findUnique({ where: { id: imageId } });
+  if (!image) return { success: false, error: "Image not found" };
+
+  await deleteImage(image.url);
+  await db.projectImage.delete({ where: { id: imageId } });
+
+  if (image.isPrimary) {
+    const next = await db.projectImage.findFirst({ where: { projectId: image.projectId }, orderBy: { sortOrder: "asc" } });
+    if (next) await db.projectImage.update({ where: { id: next.id }, data: { isPrimary: true } });
+  }
+
+  revalidatePath(`/admin/projects/${image.projectId}`);
+  revalidatePath("/projects");
   return { success: true };
 }
 
@@ -166,7 +265,6 @@ export async function createInquiry(data: unknown): Promise<ActionResult> {
   if (!property) return { success: false, error: "Property not found" };
 
   await db.inquiry.create({ data: parsed.data });
-
   return { success: true };
 }
 

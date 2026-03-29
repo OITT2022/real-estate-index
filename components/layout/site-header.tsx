@@ -9,6 +9,7 @@ export function SiteHeader() {
         </Link>
         <nav className="top-nav">
           <Link href="/">Home</Link>
+          <Link href="/projects">Projects</Link>
           <Link href="/admin/dashboard">Admin</Link>
         </nav>
       </div>

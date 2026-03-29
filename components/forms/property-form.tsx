@@ -10,13 +10,16 @@ import type { Property } from "@prisma/client";
 
 type SerializedProperty = Omit<Property, "price"> & { price: number };
 
+type ProjectOption = { id: string; title: string };
+
 type PropertyFormProps = {
   mode: "create" | "edit";
   property?: SerializedProperty | null;
+  projects?: ProjectOption[];
   onCreated?: (id: string) => void;
 };
 
-export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
+export function PropertyForm({ mode, property, projects, onCreated }: PropertyFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -57,6 +60,7 @@ export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
           featured: property.featured,
           metaTitle: property.metaTitle ?? "",
           metaDescription: property.metaDescription ?? "",
+          projectId: property.projectId ?? "",
         }
       : {
           published: false,
@@ -205,6 +209,18 @@ export function PropertyForm({ mode, property, onCreated }: PropertyFormProps) {
         <span>Website URL</span>
         <input {...register("websiteUrl")} placeholder="https://example.com" />
       </label>
+
+      {projects && projects.length > 0 && (
+        <label>
+          <span>Project</span>
+          <select {...register("projectId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+            <option value="">None — standalone property</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.title}</option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <div className="admin-form-grid">
         <label>

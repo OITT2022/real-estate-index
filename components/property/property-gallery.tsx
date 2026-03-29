@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import type { PropertyImage } from "@prisma/client";
+type GalleryImage = {
+  id: string;
+  url: string;
+  altText: string | null;
+  isPrimary: boolean;
+};
 
 type Props = {
   title: string;
-  images: PropertyImage[];
+  images: GalleryImage[];
 };
 
 export function PropertyGallery({ title, images }: Props) {

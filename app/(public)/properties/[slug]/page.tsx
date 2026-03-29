@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { InquiryForm } from "@/components/forms/inquiry-form";
 import { PropertyMap } from "@/components/map/property-map";
 import { PropertyCard } from "@/components/property/property-card";
@@ -41,6 +42,11 @@ export default async function PropertyPage({ params }: Props) {
             <p className="eyebrow">{property.city}</p>
             <h1>{property.title}</h1>
             <p className="muted">{property.address}</p>
+            {property.project && (
+              <p style={{ marginTop: 6 }}>
+                Part of <Link href={`/projects/${property.project.slug}`} style={{ color: "var(--accent)", textDecoration: "underline", fontWeight: 600 }}>{property.project.title}</Link>
+              </p>
+            )}
           </div>
           <div className="card">
             <p className="muted">Asking price</p>

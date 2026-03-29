@@ -1,6 +1,12 @@
 import { db } from "@/lib/db";
 
 const propertyInclude = { images: { orderBy: { sortOrder: "asc" as const } } };
+const projectInclude = {
+  images: { orderBy: { sortOrder: "asc" as const } },
+  _count: { select: { properties: true } },
+};
+
+// ── Properties ─────────────────────────────────────────────────
 
 export async function getPublishedProperties() {
   return db.property.findMany({
@@ -21,7 +27,10 @@ export async function getFeaturedProperties() {
 export async function getPropertyBySlug(slug: string) {
   return db.property.findFirst({
     where: { slug, published: true, status: "ACTIVE" },
-    include: propertyInclude,
+    include: {
+      ...propertyInclude,
+      project: { select: { title: true, slug: true } },
+    },
   });
 }
 
@@ -95,7 +104,7 @@ export async function getDistinctPropertyTypes() {
 
 export async function getAllProperties() {
   return db.property.findMany({
-    include: propertyInclude,
+    include: { ...propertyInclude, project: { select: { title: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -107,11 +116,65 @@ export async function getPropertyById(id: string) {
   });
 }
 
+// ── Projects ───────────────────────────────────────────────────
+
+export async function getPublishedProjects() {
+  return db.project.findMany({
+    where: { published: true, status: "ACTIVE" },
+    include: projectInclude,
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getProjectBySlug(slug: string) {
+  return db.project.findFirst({
+    where: { slug, published: true, status: "ACTIVE" },
+    include: {
+      images: { orderBy: { sortOrder: "asc" } },
+      properties: {
+        where: { published: true, status: "ACTIVE" },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { price: "asc" },
+      },
+    },
+  });
+}
+
+export async function getAllProjects() {
+  return db.project.findMany({
+    include: projectInclude,
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getProjectById(id: string) {
+  return db.project.findUnique({
+    where: { id },
+    include: {
+      images: { orderBy: { sortOrder: "asc" } },
+      properties: {
+        include: { images: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+}
+
+export async function getAllProjectsForSelect() {
+  return db.project.findMany({
+    select: { id: true, title: true },
+    orderBy: { title: "asc" },
+  });
+}
+
+// ── Dashboard ──────────────────────────────────────────────────
+
 export async function getDashboardStats() {
-  const [total, published, inquiries] = await Promise.all([
+  const [total, published, inquiries, projects] = await Promise.all([
     db.property.count(),
     db.property.count({ where: { published: true, status: "ACTIVE" } }),
     db.inquiry.count(),
+    db.project.count(),
   ]);
-  return { total, published, inquiries };
+  return { total, published, inquiries, projects };
 }
