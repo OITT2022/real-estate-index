@@ -127,7 +127,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
           {project.properties.length > 0 ? (
             <div className="card">
-              <div className="admin-header-row muted" style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr auto" }}>
+              <div className="st-row st-header muted" style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 70px" }}>
                 <div>Name</div>
                 <div>Beds</div>
                 <div>Baths</div>
@@ -136,7 +136,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                 <div></div>
               </div>
               {project.properties.map((property) => (
-                <div key={property.id} className="table-row" style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr auto" }}>
+                <div key={property.id} className="st-row" style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 70px" }}>
                   <div><strong>{property.title}</strong></div>
                   <div>{property.bedrooms ?? "-"}</div>
                   <div>{property.bathrooms ?? "-"}</div>
