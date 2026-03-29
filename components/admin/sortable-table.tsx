@@ -59,7 +59,7 @@ export function SortableTable<T>({ data, columns, getKey, gridTemplate, actions,
 
   return (
     <div className="card">
-      <div className="sortable-header-row muted" style={{ gridTemplateColumns: tpl }}>
+      <div className="st-row st-header muted" style={{ gridTemplateColumns: tpl }}>
         {columns.map((col) => (
           <div
             key={col.key}
@@ -76,20 +76,20 @@ export function SortableTable<T>({ data, columns, getKey, gridTemplate, actions,
       </div>
 
       {sorted.length === 0 && (
-        <div className="table-row" style={{ gridTemplateColumns: "1fr" }}>
+        <div className="st-row" style={{ gridTemplateColumns: "1fr" }}>
           <div className="muted">{emptyMessage ?? "No items."}</div>
         </div>
       )}
 
       {sorted.map((item) => (
-        <div key={getKey(item)} className="table-row" style={{ gridTemplateColumns: tpl }}>
+        <div key={getKey(item)} className="st-row" style={{ gridTemplateColumns: tpl }}>
           {columns.map((col) => (
             <div key={col.key}>
               {col.render ? col.render(item) : String(col.getValue(item) ?? "-")}
             </div>
           ))}
           {actions && (
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {actions(item)}
             </div>
           )}

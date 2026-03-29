@@ -300,11 +300,20 @@ button { cursor: pointer; }
   padding: 14px 0;
   border-top: 1px solid var(--line);
 }
-.sortable-header-row {
+.st-row {
   display: grid;
   gap: 12px;
   align-items: center;
+}
+.st-header {
   padding-bottom: 8px;
+}
+.st-row + .st-row {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.st-row:not(.st-header) {
+  padding: 14px 0;
 }
 .sortable-header {
   cursor: pointer;
