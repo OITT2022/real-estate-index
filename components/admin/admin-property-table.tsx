@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { PropertyActions } from "@/components/admin/property-actions";
+import { PublishToggle } from "@/components/admin/publish-toggle";
 import { ApiToggle } from "@/components/admin/api-toggle";
 import { SortableTable } from "@/components/admin/sortable-table";
 
@@ -21,7 +22,7 @@ export function AdminPropertyTable({ rows }: { rows: Row[] }) {
     <SortableTable
       data={rows}
       getKey={(r) => r.id}
-      gridTemplate="48px 2fr 1fr 1fr 1fr 1fr 60px 110px"
+      gridTemplate="48px 2fr 1fr 1fr 1fr 90px 60px 80px"
       emptyMessage="No properties yet. Create your first listing."
       columns={[
         {
@@ -34,7 +35,10 @@ export function AdminPropertyTable({ rows }: { rows: Row[] }) {
         { key: "city", label: "City", getValue: (r) => r.city },
         { key: "price", label: "Price", getValue: (r) => r.price, render: (r) => <span>€{r.price.toLocaleString()}</span> },
         { key: "project", label: "Project", getValue: (r) => r.projectTitle, render: (r) => <span className={r.projectTitle ? "" : "muted"}>{r.projectTitle ?? "—"}</span> },
-        { key: "status", label: "Status", getValue: (r) => r.published ? "Published" : "Draft" },
+        {
+          key: "status", label: "Status", getValue: (r) => r.published ? "Published" : "Draft",
+          render: (r) => <PublishToggle type="property" id={r.id} published={r.published} />,
+        },
         {
           key: "api", label: "API", getValue: (r) => r.apiEnabled ? "On" : "Off",
           render: (r) => <ApiToggle type="property" id={r.id} enabled={r.apiEnabled} />,

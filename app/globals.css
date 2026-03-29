@@ -346,6 +346,30 @@ button { cursor: pointer; }
   color: #ef4444;
   background: #fef2f2;
 }
+.publish-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.publish-badge-on {
+  background: #dcfce7;
+  color: #166534;
+}
+.publish-badge-on:hover {
+  background: #bbf7d0;
+}
+.publish-badge-off {
+  background: #fff7ed;
+  color: #9a3412;
+}
+.publish-badge-off:hover {
+  background: #fed7aa;
+}
 .api-badge {
   display: inline-block;
   padding: 4px 10px;
