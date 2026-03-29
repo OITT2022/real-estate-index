@@ -19,7 +19,7 @@ export function AdminApiClientTable({ rows }: { rows: Row[] }) {
     <SortableTable
       data={rows}
       getKey={(r) => r.id}
-      gridTemplate="2fr 1fr 1fr 1fr 1fr"
+      gridTemplate="2fr 1fr 1fr 1fr 1fr 160px"
       emptyMessage="No API clients yet. Create your first client."
       columns={[
         { key: "name", label: "Name", getValue: (r) => r.name },

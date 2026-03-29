@@ -21,7 +21,7 @@ export function AdminProjectTable({ rows }: { rows: Row[] }) {
     <SortableTable
       data={rows}
       getKey={(r) => r.id}
-      gridTemplate="48px 2fr 1fr 1fr 1fr 1fr 60px"
+      gridTemplate="48px 2fr 1fr 1fr 1fr 1fr 60px 260px"
       emptyMessage="No projects yet. Create your first project."
       columns={[
         {

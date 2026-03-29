@@ -55,7 +55,7 @@ export function SortableTable<T>({ data, columns, getKey, gridTemplate, actions,
     });
   }, [data, sortKey, sortDir, columns]);
 
-  const tpl = actions ? `${gridTemplate} auto` : gridTemplate;
+  const tpl = gridTemplate;
 
   return (
     <div className="card">
@@ -73,7 +73,7 @@ export function SortableTable<T>({ data, columns, getKey, gridTemplate, actions,
               )}
             </div>
           ) : (
-            <div key={col.key} />
+            <div key={col.key}>&nbsp;</div>
           )
         )}
         {actions && <div>Actions</div>}
