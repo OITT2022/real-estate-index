@@ -22,6 +22,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     city: p.city,
     price: Number(p.price),
     published: p.published,
+    currentProjectTitle: project.title,
   }));
 
   const allPropertiesSimple = allProperties.map((p) => ({
@@ -30,6 +31,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     city: p.city,
     price: Number(p.price),
     published: p.published,
+    currentProjectTitle: p.project?.title ?? null,
   }));
 
   return (

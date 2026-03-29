@@ -11,6 +11,7 @@ type PropertySummary = {
   city: string;
   price: number | { toString(): string };
   published: boolean;
+  currentProjectTitle: string | null;
 };
 
 type Props = {
@@ -30,6 +31,10 @@ export function ProjectPropertiesManager({ projectId, linkedProperties, allPrope
 
   async function handleLink() {
     if (!selectedId) return;
+    const prop = unlinkedProperties.find((p) => p.id === selectedId);
+    if (prop?.currentProjectTitle) {
+      if (!confirm(`"${prop.title}" is already linked to "${prop.currentProjectTitle}". Move it to this project?`)) return;
+    }
     setLinking(true);
     await linkPropertyToProject(selectedId, projectId);
     setSelectedId("");
@@ -75,7 +80,9 @@ export function ProjectPropertiesManager({ projectId, linkedProperties, allPrope
           >
             <option value="">Select a property to link...</option>
             {unlinkedProperties.map((p) => (
-              <option key={p.id} value={p.id}>{p.title} — {p.city}</option>
+              <option key={p.id} value={p.id}>
+                {p.title} — {p.city}{p.currentProjectTitle ? ` (in: ${p.currentProjectTitle})` : ""}
+              </option>
             ))}
           </select>
           <button type="button" className="button-primary" onClick={handleLink} disabled={!selectedId || linking}>
