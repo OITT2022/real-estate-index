@@ -78,6 +78,14 @@ model Property {
   @@index([apiEnabled, published, status])
 }
 
+model ImageBank {
+  id        String   @id @default(cuid())
+  url       String
+  altText   String?
+  tags      String?
+  createdAt DateTime @default(now())
+}
+
 model PropertyImage {
   id          String   @id @default(cuid())
   propertyId  String

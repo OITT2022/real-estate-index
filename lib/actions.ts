@@ -359,6 +359,50 @@ export async function saveMapSettings(data: {
   return { success: true };
 }
 
+// ── Image Bank ────────────────────────────────────────────────
+
+export async function linkBankImageToProperty(bankImageId: string, propertyId: string): Promise<ActionResult> {
+  const bankImg = await db.imageBank.findUnique({ where: { id: bankImageId } });
+  if (!bankImg) return { success: false, error: "Image not found" };
+
+  const maxOrder = await db.propertyImage.aggregate({ where: { propertyId }, _max: { sortOrder: true } });
+  const nextOrder = (maxOrder._max.sortOrder ?? -1) + 1;
+  const existingCount = await db.propertyImage.count({ where: { propertyId } });
+
+  await db.propertyImage.create({
+    data: { propertyId, url: bankImg.url, altText: bankImg.altText, sortOrder: nextOrder, isPrimary: existingCount === 0 },
+  });
+
+  revalidatePath(`/admin/properties/${propertyId}`);
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function linkBankImageToProject(bankImageId: string, projectId: string): Promise<ActionResult> {
+  const bankImg = await db.imageBank.findUnique({ where: { id: bankImageId } });
+  if (!bankImg) return { success: false, error: "Image not found" };
+
+  const maxOrder = await db.projectImage.aggregate({ where: { projectId }, _max: { sortOrder: true } });
+  const nextOrder = (maxOrder._max.sortOrder ?? -1) + 1;
+  const existingCount = await db.projectImage.count({ where: { projectId } });
+
+  await db.projectImage.create({
+    data: { projectId, url: bankImg.url, altText: bankImg.altText, sortOrder: nextOrder, isPrimary: existingCount === 0 },
+  });
+
+  revalidatePath(`/admin/projects/${projectId}`);
+  revalidatePath("/projects");
+  return { success: true };
+}
+
+export async function deleteBankImage(id: string): Promise<ActionResult> {
+  const img = await db.imageBank.findUnique({ where: { id } });
+  if (!img) return { success: false, error: "Image not found" };
+  await deleteImage(img.url);
+  await db.imageBank.delete({ where: { id } });
+  return { success: true };
+}
+
 // ── Admin Users ───────────────────────────────────────────────
 
 export async function createAdminUser(data: unknown): Promise<ActionResult> {

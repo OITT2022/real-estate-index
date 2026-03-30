@@ -19,13 +19,26 @@ export async function POST(req: NextRequest) {
   const projectId = formData.get("projectId") as string | null;
   const documentType = formData.get("documentType") as string | null;
   const heroImage = formData.get("heroImage") as string | null;
+  const bankImage = formData.get("bankImage") as string | null;
 
-  if (!file || (!propertyId && !projectId && !heroImage)) {
+  if (!file || (!propertyId && !projectId && !heroImage && !bankImage)) {
     return NextResponse.json({ error: "File and target required" }, { status: 400 });
   }
 
   if (file.size > 20 * 1024 * 1024) {
     return NextResponse.json({ error: "File must be under 20MB" }, { status: 400 });
+  }
+
+  // Image bank upload
+  if (bankImage) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 });
+    }
+    const url = await uploadFile(file);
+    const img = await db.imageBank.create({
+      data: { url, altText: file.name.replace(/\.[^.]+$/, ""), tags: "" },
+    });
+    return NextResponse.json(img);
   }
 
   // Hero image upload

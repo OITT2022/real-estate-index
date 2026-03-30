@@ -169,6 +169,12 @@ export async function getAllProjectsForSelect() {
   });
 }
 
+// ── Image Bank ─────────────────────────────────────────────────
+
+export async function getAllBankImages() {
+  return db.imageBank.findMany({ orderBy: { createdAt: "desc" } });
+}
+
 // ── Inquiries CRM ──────────────────────────────────────────────
 
 export async function getInquiryById(id: string) {
