@@ -18,6 +18,7 @@ export function ImageBankPicker({ bankImages: initial, targetType, targetId }: P
   const [images, setImages] = useState(initial);
   const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [linkedId, setLinkedId] = useState<string | null>(null);
 
   async function handleUploadToBank(files: FileList) {
     setUploading(true);
@@ -40,6 +41,8 @@ export function ImageBankPicker({ bankImages: initial, targetType, targetId }: P
     } else {
       await linkBankImageToProject(bankImageId, targetId);
     }
+    setLinkedId(bankImageId);
+    setTimeout(() => setLinkedId(null), 1500);
     router.refresh();
   }
 
@@ -77,8 +80,9 @@ export function ImageBankPicker({ bankImages: initial, targetType, targetId }: P
 
       <div className="image-grid">
         {images.map((img) => (
-          <div key={img.id} className="image-thumb" style={{ cursor: "pointer" }}>
+          <div key={img.id} className={`image-thumb${linkedId === img.id ? " image-primary" : ""}`} style={{ cursor: "pointer" }}>
             <img src={img.url} alt={img.altText ?? ""} onClick={() => handleLink(img.id)} />
+            {linkedId === img.id && <span className="image-badge">Added!</span>}
             <div className="image-actions">
               <button type="button" onClick={() => handleLink(img.id)} title="Add to this item">+</button>
               <button type="button" onClick={() => handleDelete(img.id)} title="Delete from bank">✕</button>

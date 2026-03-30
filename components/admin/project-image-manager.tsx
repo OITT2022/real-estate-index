@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ProjectImage } from "@prisma/client";
 import { setProjectImagePrimary, reorderProjectImages, removeProjectImage } from "@/lib/actions";
@@ -16,6 +16,8 @@ export function ProjectImageManager({ projectId, images: initial }: Props) {
   const [images, setImages] = useState(initial);
   const [uploading, setUploading] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+
+  useEffect(() => { setImages(initial); }, [initial]);
 
   const refresh = useCallback(() => router.refresh(), [router]);
 
