@@ -1,0 +1,22 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+        - npx prisma generate
+    build:
+      commands:
+        - npm run build
+        # Debug — verify critical env vars exist during build
+        - echo "DEBUG DATABASE_URL set = $(if [ -n \"$DATABASE_URL\" ]; then echo YES; else echo NO; fi)"
+        - echo "DEBUG PLATFORM = ${PLATFORM:-not set}"
+        - echo "DEBUG STORAGE_PROVIDER = ${STORAGE_PROVIDER:-not set}"
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
