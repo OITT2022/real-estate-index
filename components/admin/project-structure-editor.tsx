@@ -44,6 +44,7 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [createForUnit, setCreateForUnit] = useState<UnitData | null>(null);
+  const [linkForUnit, setLinkForUnit] = useState<UnitData | null>(null);
 
   // Generator state
   const [buildings, setBuildings] = useState(1);
@@ -309,16 +310,10 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
                           </div>
                         ) : (
                           <div style={{ display: "flex", gap: 6, flex: 1, alignItems: "center" }}>
-                            <select
-                              defaultValue=""
-                              onChange={(e) => { if (e.target.value) handleLinkProperty(unit.id, e.target.value); }}
-                              style={{ flex: 1, padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", color: "var(--muted)" }}
-                            >
-                              <option value="">Link property...</option>
-                              {unlinkedProperties.map((p) => (
-                                <option key={p.id} value={p.id}>{p.title}</option>
-                              ))}
-                            </select>
+                            <span className="muted" style={{ flex: 1, fontSize: "0.85rem" }}>No property linked</span>
+                            <button type="button" className="button-secondary" style={{ padding: "4px 10px", fontSize: "0.75rem", whiteSpace: "nowrap" }} onClick={() => setLinkForUnit(unit)}>
+                              Link
+                            </button>
                             <button type="button" className="button-secondary" style={{ padding: "4px 10px", fontSize: "0.75rem", whiteSpace: "nowrap" }} onClick={() => setCreateForUnit(unit)}>
                               + New
                             </button>
@@ -337,6 +332,19 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
           ))}
         </div>
       ))}
+
+      {/* Link Property Modal */}
+      {linkForUnit && (
+        <LinkPropertyModal
+          unit={linkForUnit}
+          properties={unlinkedProperties}
+          onClose={() => setLinkForUnit(null)}
+          onLink={async (propertyId: string) => {
+            await handleLinkProperty(linkForUnit.id, propertyId);
+            setLinkForUnit(null);
+          }}
+        />
+      )}
 
       {/* Create Property Modal for a specific unit */}
       {createForUnit && (
@@ -497,6 +505,75 @@ function CreatePropertyForUnitModal({
             <button type="button" className="button-secondary" onClick={onClose}>Cancel</button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Link property modal ──
+
+function LinkPropertyModal({
+  unit, properties, onClose, onLink,
+}: {
+  unit: UnitData;
+  properties: PropertyOption[];
+  onClose: () => void;
+  onLink: (propertyId: string) => void;
+}) {
+  const [search, setSearch] = useState("");
+
+  const filtered = search
+    ? properties.filter((p) => p.title.toLowerCase().includes(search.toLowerCase()))
+    : properties;
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 500 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            <h2 style={{ margin: 0 }}>Link Property to Unit {unit.unitNumber}</h2>
+            <p className="muted" style={{ margin: "4px 0 0" }}>
+              Bldg {unit.building} / Ent {unit.entrance} / Floor {unit.floor}
+            </p>
+          </div>
+          <button type="button" className="icon-btn" onClick={onClose} title="Close">
+            <span style={{ fontSize: "1.2rem" }}>&times;</span>
+          </button>
+        </div>
+
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search properties..."
+          style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--line)", marginBottom: 12, fontSize: "0.9rem" }}
+          autoFocus
+        />
+
+        <div style={{ maxHeight: 350, overflowY: "auto", display: "grid", gap: 4 }}>
+          {filtered.length === 0 ? (
+            <p className="muted" style={{ padding: 16, textAlign: "center" }}>
+              {properties.length === 0 ? "No available properties to link." : "No properties match your search."}
+            </p>
+          ) : (
+            filtered.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onLink(p.id)}
+                style={{
+                  display: "block", width: "100%", textAlign: "left",
+                  padding: "10px 14px", borderRadius: 8, border: "1px solid var(--line)",
+                  background: "white", cursor: "pointer", fontSize: "0.9rem",
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-alt)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
+              >
+                {p.title}
+              </button>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
