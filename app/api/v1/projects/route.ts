@@ -11,8 +11,19 @@ export async function GET(req: NextRequest) {
   const allowedProjectFields = client.allowedProjectFields as string[];
   const allowedPropertyFields = client.allowedPropertyFields as string[];
 
+  const where: Record<string, unknown> = {
+    published: true,
+    status: "ACTIVE",
+    apiEnabled: true,
+  };
+
+  // Customer scope filtering
+  if (client.scopeType === "customer" && client.customerId) {
+    where.customerId = client.customerId;
+  }
+
   const projects = await db.project.findMany({
-    where: { published: true, status: "ACTIVE", apiEnabled: true },
+    where,
     include: {
       images: client.includeImages ? { orderBy: { sortOrder: "asc" } } : false,
       documents: client.includeDocuments ? { orderBy: { sortOrder: "asc" } } : false,

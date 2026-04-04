@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
-import { getAllApiClients } from "@/lib/site-data";
+import { db } from "@/lib/db";
 import { AdminApiClientTable } from "@/components/admin/admin-api-client-table";
 import { checkPageAccess } from "@/lib/check-access";
 
@@ -8,12 +8,18 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminApiPage() {
   await checkPageAccess("api");
-  const clients = await getAllApiClients();
+  const clients = await db.apiClient.findMany({
+    include: { customer: { select: { companyName: true } } },
+    orderBy: { createdAt: "desc" },
+  });
 
   const rows = clients.map((c) => ({
     id: c.id,
     name: c.name,
     tokenPrefix: c.tokenPrefix,
+    scopeLabel: c.scopeType === "customer" && c.customer
+      ? c.customer.companyName
+      : "All Customers",
     active: c.active,
     createdAt: c.createdAt.toLocaleDateString(),
     propertyFieldCount: (c.allowedPropertyFields as string[]).length,

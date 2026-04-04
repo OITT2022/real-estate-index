@@ -8,6 +8,7 @@ type Row = {
   id: string;
   name: string;
   tokenPrefix: string;
+  scopeLabel: string;
   active: boolean;
   createdAt: string;
   propertyFieldCount: number;
@@ -19,10 +20,11 @@ export function AdminApiClientTable({ rows }: { rows: Row[] }) {
     <SortableTable
       data={rows}
       getKey={(r) => r.id}
-      gridTemplate="2fr 1fr 1fr 1fr 1fr 80px"
+      gridTemplate="2fr 1.2fr 1fr 1fr 1fr 1fr 80px"
       emptyMessage="No API clients yet. Create your first client."
       columns={[
         { key: "name", label: "Name", getValue: (r) => r.name },
+        { key: "scope", label: "Scope", getValue: (r) => r.scopeLabel },
         {
           key: "token", label: "Token", getValue: (r) => r.tokenPrefix,
           render: (r) => <code style={{ fontSize: "0.85rem", color: "var(--muted)" }}>{r.tokenPrefix}...</code>,

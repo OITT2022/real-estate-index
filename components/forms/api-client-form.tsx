@@ -14,18 +14,23 @@ type ClientData = {
   description: string | null;
   tokenPrefix: string;
   active: boolean;
+  scopeType: string;
+  customerId: string | null;
   allowedPropertyFields: unknown;
   allowedProjectFields: unknown;
   includeImages: boolean;
   includeDocuments: boolean;
 };
 
+type CustomerOption = { id: string; companyName: string };
+
 type Props = {
   mode: "create" | "edit";
   client?: ClientData | null;
+  customers?: CustomerOption[];
 };
 
-export function ApiClientForm({ mode, client }: Props) {
+export function ApiClientForm({ mode, client, customers }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
@@ -43,6 +48,8 @@ export function ApiClientForm({ mode, client }: Props) {
       ? {
           name: client.name,
           description: client.description ?? "",
+          scopeType: (client.scopeType as "all" | "customer") ?? "all",
+          customerId: client.customerId ?? "",
           allowedPropertyFields: (client.allowedPropertyFields as string[]) ?? [],
           allowedProjectFields: (client.allowedProjectFields as string[]) ?? [],
           includeImages: client.includeImages,
@@ -50,6 +57,8 @@ export function ApiClientForm({ mode, client }: Props) {
           active: client.active,
         }
       : {
+          scopeType: "all" as const,
+          customerId: "",
           allowedPropertyFields: ALL_PROPERTY_FIELD_KEYS.slice(),
           allowedProjectFields: ALL_PROJECT_FIELD_KEYS.slice(),
           includeImages: true,
@@ -58,6 +67,7 @@ export function ApiClientForm({ mode, client }: Props) {
         },
   });
 
+  const scopeType = watch("scopeType");
   const propertyFields = watch("allowedPropertyFields");
   const projectFields = watch("allowedProjectFields");
 
@@ -169,6 +179,35 @@ export function ApiClientForm({ mode, client }: Props) {
           <label><input type="checkbox" {...register("includeImages")} /> Include Images</label>
           <label><input type="checkbox" {...register("includeDocuments")} /> Include Documents</label>
         </div>
+      </div>
+
+      <div className="card" style={{ display: "grid", gap: 16 }}>
+        <p className="eyebrow">Data Scope</p>
+        <div className="admin-form-grid">
+          <label>
+            <span>Scope</span>
+            <select {...register("scopeType")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+              <option value="all">All Customers</option>
+              <option value="customer">Specific Customer</option>
+            </select>
+          </label>
+          {scopeType === "customer" && customers && customers.length > 0 && (
+            <label>
+              <span>Customer</span>
+              <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+                <option value="">Select customer...</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>{c.companyName}</option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+        <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>
+          {scopeType === "all"
+            ? "This API client will return all eligible projects and properties across all customers."
+            : "This API client will only return projects and properties belonging to the selected customer."}
+        </p>
       </div>
 
       <div className="card" style={{ display: "grid", gap: 12 }}>

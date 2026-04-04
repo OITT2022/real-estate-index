@@ -632,6 +632,10 @@ export async function createApiClient(data: unknown): Promise<ActionResult & { t
   const tokenPrefix = token.substring(0, 8);
   const tokenHash = await bcrypt.hash(token, 10);
 
+  if (parsed.data.scopeType === "customer" && !parsed.data.customerId) {
+    return { success: false, error: "Customer is required for customer-scoped API clients" };
+  }
+
   const client = await db.apiClient.create({
     data: {
       name: parsed.data.name,
@@ -639,6 +643,8 @@ export async function createApiClient(data: unknown): Promise<ActionResult & { t
       tokenHash,
       tokenPrefix,
       active: parsed.data.active,
+      scopeType: parsed.data.scopeType,
+      customerId: parsed.data.scopeType === "customer" ? (parsed.data.customerId || null) : null,
       allowedPropertyFields: parsed.data.allowedPropertyFields,
       allowedProjectFields: parsed.data.allowedProjectFields,
       includeImages: parsed.data.includeImages,
@@ -654,12 +660,18 @@ export async function updateApiClient(id: string, data: unknown): Promise<Action
   const parsed = apiClientFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
+  if (parsed.data.scopeType === "customer" && !parsed.data.customerId) {
+    return { success: false, error: "Customer is required for customer-scoped API clients" };
+  }
+
   await db.apiClient.update({
     where: { id },
     data: {
       name: parsed.data.name,
       description: parsed.data.description || null,
       active: parsed.data.active,
+      scopeType: parsed.data.scopeType,
+      customerId: parsed.data.scopeType === "customer" ? (parsed.data.customerId || null) : null,
       allowedPropertyFields: parsed.data.allowedPropertyFields,
       allowedProjectFields: parsed.data.allowedProjectFields,
       includeImages: parsed.data.includeImages,

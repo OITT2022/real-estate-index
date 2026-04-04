@@ -70,6 +70,8 @@ export type InquiryFormValues = z.infer<typeof inquirySchema>;
 export const apiClientFormSchema = z.object({
   name: z.string().min(2, "Name is required"),
   description: z.string().optional().or(z.literal("")),
+  scopeType: z.enum(["all", "customer"]),
+  customerId: z.string().optional().or(z.literal("")),
   allowedPropertyFields: z.array(z.string()),
   allowedProjectFields: z.array(z.string()),
   includeImages: z.boolean(),

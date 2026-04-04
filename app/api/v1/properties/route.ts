@@ -19,6 +19,15 @@ export async function GET(req: NextRequest) {
     status: "ACTIVE",
     apiEnabled: true,
   };
+
+  // Customer scope filtering
+  if (client.scopeType === "customer" && client.customerId) {
+    where.OR = [
+      { customerId: client.customerId },
+      { project: { customerId: client.customerId } },
+    ];
+  }
+
   if (city) where.city = { contains: city, mode: "insensitive" };
   if (propertyType) where.propertyType = { equals: propertyType, mode: "insensitive" };
 

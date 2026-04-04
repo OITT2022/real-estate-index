@@ -236,18 +236,23 @@ model HeroImage {
 }
 
 model ApiClient {
-  id                    String   @id @default(cuid())
+  id                    String    @id @default(cuid())
   name                  String
   description           String?
-  tokenHash             String   @unique
+  tokenHash             String    @unique
   tokenPrefix           String
-  active                Boolean  @default(true)
+  active                Boolean   @default(true)
+  scopeType             String    @default("all")
+  customerId            String?
   allowedPropertyFields Json
   allowedProjectFields  Json
-  includeImages         Boolean  @default(false)
-  includeDocuments      Boolean  @default(false)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  includeImages         Boolean   @default(false)
+  includeDocuments      Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  customer              Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
 }
 
 model Customer {
@@ -263,6 +268,7 @@ model Customer {
   projects      Project[]
   properties    Property[]
   managers      AdminUser[] @relation("CustomerManagers")
+  apiClients    ApiClient[]
 
   @@index([companyName])
 }
