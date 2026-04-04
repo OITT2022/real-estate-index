@@ -28,6 +28,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           isSuperAdmin: user.isSuperAdmin,
           allowedPages: user.allowedPages as string[],
+          customerId: user.customerId,
         };
       },
     }),
@@ -40,15 +41,22 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.isSuperAdmin = (user as { isSuperAdmin?: boolean }).isSuperAdmin;
         token.allowedPages = (user as { allowedPages?: string[] }).allowedPages;
+        token.customerId = (user as { customerId?: string | null }).customerId ?? null;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        const u = session.user as { id?: string; isSuperAdmin?: boolean; allowedPages?: string[] };
+        const u = session.user as {
+          id?: string;
+          isSuperAdmin?: boolean;
+          allowedPages?: string[];
+          customerId?: string | null;
+        };
         u.id = token.id as string;
         u.isSuperAdmin = token.isSuperAdmin as boolean;
         u.allowedPages = token.allowedPages as string[];
+        u.customerId = (token.customerId as string) ?? null;
       }
       return session;
     },

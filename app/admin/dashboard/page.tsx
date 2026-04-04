@@ -1,12 +1,14 @@
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getDashboardStats } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
+import { getSessionUser } from "@/lib/scope";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   await checkPageAccess("dashboard");
-  const stats = await getDashboardStats();
+  const sessionUser = await getSessionUser();
+  const stats = await getDashboardStats(sessionUser ?? undefined);
 
   return (
     <main className="admin-shell">

@@ -12,15 +12,17 @@ import type { Project } from "@prisma/client";
 type SerializedProject = Omit<Project, "createdAt" | "updatedAt"> & { createdAt?: unknown; updatedAt?: unknown };
 
 type CustomerOption = { id: string; companyName: string };
+type UserScope = { customerId: string; customerName: string } | null;
 
 type ProjectFormProps = {
   mode: "create" | "edit";
   project?: SerializedProject | null;
   customers?: CustomerOption[];
+  userScope?: UserScope;
   onCreated?: (id: string) => void;
 };
 
-export function ProjectForm({ mode, project, customers, onCreated }: ProjectFormProps) {
+export function ProjectForm({ mode, project, customers, userScope, onCreated }: ProjectFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -53,7 +55,7 @@ export function ProjectForm({ mode, project, customers, onCreated }: ProjectForm
           metaDescription: project.metaDescription ?? "",
           customerId: project.customerId ?? "",
         }
-      : { published: false, featured: false, customerId: "" },
+      : { published: false, featured: false, customerId: userScope?.customerId ?? "" },
   });
 
   function slugify(text: string) {
@@ -165,7 +167,16 @@ export function ProjectForm({ mode, project, customers, onCreated }: ProjectForm
         </label>
       </div>
 
-      {customers && customers.length > 0 && (
+      {userScope ? (
+        <div>
+          <span style={{ display: "block", marginBottom: 6, fontWeight: 500, fontSize: "0.9rem" }}>Customer</span>
+          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "#f0fdf4", color: "var(--fg)" }}>
+            <strong>{userScope.customerName}</strong>
+            <span className="muted" style={{ marginLeft: 8, fontSize: "0.85rem" }}>your assigned customer</span>
+          </div>
+          <input type="hidden" {...register("customerId")} value={userScope.customerId} />
+        </div>
+      ) : customers && customers.length > 0 ? (
         <label>
           <span>Customer</span>
           <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
@@ -175,7 +186,7 @@ export function ProjectForm({ mode, project, customers, onCreated }: ProjectForm
             ))}
           </select>
         </label>
-      )}
+      ) : null}
 
       <div className="checkbox-row">
         <label><input type="checkbox" {...register("published")} /> Published</label>

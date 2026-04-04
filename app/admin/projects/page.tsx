@@ -3,12 +3,14 @@ import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllProjects } from "@/lib/site-data";
 import { AdminProjectTable } from "@/components/admin/admin-project-table";
 import { checkPageAccess } from "@/lib/check-access";
+import { getSessionUser } from "@/lib/scope";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProjectsPage() {
   await checkPageAccess("projects");
-  const projects = await getAllProjects();
+  const sessionUser = await getSessionUser();
+  const projects = await getAllProjects(sessionUser ?? undefined);
 
   const rows = projects.map((p) => ({
     id: p.id,

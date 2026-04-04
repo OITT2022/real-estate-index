@@ -22,15 +22,19 @@ enum ProjectStatus {
 }
 
 model AdminUser {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   name            String?
-  email           String   @unique
+  email           String    @unique
   passwordHash    String
-  isSuperAdmin    Boolean  @default(false)
-  allowedPages    Json     @default("[]")
-  active          Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  isSuperAdmin    Boolean   @default(false)
+  allowedPages    Json      @default("[]")
+  customerId      String?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  customer        Customer? @relation("CustomerManagers", fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
 }
 
 model Property {
@@ -258,6 +262,7 @@ model Customer {
   updatedAt     DateTime    @updatedAt
   projects      Project[]
   properties    Property[]
+  managers      AdminUser[] @relation("CustomerManagers")
 
   @@index([companyName])
 }

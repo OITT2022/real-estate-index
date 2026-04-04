@@ -7,17 +7,20 @@ import { ImageBankPicker } from "@/components/admin/image-bank-picker";
 import { AddPropertyModal } from "@/components/admin/add-property-modal";
 import { getProjectById, getAllProperties, getAllBankImages, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
+import { getSessionUser, getUserScope } from "@/lib/scope";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   await checkPageAccess("projects");
   const { id } = await params;
-  const [project, allProperties, bankImages, customers] = await Promise.all([
+  const sessionUser = await getSessionUser();
+  const [project, allProperties, bankImages, customers, userScope] = await Promise.all([
     getProjectById(id),
-    getAllProperties(),
+    getAllProperties(sessionUser ?? undefined),
     getAllBankImages(),
     getAllCustomersForSelect(),
+    sessionUser ? getUserScope(sessionUser) : Promise.resolve(null),
   ]);
 
   if (!project) return notFound();
@@ -68,7 +71,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           linkedProperties={linkedProperties}
           allProperties={allPropertiesSimple}
         />
-        <ProjectForm mode="edit" project={project} customers={customers} />
+        <ProjectForm mode="edit" project={project} customers={customers} userScope={userScope} />
       </div>
     </main>
   );

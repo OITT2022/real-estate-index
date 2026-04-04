@@ -14,15 +14,19 @@ type UserData = {
   email: string;
   isSuperAdmin: boolean;
   allowedPages: unknown;
+  customerId: string | null;
   active: boolean;
 };
+
+type CustomerOption = { id: string; companyName: string };
 
 type Props = {
   mode: "create" | "edit";
   user?: UserData | null;
+  customers?: CustomerOption[];
 };
 
-export function AdminUserForm({ mode, user }: Props) {
+export function AdminUserForm({ mode, user, customers }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -41,11 +45,13 @@ export function AdminUserForm({ mode, user }: Props) {
           password: "",
           isSuperAdmin: user.isSuperAdmin,
           allowedPages: (user.allowedPages as string[]) ?? [],
+          customerId: user.customerId ?? "",
           active: user.active,
         }
       : {
           isSuperAdmin: false,
           allowedPages: ALL_PAGE_KEYS.slice(),
+          customerId: "",
           active: true,
           password: "",
         },
@@ -105,6 +111,22 @@ export function AdminUserForm({ mode, user }: Props) {
           <label><input type="checkbox" {...register("isSuperAdmin")} /> Super Admin (full access)</label>
         </div>
       </div>
+
+      {!isSuperAdmin && customers && customers.length > 0 && (
+        <div className="card" style={{ display: "grid", gap: 12 }}>
+          <p className="eyebrow">Customer Assignment</p>
+          <p className="muted" style={{ margin: 0 }}>Assign a customer to make this user a Customer Manager with scoped access.</p>
+          <label>
+            <span>Assigned Customer</span>
+            <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+              <option value="">None — regular admin user</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>{c.companyName}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
 
       {!isSuperAdmin && (
         <div className="card" style={{ display: "grid", gap: 12 }}>

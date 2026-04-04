@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import type { SessionUser } from "@/lib/scope";
+import { customerScope, propertyCustomerScope } from "@/lib/scope";
 
 const propertyInclude = { images: { orderBy: { sortOrder: "asc" as const } } };
 const projectInclude = {
@@ -102,8 +104,9 @@ export async function getDistinctPropertyTypes() {
   return results.map((r) => r.propertyType).filter(Boolean) as string[];
 }
 
-export async function getAllProperties() {
+export async function getAllProperties(user?: SessionUser) {
   return db.property.findMany({
+    where: user ? propertyCustomerScope(user) : undefined,
     include: { ...propertyInclude, project: { select: { title: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -141,8 +144,9 @@ export async function getProjectBySlug(slug: string) {
   });
 }
 
-export async function getAllProjects() {
+export async function getAllProjects(user?: SessionUser) {
   return db.project.findMany({
+    where: user ? customerScope(user) : undefined,
     include: projectInclude,
     orderBy: { createdAt: "desc" },
   });
@@ -162,8 +166,9 @@ export async function getProjectById(id: string) {
   });
 }
 
-export async function getAllProjectsForSelect() {
+export async function getAllProjectsForSelect(user?: SessionUser) {
   return db.project.findMany({
+    where: user ? customerScope(user) : undefined,
     select: { id: true, title: true, customerId: true },
     orderBy: { title: "asc" },
   });
@@ -247,12 +252,15 @@ export async function getApiClientById(id: string) {
 
 // ── Dashboard ──────────────────────────────────────────────────
 
-export async function getDashboardStats() {
+export async function getDashboardStats(user?: SessionUser) {
+  const propWhere = user ? (propertyCustomerScope(user) ?? {}) : {};
+  const projWhere = user ? (customerScope(user) ?? {}) : {};
+
   const [total, published, inquiries, projects] = await Promise.all([
-    db.property.count(),
-    db.property.count({ where: { published: true, status: "ACTIVE" } }),
-    db.inquiry.count(),
-    db.project.count(),
+    db.property.count({ where: propWhere }),
+    db.property.count({ where: { ...propWhere, published: true, status: "ACTIVE" } }),
+    db.inquiry.count({ where: user && !user.isSuperAdmin && user.customerId ? { property: { OR: [{ customerId: user.customerId }, { project: { customerId: user.customerId } }] } } : undefined }),
+    db.project.count({ where: projWhere }),
   ]);
   return { total, published, inquiries, projects };
 }

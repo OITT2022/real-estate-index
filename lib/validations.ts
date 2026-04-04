@@ -96,6 +96,7 @@ export const adminUserFormSchema = z.object({
   password: z.string().optional().or(z.literal("")),
   isSuperAdmin: z.boolean(),
   allowedPages: z.array(z.string()),
+  customerId: z.string().optional().or(z.literal("")),
   active: z.boolean(),
 });
 

@@ -14,15 +14,18 @@ type SerializedProperty = Omit<Property, "price"> & { price: number };
 type ProjectOption = { id: string; title: string; customerId: string | null };
 type CustomerOption = { id: string; companyName: string };
 
+type UserScope = { customerId: string; customerName: string } | null;
+
 type PropertyFormProps = {
   mode: "create" | "edit";
   property?: SerializedProperty | null;
   projects?: ProjectOption[];
   customers?: CustomerOption[];
+  userScope?: UserScope;
   onCreated?: (id: string) => void;
 };
 
-export function PropertyForm({ mode, property, projects, customers, onCreated }: PropertyFormProps) {
+export function PropertyForm({ mode, property, projects, customers, userScope, onCreated }: PropertyFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -72,7 +75,7 @@ export function PropertyForm({ mode, property, projects, customers, onCreated }:
           parking: false,
           balcony: false,
           currency: "EUR",
-          customerId: "",
+          customerId: userScope?.customerId ?? "",
         },
   });
 
@@ -243,7 +246,7 @@ export function PropertyForm({ mode, property, projects, customers, onCreated }:
         </label>
       )}
 
-      {customers && customers.length > 0 && (
+      {(customers && customers.length > 0 || userScope) && (
         inheritedCustomer ? (
           <div>
             <span style={{ display: "block", marginBottom: 6, fontWeight: 500, fontSize: "0.9rem" }}>Customer</span>
@@ -253,12 +256,21 @@ export function PropertyForm({ mode, property, projects, customers, onCreated }:
             </div>
             <input type="hidden" {...register("customerId")} value="" />
           </div>
+        ) : userScope ? (
+          <div>
+            <span style={{ display: "block", marginBottom: 6, fontWeight: 500, fontSize: "0.9rem" }}>Customer</span>
+            <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "#f0fdf4", color: "var(--fg)" }}>
+              <strong>{userScope.customerName}</strong>
+              <span className="muted" style={{ marginLeft: 8, fontSize: "0.85rem" }}>your assigned customer</span>
+            </div>
+            <input type="hidden" {...register("customerId")} value={userScope.customerId} />
+          </div>
         ) : (
           <label>
             <span>Customer</span>
             <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
               <option value="">None</option>
-              {customers.map((c) => (
+              {customers?.map((c) => (
                 <option key={c.id} value={c.id}>{c.companyName}</option>
               ))}
             </select>

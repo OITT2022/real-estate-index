@@ -4,11 +4,14 @@ import { useState } from "react";
 import { ProjectForm } from "@/components/forms/project-form";
 import { ProjectImageManager } from "@/components/admin/project-image-manager";
 
+type UserScope = { customerId: string; customerName: string } | null;
+
 type Props = {
   customers?: { id: string; companyName: string }[];
+  userScope?: UserScope;
 };
 
-export function CreateProjectFlow({ customers }: Props) {
+export function CreateProjectFlow({ customers, userScope }: Props) {
   const [createdId, setCreatedId] = useState<string | null>(null);
 
   if (createdId) {
@@ -31,5 +34,5 @@ export function CreateProjectFlow({ customers }: Props) {
     );
   }
 
-  return <ProjectForm mode="create" customers={customers} onCreated={(id) => setCreatedId(id)} />;
+  return <ProjectForm mode="create" customers={customers} userScope={userScope} onCreated={(id) => setCreatedId(id)} />;
 }

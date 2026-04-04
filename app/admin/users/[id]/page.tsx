@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { AdminUserForm } from "@/components/forms/admin-user-form";
-import { getAdminUserById } from "@/lib/site-data";
+import { getAdminUserById, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,10 @@ export const dynamic = "force-dynamic";
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   await checkPageAccess("users");
   const { id } = await params;
-  const user = await getAdminUserById(id);
+  const [user, customers] = await Promise.all([
+    getAdminUserById(id),
+    getAllCustomersForSelect(),
+  ]);
 
   if (!user) return notFound();
 
@@ -17,7 +20,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
       <div className="container">
         <p className="eyebrow">Admin</p>
         <h1>Edit User</h1>
-        <AdminUserForm mode="edit" user={user} />
+        <AdminUserForm mode="edit" user={user} customers={customers} />
       </div>
     </main>
   );

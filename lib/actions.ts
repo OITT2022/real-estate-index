@@ -6,6 +6,7 @@ import { deleteImage } from "@/lib/upload";
 import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema, adminUserFormSchema, customerFormSchema } from "@/lib/validations";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import { getSessionUser, canAccessCustomer, isCustomerManager } from "@/lib/scope";
 
 export type ActionResult =
   | { success: true; id?: string }
@@ -27,13 +28,24 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
   const parsed = propertyFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
+  const sessionUser = await getSessionUser();
   const { latitude, longitude, price, projectId, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
   // Resolve effective customerId: if project has a customer, inherit it; clear direct assignment
   let resolvedCustomerId: string | null = customerId || null;
+
+  // Customer manager: force their customer
+  if (sessionUser && isCustomerManager(sessionUser)) {
+    resolvedCustomerId = sessionUser.customerId;
+  }
+
   if (projectId) {
     const project = await db.project.findUnique({ where: { id: projectId }, select: { customerId: true } });
+    // Scope check: customer manager can only use their own projects
+    if (sessionUser && isCustomerManager(sessionUser) && project?.customerId && project.customerId !== sessionUser.customerId) {
+      return { success: false, error: "You cannot use a project from another customer" };
+    }
     if (project?.customerId) {
       resolvedCustomerId = null; // inherited from project, don't store directly
     }
@@ -61,15 +73,35 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
   const parsed = propertyFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
+  const sessionUser = await getSessionUser();
+
+  // Scope check: customer manager can only edit their own properties
+  if (sessionUser && isCustomerManager(sessionUser)) {
+    const existing = await db.property.findUnique({ where: { id }, include: { project: { select: { customerId: true } } } });
+    if (!existing) return { success: false, error: "Property not found" };
+    const effectiveCust = existing.project?.customerId ?? existing.customerId;
+    if (effectiveCust && effectiveCust !== sessionUser.customerId) {
+      return { success: false, error: "You cannot edit a property from another customer" };
+    }
+  }
+
   const { latitude, longitude, price, projectId, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
-  // Resolve effective customerId: if project has a customer, inherit it; clear direct assignment
+  // Resolve effective customerId
   let resolvedCustomerId: string | null = customerId || null;
+
+  if (sessionUser && isCustomerManager(sessionUser)) {
+    resolvedCustomerId = sessionUser.customerId;
+  }
+
   if (projectId) {
     const project = await db.project.findUnique({ where: { id: projectId }, select: { customerId: true } });
+    if (sessionUser && isCustomerManager(sessionUser) && project?.customerId && project.customerId !== sessionUser.customerId) {
+      return { success: false, error: "You cannot use a project from another customer" };
+    }
     if (project?.customerId) {
-      resolvedCustomerId = null; // inherited from project, don't store directly
+      resolvedCustomerId = null; // inherited from project
     }
   }
 
@@ -120,11 +152,17 @@ export async function createProject(data: unknown): Promise<ActionResult> {
   const parsed = projectFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
+  const sessionUser = await getSessionUser();
   const { latitude, longitude, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
+  // Customer manager: force their customer
+  const resolvedCustomerId = sessionUser && isCustomerManager(sessionUser)
+    ? sessionUser.customerId
+    : customerId || null;
+
   const project = await db.project.create({
-    data: { ...rest, latitude, longitude, customerId: customerId || null, status: rest.published ? "ACTIVE" : "DRAFT" },
+    data: { ...rest, latitude, longitude, customerId: resolvedCustomerId, status: rest.published ? "ACTIVE" : "DRAFT" },
   });
 
   revalidatePath("/admin/projects");
@@ -137,12 +175,26 @@ export async function updateProject(id: string, data: unknown): Promise<ActionRe
   const parsed = projectFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
+  const sessionUser = await getSessionUser();
+
+  // Scope check: customer manager can only edit their own projects
+  if (sessionUser && isCustomerManager(sessionUser)) {
+    const existing = await db.project.findUnique({ where: { id }, select: { customerId: true } });
+    if (existing?.customerId && existing.customerId !== sessionUser.customerId) {
+      return { success: false, error: "You cannot edit a project from another customer" };
+    }
+  }
+
   const { latitude, longitude, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
+  const resolvedCustomerId = sessionUser && isCustomerManager(sessionUser)
+    ? sessionUser.customerId
+    : customerId || null;
+
   await db.project.update({
     where: { id },
-    data: { ...rest, latitude, longitude, customerId: customerId || null, status: rest.published ? "ACTIVE" : "DRAFT" },
+    data: { ...rest, latitude, longitude, customerId: resolvedCustomerId, status: rest.published ? "ACTIVE" : "DRAFT" },
   });
 
   // If project customer changed, clear direct customerId on properties that now inherit
@@ -506,6 +558,7 @@ export async function createAdminUser(data: unknown): Promise<ActionResult> {
       passwordHash,
       isSuperAdmin: parsed.data.isSuperAdmin,
       allowedPages: parsed.data.allowedPages,
+      customerId: parsed.data.customerId || null,
       active: parsed.data.active,
     },
   });
@@ -523,6 +576,7 @@ export async function updateAdminUser(id: string, data: unknown): Promise<Action
     email: parsed.data.email,
     isSuperAdmin: parsed.data.isSuperAdmin,
     allowedPages: parsed.data.allowedPages,
+    customerId: parsed.data.customerId || null,
     active: parsed.data.active,
   };
 
