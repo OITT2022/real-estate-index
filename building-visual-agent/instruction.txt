@@ -1,0 +1,115 @@
+BUILDING VISUAL AGENT - STEP BY STEP
+====================================
+
+Goal
+----
+Build a standalone agent that receives project structure data and project images, generates a procedural building model, auto-maps facade textures, allows manual adjustment, and renders the project in a Three.js viewer.
+
+Core Stack
+----------
+1. React - client UI
+2. Node.js + Express - API and agent pipeline
+3. Three.js - 3D rendering
+4. TypeScript - shared typing across client/server
+
+Recommended workflow in VS Code with Claude
+-------------------------------------------
+STEP 1 - Open the folder
+- Open this folder in VS Code.
+- Make sure Claude Code is active in the workspace.
+
+STEP 2 - Review architecture
+- Read README.md
+- Read CLAUDE.md
+- Review folders:
+  - client/
+  - server/
+  - shared/
+  - agents/
+
+STEP 3 - Install dependencies
+Client:
+- cd client
+- npm install
+
+Server:
+- cd ../server
+- npm install
+
+Optional root workflow:
+- create a root package.json later if you want one-command dev mode.
+
+STEP 4 - Start the server
+- cd server
+- npm run dev
+- Server default URL: http://localhost:4000
+
+STEP 5 - Start the client
+- cd client
+- npm run dev
+- Client default URL: http://localhost:5173
+
+STEP 6 - Test sample input
+- Open assets/sample-project/project.json
+- POST it to /api/projects/scene
+- Or wire the client upload form to submit it.
+
+STEP 7 - Verify the flow
+Expected flow:
+1. input JSON received
+2. normalize service runs
+3. layout service runs
+4. mapping service runs
+5. scene spec returned
+6. viewer renders building and highlights selected apartment
+
+STEP 8 - Build the manual facade editor
+Main editor goals:
+- select facade: front / left / right / back
+- adjust offset X/Y
+- adjust scale X/Y
+- rotate texture
+- preview grid overlay
+- save preset to server
+
+STEP 9 - Save presets
+- Save mapping presets per project
+- Endpoint: POST /api/presets
+- Load presets with GET /api/presets/:projectId
+
+STEP 10 - Expand the model
+Suggested next improvements:
+1. multiple buildings
+2. section mode
+3. apartment hover tooltip
+4. click-to-focus camera
+5. texture opacity overlay in editor
+6. apartment filtering by status / rooms / area
+7. richer lighting and environment
+
+Suggested Claude tasks
+----------------------
+1. “Implement the normalize pipeline for project.json according to shared types.”
+2. “Implement layout generation for buildings, entrances, floors and apartments.”
+3. “Implement Three.js viewer that renders apartment boxes and highlights selectedApartmentId.”
+4. “Build a facade editor panel with controls for offset, scale and rotation.”
+5. “Connect client to the /api/projects/scene endpoint.”
+6. “Implement preset persistence with file-based storage or database storage.”
+
+Production notes
+----------------
+- Keep the data model as the source of truth.
+- Treat the 3D model as procedural visualization, not as an engineering BIM model.
+- Save mapping presets separately from the main project JSON.
+- Prefer deterministic layout rules over freeform generation.
+
+Files to review first
+---------------------
+1. shared/types/project.ts
+2. shared/types/scene.ts
+3. server/src/services/normalize/normalizeProject.ts
+4. server/src/services/layout/generateLayout.ts
+5. server/src/services/mapping/autoMapFacades.ts
+6. client/src/components/BuildingViewer/BuildingViewer.tsx
+7. client/src/components/FacadeEditor/FacadeEditor.tsx
+

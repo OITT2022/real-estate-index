@@ -1,0 +1,23 @@
+[
+  {
+    "presetId": "preset-P1001-1775344141068",
+    "projectId": "P1001",
+    "layoutType": "linear",
+    "mappings": [
+      {
+        "face": "front",
+        "image": "test.jpg",
+        "confidence": 0.92,
+        "uv": {
+          "offsetX": 0.1,
+          "offsetY": 0.2,
+          "repeatX": 1,
+          "repeatY": 1,
+          "rotation": 5
+        }
+      }
+    ],
+    "createdAt": "2026-04-04T23:09:01.068Z",
+    "updatedAt": "2026-04-04T23:09:01.068Z"
+  }
+]

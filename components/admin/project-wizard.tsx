@@ -12,7 +12,8 @@ const STEPS: Step[] = [
   { number: 1, label: "General Info", description: "Project details and location" },
   { number: 2, label: "Media", description: "Images and documents" },
   { number: 3, label: "Structure", description: "Buildings, floors and units" },
-  { number: 4, label: "Finish", description: "Review and update" },
+  { number: 4, label: "3D Preview", description: "Interactive building model" },
+  { number: 5, label: "Finish", description: "Review and update" },
 ];
 
 type Props = {
@@ -41,7 +42,7 @@ export function ProjectWizard({ children, initialStep = 1 }: Props) {
                 background: isActive ? "var(--accent)" : isCompleted ? "#f0fdf4" : "white",
                 color: isActive ? "white" : "var(--fg)",
                 border: "none",
-                borderRight: step.number < 4 ? "1px solid var(--line)" : "none",
+                borderRight: step.number < STEPS.length ? "1px solid var(--line)" : "none",
                 cursor: "pointer",
                 textAlign: "center",
                 transition: "background 0.2s",
@@ -82,11 +83,11 @@ export function ProjectWizard({ children, initialStep = 1 }: Props) {
           Previous
         </button>
         <div style={{ display: "flex", gap: 8 }}>
-          {activeStep < 4 && (
+          {activeStep < STEPS.length && (
             <button
               type="button"
               className="button-primary"
-              onClick={() => setActiveStep(Math.min(4, activeStep + 1))}
+              onClick={() => setActiveStep(Math.min(STEPS.length, activeStep + 1))}
             >
               Next Step
             </button>

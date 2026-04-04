@@ -7,9 +7,12 @@ import { ProjectStructureEditor } from "@/components/admin/project-structure-edi
 import { ProjectWizard } from "@/components/admin/project-wizard";
 import { ImageBankPicker } from "@/components/admin/image-bank-picker";
 import { AddPropertyModal } from "@/components/admin/add-property-modal";
+import { Project3DPreview } from "@/components/admin/project-3d-preview";
 import { getProjectById, getAllProperties, getAllBankImages, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 import { getSessionUser, getUserScope } from "@/lib/scope";
+import { transformProjectToInput } from "@/lib/building-3d/transform-project";
+import { generateSceneFromProject } from "@/lib/building-3d/generate-scene";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +29,10 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   ]);
 
   if (!project) return notFound();
+
+  // Generate 3D scene from project structure
+  const projectInput = transformProjectToInput(project);
+  const sceneSpec = projectInput ? generateSceneFromProject(projectInput) : null;
 
   const linkedProperties = project.properties.map((p) => ({
     id: p.id, title: p.title, city: p.city,
@@ -90,7 +97,22 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
             />
           </div>
 
-          {/* Step 4: Finish */}
+          {/* Step 4: 3D Preview */}
+          <div style={{ display: "grid", gap: 20 }}>
+            {sceneSpec ? (
+              <Project3DPreview sceneSpec={sceneSpec} />
+            ) : (
+              <div className="card" style={{ textAlign: "center", padding: 40 }}>
+                <div style={{ fontSize: "2rem", marginBottom: 12, opacity: 0.3 }}>&#9632;&#9632;&#9632;</div>
+                <h3 style={{ margin: "0 0 8px" }}>No 3D Preview Available</h3>
+                <p className="muted" style={{ margin: 0 }}>
+                  Add units in the Structure tab to generate a 3D building preview.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Step 5: Finish */}
           <div style={{ display: "grid", gap: 20 }}>
             <div className="card" style={{ textAlign: "center", padding: 40 }}>
               <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>&#10003;</div>

@@ -1,0 +1,82 @@
+{
+  "project": {
+    "id": "P1001",
+    "name": "Eden House",
+    "location": "Larnaca",
+    "images": {
+      "front": "/assets/projects/P1001/front.jpg",
+      "left": "/assets/projects/P1001/left.jpg",
+      "right": "/assets/projects/P1001/right.jpg",
+      "back": "/assets/projects/P1001/back.jpg",
+      "gallery": [
+        "/assets/projects/P1001/1.jpg",
+        "/assets/projects/P1001/2.jpg"
+      ]
+    }
+  },
+  "buildings": [
+    {
+      "id": "B1",
+      "name": "Building A",
+      "entrances": [
+        {
+          "id": "E1",
+          "name": "Entrance 1",
+          "floors": [
+            {
+              "floorNumber": 1,
+              "apartments": [
+                {
+                  "id": "A101",
+                  "unitNumber": "101",
+                  "rooms": 4,
+                  "areaSqm": 105,
+                  "status": "available",
+                  "images": [
+                    "/assets/projects/P1001/apartments/A101/1.jpg"
+                  ]
+                },
+                {
+                  "id": "A102",
+                  "unitNumber": "102",
+                  "rooms": 5,
+                  "areaSqm": 125,
+                  "status": "sold",
+                  "images": []
+                }
+              ]
+            },
+            {
+              "floorNumber": 2,
+              "apartments": [
+                {
+                  "id": "A201",
+                  "unitNumber": "201",
+                  "rooms": 4,
+                  "areaSqm": 105,
+                  "status": "available",
+                  "images": []
+                },
+                {
+                  "id": "A202",
+                  "unitNumber": "202",
+                  "rooms": 5,
+                  "areaSqm": 125,
+                  "status": "available",
+                  "images": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "selectedApartmentId": "A201",
+  "settings": {
+    "defaultApartmentWidth": 3.2,
+    "floorHeight": 3,
+    "buildingDepth": 8,
+    "gapBetweenEntrances": 1.5
+  }
+}
