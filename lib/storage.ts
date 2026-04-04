@@ -2,8 +2,7 @@
  * Storage abstraction layer.
  *
  * STORAGE_PROVIDER=local  -> local filesystem (default, dev)
- * STORAGE_PROVIDER=vercel -> @vercel/blob (current production)
- * STORAGE_PROVIDER=s3     -> AWS S3
+ * STORAGE_PROVIDER=s3     -> AWS S3 (production)
  */
 
 import fs from "fs/promises";
@@ -37,26 +36,6 @@ class LocalStorageProvider implements StorageProvider {
     if (url.startsWith("/uploads/")) {
       const filepath = path.join(process.cwd(), "public", url);
       await fs.unlink(filepath).catch(() => {});
-    }
-  }
-}
-
-// ── Vercel Blob provider ──
-
-class VercelBlobStorageProvider implements StorageProvider {
-  async upload(file: File): Promise<string> {
-    const { put } = await import("@vercel/blob");
-    const blob = await put(file.name, file, {
-      access: "public",
-      addRandomSuffix: true,
-    });
-    return blob.url;
-  }
-
-  async delete(url: string): Promise<void> {
-    if (url.includes("vercel-storage.com")) {
-      const { del } = await import("@vercel/blob");
-      await del(url);
     }
   }
 }
@@ -123,8 +102,6 @@ export function getStorage(): StorageProvider {
   const provider = process.env.STORAGE_PROVIDER?.trim().toLowerCase();
   if (provider === "s3") {
     _instance = new S3StorageProvider();
-  } else if (provider === "vercel") {
-    _instance = new VercelBlobStorageProvider();
   } else {
     _instance = new LocalStorageProvider();
   }

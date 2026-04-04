@@ -4,7 +4,6 @@ node_modules/
 *.env.local
 public/uploads/
 
-.vercel
 .amplify-hosting/
 dist/
 .env*.local
