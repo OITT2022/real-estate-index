@@ -9,7 +9,7 @@ import { VideoEmbed } from "@/components/property/video-embed";
 import { getProjectBySlug } from "@/lib/site-data";
 import { getMapSettings } from "@/lib/settings";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 type Props = { params: Promise<{ slug: string }> };
 

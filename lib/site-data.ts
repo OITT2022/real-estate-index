@@ -274,11 +274,14 @@ export async function getApiClientById(id: string) {
 export async function getDashboardStats(user?: SessionUser) {
   const propWhere = user ? (propertyCustomerScope(user) ?? {}) : {};
   const projWhere = user ? (customerScope(user) ?? {}) : {};
+  const inqWhere = user && !user.isSuperAdmin && user.customerId
+    ? { property: { OR: [{ customerId: user.customerId }, { project: { customerId: user.customerId } }] } }
+    : undefined;
 
   const [total, published, inquiries, projects] = await Promise.all([
     db.property.count({ where: propWhere }),
     db.property.count({ where: { ...propWhere, published: true, status: "ACTIVE" } }),
-    db.inquiry.count({ where: user && !user.isSuperAdmin && user.customerId ? { property: { OR: [{ customerId: user.customerId }, { project: { customerId: user.customerId } }] } } : undefined }),
+    db.inquiry.count({ where: inqWhere }),
     db.project.count({ where: projWhere }),
   ]);
   return { total, published, inquiries, projects };
@@ -289,7 +292,8 @@ export async function getDashboardStats(user?: SessionUser) {
 export async function getApiScopeCounts() {
   const apiFilter = { published: true, status: "ACTIVE" as const, apiEnabled: true };
 
-  const [totalProjects, totalProperties, customers] = await Promise.all([
+  // Single parallel batch: totals + per-customer direct counts + per-customer via-project counts
+  const [totalProjects, totalProperties, customers, viaProjectCounts] = await Promise.all([
     db.project.count({ where: apiFilter }),
     db.property.count({ where: apiFilter }),
     db.customer.findMany({
@@ -303,26 +307,25 @@ export async function getApiScopeCounts() {
         },
       },
     }),
+    // Count properties linked to each customer via project (single query, no N+1)
+    db.$queryRaw<{ customerId: string; count: bigint }[]>`
+      SELECT p."customerId", COUNT(DISTINCT prop.id) as count
+      FROM "Project" p
+      JOIN "Property" prop ON prop."projectId" = p.id
+      WHERE p."customerId" IS NOT NULL
+        AND prop.published = true AND prop.status = 'ACTIVE' AND prop."apiEnabled" = true
+        AND (prop."customerId" IS NULL OR prop."customerId" != p."customerId")
+      GROUP BY p."customerId"
+    `,
   ]);
 
-  // Also count properties that belong to customer via project
-  const projectCustomerPropertyCounts = await db.property.groupBy({
-    by: ["customerId"],
-    where: { ...apiFilter, project: { customerId: { not: null } } },
-    _count: true,
-  });
+  const viaProjectMap = new Map(viaProjectCounts.map((r) => [r.customerId, Number(r.count)]));
 
   const byCustomer: Record<string, { projects: number; properties: number }> = {};
   for (const c of customers) {
-    // Direct properties for this customer
-    const directProps = c._count.properties;
-    // Properties via projects: count properties where project.customerId = this customer
-    const viaProject = await db.property.count({
-      where: { ...apiFilter, project: { customerId: c.id }, customerId: { not: c.id } },
-    });
     byCustomer[c.id] = {
       projects: c._count.projects,
-      properties: directProps + viaProject,
+      properties: c._count.properties + (viaProjectMap.get(c.id) ?? 0),
     };
   }
 

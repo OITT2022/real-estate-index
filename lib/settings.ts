@@ -46,22 +46,20 @@ export const MAP_TILE_LAYERS = {
 export type TileLayerKey = keyof typeof MAP_TILE_LAYERS;
 
 export async function getMapSettings() {
-  const [tileLayer, defaultZoom, defaultLat, defaultLng] = await Promise.all([
-    db.siteSetting.findUnique({ where: { key: "map_tile_layer" } }),
-    db.siteSetting.findUnique({ where: { key: "map_default_zoom" } }),
-    db.siteSetting.findUnique({ where: { key: "map_default_lat" } }),
-    db.siteSetting.findUnique({ where: { key: "map_default_lng" } }),
-  ]);
+  const settings = await db.siteSetting.findMany({
+    where: { key: { in: ["map_tile_layer", "map_default_zoom", "map_default_lat", "map_default_lng"] } },
+  });
 
-  const layerKey = (tileLayer?.value ?? "osm") as TileLayerKey;
+  const map = new Map(settings.map((s) => [s.key, s.value]));
+  const layerKey = (map.get("map_tile_layer") ?? "osm") as TileLayerKey;
   const layer = MAP_TILE_LAYERS[layerKey] ?? MAP_TILE_LAYERS.osm;
 
   return {
     tileLayerKey: layerKey,
     tileUrl: layer.url,
     tileAttribution: layer.attribution,
-    defaultZoom: Number(defaultZoom?.value ?? 15),
-    defaultLat: Number(defaultLat?.value ?? 32.0853),
-    defaultLng: Number(defaultLng?.value ?? 34.7818),
+    defaultZoom: Number(map.get("map_default_zoom") ?? 15),
+    defaultLat: Number(map.get("map_default_lat") ?? 32.0853),
+    defaultLng: Number(map.get("map_default_lng") ?? 34.7818),
   };
 }
