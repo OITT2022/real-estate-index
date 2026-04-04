@@ -31,7 +31,7 @@ export function AdminSidebar() {
           )}
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ callbackUrl: "/admin/login" })}
             style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left", color: "var(--muted)", font: "inherit", fontSize: "0.9rem" }}
           >
             Sign out
