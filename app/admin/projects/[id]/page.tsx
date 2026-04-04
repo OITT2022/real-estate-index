@@ -74,7 +74,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
                 floor: u.floor, unitNumber: u.unitNumber,
                 propertyId: u.propertyId, propertyTitle: u.property?.title ?? null,
               }))}
-              availableProperties={project.properties.map((p) => ({ id: p.id, title: p.title }))}
+              availableProperties={allPropertiesSimple.map((p) => ({ id: p.id, title: p.title }))}
             />
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
