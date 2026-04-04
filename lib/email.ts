@@ -7,7 +7,7 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
     return { success: false, error: "RESEND_API_KEY not configured" };
   }
 
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "noreply@findus.co.il";
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "noreply@aradre.com";
 
   const { error } = await resend.emails.send({
     from: fromEmail,

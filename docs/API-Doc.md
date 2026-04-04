@@ -1,14 +1,14 @@
-# FindUs Real Estate API Documentation
+# AradRE Real Estate API Documentation
 
 ## Base URL
 
 ```
-https://www.findus.co.il/api/v1
+https://www.aradre.com/api/v1
 ```
 
 ## Authentication
 
-All requests require a Bearer token in the `Authorization` header. You receive this token from the FindUs admin when your API client is created.
+All requests require a Bearer token in the `Authorization` header. You receive this token from the AradRE admin when your API client is created.
 
 ```
 Authorization: Bearer YOUR_API_TOKEN
@@ -46,15 +46,15 @@ Returns all published properties that are enabled for API access.
 ```bash
 # Get all properties
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  https://www.findus.co.il/api/v1/properties
+  https://www.aradre.com/api/v1/properties
 
 # Filter by city
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  "https://www.findus.co.il/api/v1/properties?city=Larnaca"
+  "https://www.aradre.com/api/v1/properties?city=Larnaca"
 
 # Filter by type with pagination
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  "https://www.findus.co.il/api/v1/properties?propertyType=Apartment&page=1&limit=10"
+  "https://www.aradre.com/api/v1/properties?propertyType=Apartment&page=1&limit=10"
 ```
 
 #### Example Response
@@ -131,7 +131,7 @@ Returns all published projects that are enabled for API access, including their 
 
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  https://www.findus.co.il/api/v1/projects
+  https://www.aradre.com/api/v1/projects
 ```
 
 #### Example Response
@@ -317,7 +317,7 @@ Only properties and projects that meet **all** of the following criteria are ret
 ### JavaScript (fetch)
 
 ```javascript
-const API_URL = 'https://www.findus.co.il/api/v1';
+const API_URL = 'https://www.aradre.com/api/v1';
 const TOKEN = 'YOUR_API_TOKEN';
 
 // Get all properties
@@ -360,7 +360,7 @@ projects.forEach(project => {
 ```python
 import requests
 
-API_URL = 'https://www.findus.co.il/api/v1'
+API_URL = 'https://www.aradre.com/api/v1'
 TOKEN = 'YOUR_API_TOKEN'
 HEADERS = {'Authorization': f'Bearer {TOKEN}'}
 
@@ -393,7 +393,7 @@ for project in projects:
 
 ```php
 <?php
-$apiUrl = 'https://www.findus.co.il/api/v1';
+$apiUrl = 'https://www.aradre.com/api/v1';
 $token = 'YOUR_API_TOKEN';
 
 function apiRequest($endpoint, $params = []) {
@@ -447,7 +447,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 var client = new HttpClient();
-client.BaseAddress = new Uri("https://www.findus.co.il/api/v1/");
+client.BaseAddress = new Uri("https://www.aradre.com/api/v1/");
 client.DefaultRequestHeaders.Authorization =
     new AuthenticationHeaderValue("Bearer", "YOUR_API_TOKEN");
 
@@ -472,4 +472,4 @@ var projectJson = await projectResponse.Content.ReadAsStringAsync();
 
 ## Support
 
-For API access, token issues, or questions, contact the FindUs admin team.
+For API access, token issues, or questions, contact the AradRE admin team.
