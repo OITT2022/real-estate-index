@@ -24,8 +24,17 @@ function slugify(text: string) {
 
 // ── Property CRUD ──────────────────────────────────────────────
 
+function cleanNumericFields(data: unknown): unknown {
+  if (typeof data !== "object" || data === null) return data;
+  const obj = { ...(data as Record<string, unknown>) };
+  for (const key of ["bedrooms", "bathrooms", "areaSqm", "floor"]) {
+    if (obj[key] === "" || obj[key] === undefined) obj[key] = undefined;
+  }
+  return obj;
+}
+
 export async function createProperty(data: unknown): Promise<ActionResult> {
-  const parsed = propertyFormSchema.safeParse(data);
+  const parsed = propertyFormSchema.safeParse(cleanNumericFields(data));
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
   const sessionUser = await getSessionUser();
@@ -70,7 +79,7 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
 }
 
 export async function updateProperty(id: string, data: unknown): Promise<ActionResult> {
-  const parsed = propertyFormSchema.safeParse(data);
+  const parsed = propertyFormSchema.safeParse(cleanNumericFields(data));
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
   const sessionUser = await getSessionUser();
