@@ -4,7 +4,11 @@ import { useState } from "react";
 import { ProjectForm } from "@/components/forms/project-form";
 import { ProjectImageManager } from "@/components/admin/project-image-manager";
 
-export function CreateProjectFlow() {
+type Props = {
+  customers?: { id: string; companyName: string }[];
+};
+
+export function CreateProjectFlow({ customers }: Props) {
   const [createdId, setCreatedId] = useState<string | null>(null);
 
   if (createdId) {
@@ -27,5 +31,5 @@ export function CreateProjectFlow() {
     );
   }
 
-  return <ProjectForm mode="create" onCreated={(id) => setCreatedId(id)} />;
+  return <ProjectForm mode="create" customers={customers} onCreated={(id) => setCreatedId(id)} />;
 }

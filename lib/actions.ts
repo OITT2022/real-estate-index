@@ -27,8 +27,17 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
   const parsed = propertyFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
-  const { latitude, longitude, price, projectId, ...rest } = parsed.data;
+  const { latitude, longitude, price, projectId, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
+
+  // Resolve effective customerId: if project has a customer, inherit it; clear direct assignment
+  let resolvedCustomerId: string | null = customerId || null;
+  if (projectId) {
+    const project = await db.project.findUnique({ where: { id: projectId }, select: { customerId: true } });
+    if (project?.customerId) {
+      resolvedCustomerId = null; // inherited from project, don't store directly
+    }
+  }
 
   const property = await db.property.create({
     data: {
@@ -37,6 +46,7 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
       longitude,
       price,
       projectId: projectId || null,
+      customerId: resolvedCustomerId,
       sellerName: rest.sellerName ?? "",
       status: rest.published ? "ACTIVE" : "DRAFT",
     },
@@ -51,8 +61,17 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
   const parsed = propertyFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
-  const { latitude, longitude, price, projectId, ...rest } = parsed.data;
+  const { latitude, longitude, price, projectId, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
+
+  // Resolve effective customerId: if project has a customer, inherit it; clear direct assignment
+  let resolvedCustomerId: string | null = customerId || null;
+  if (projectId) {
+    const project = await db.project.findUnique({ where: { id: projectId }, select: { customerId: true } });
+    if (project?.customerId) {
+      resolvedCustomerId = null; // inherited from project, don't store directly
+    }
+  }
 
   await db.property.update({
     where: { id },
@@ -62,6 +81,7 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
       longitude,
       price,
       projectId: projectId || null,
+      customerId: resolvedCustomerId,
       status: rest.published ? "ACTIVE" : "DRAFT",
     },
   });
@@ -100,11 +120,11 @@ export async function createProject(data: unknown): Promise<ActionResult> {
   const parsed = projectFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
-  const { latitude, longitude, ...rest } = parsed.data;
+  const { latitude, longitude, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
   const project = await db.project.create({
-    data: { ...rest, latitude, longitude, status: rest.published ? "ACTIVE" : "DRAFT" },
+    data: { ...rest, latitude, longitude, customerId: customerId || null, status: rest.published ? "ACTIVE" : "DRAFT" },
   });
 
   revalidatePath("/admin/projects");
@@ -117,13 +137,21 @@ export async function updateProject(id: string, data: unknown): Promise<ActionRe
   const parsed = projectFormSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
-  const { latitude, longitude, ...rest } = parsed.data;
+  const { latitude, longitude, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
   await db.project.update({
     where: { id },
-    data: { ...rest, latitude, longitude, status: rest.published ? "ACTIVE" : "DRAFT" },
+    data: { ...rest, latitude, longitude, customerId: customerId || null, status: rest.published ? "ACTIVE" : "DRAFT" },
   });
+
+  // If project customer changed, clear direct customerId on properties that now inherit
+  if (customerId) {
+    await db.property.updateMany({
+      where: { projectId: id, customerId: { not: null } },
+      data: { customerId: null },
+    });
+  }
 
   revalidatePath("/admin/projects");
   revalidatePath(`/admin/projects/${id}`);

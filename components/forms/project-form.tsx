@@ -11,13 +11,16 @@ import type { Project } from "@prisma/client";
 
 type SerializedProject = Omit<Project, "createdAt" | "updatedAt"> & { createdAt?: unknown; updatedAt?: unknown };
 
+type CustomerOption = { id: string; companyName: string };
+
 type ProjectFormProps = {
   mode: "create" | "edit";
   project?: SerializedProject | null;
+  customers?: CustomerOption[];
   onCreated?: (id: string) => void;
 };
 
-export function ProjectForm({ mode, project, onCreated }: ProjectFormProps) {
+export function ProjectForm({ mode, project, customers, onCreated }: ProjectFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -48,8 +51,9 @@ export function ProjectForm({ mode, project, onCreated }: ProjectFormProps) {
           featured: project.featured,
           metaTitle: project.metaTitle ?? "",
           metaDescription: project.metaDescription ?? "",
+          customerId: project.customerId ?? "",
         }
-      : { published: false, featured: false },
+      : { published: false, featured: false, customerId: "" },
   });
 
   function slugify(text: string) {
@@ -160,6 +164,18 @@ export function ProjectForm({ mode, project, onCreated }: ProjectFormProps) {
           <input {...register("metaDescription")} placeholder="Optional SEO description" />
         </label>
       </div>
+
+      {customers && customers.length > 0 && (
+        <label>
+          <span>Customer</span>
+          <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+            <option value="">None</option>
+            {customers.map((c) => (
+              <option key={c.id} value={c.id}>{c.companyName}</option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <div className="checkbox-row">
         <label><input type="checkbox" {...register("published")} /> Published</label>

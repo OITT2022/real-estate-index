@@ -29,6 +29,7 @@ export const propertyFormSchema = z.object({
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   projectId: z.string().optional().or(z.literal("")),
+  customerId: z.string().optional().or(z.literal("")),
 });
 
 export type PropertyFormValues = z.infer<typeof propertyFormSchema>;
@@ -51,6 +52,7 @@ export const projectFormSchema = z.object({
   featured: z.boolean(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
+  customerId: z.string().optional().or(z.literal("")),
 });
 
 export type ProjectFormValues = z.infer<typeof projectFormSchema>;

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { PropertyForm } from "@/components/forms/property-form";
 import { ImageManager } from "@/components/admin/image-manager";
 import { ImageBankPicker } from "@/components/admin/image-bank-picker";
-import { getPropertyById, getAllProjectsForSelect, getAllBankImages } from "@/lib/site-data";
+import { getPropertyById, getAllProjectsForSelect, getAllCustomersForSelect, getAllBankImages } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
@@ -10,9 +10,10 @@ export const dynamic = "force-dynamic";
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   await checkPageAccess("properties");
   const { id } = await params;
-  const [property, projects, bankImages] = await Promise.all([
+  const [property, projects, customers, bankImages] = await Promise.all([
     getPropertyById(id),
     getAllProjectsForSelect(),
+    getAllCustomersForSelect(),
     getAllBankImages(),
   ]);
 
@@ -33,7 +34,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         </div>
         <ImageManager propertyId={property.id} images={property.images} />
         <ImageBankPicker bankImages={bankImagesSimple} targetType="property" targetId={property.id} />
-        <PropertyForm mode="edit" property={{ ...property, price: Number(property.price) }} projects={projects} />
+        <PropertyForm mode="edit" property={{ ...property, price: Number(property.price) }} projects={projects} customers={customers} />
       </div>
     </main>
   );

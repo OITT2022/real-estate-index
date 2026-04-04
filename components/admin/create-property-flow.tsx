@@ -5,10 +5,11 @@ import { PropertyForm } from "@/components/forms/property-form";
 import { ImageManager } from "@/components/admin/image-manager";
 
 type Props = {
-  projects?: { id: string; title: string }[];
+  projects?: { id: string; title: string; customerId: string | null }[];
+  customers?: { id: string; companyName: string }[];
 };
 
-export function CreatePropertyFlow({ projects }: Props) {
+export function CreatePropertyFlow({ projects, customers }: Props) {
   const [createdId, setCreatedId] = useState<string | null>(null);
 
   if (createdId) {
@@ -31,5 +32,5 @@ export function CreatePropertyFlow({ projects }: Props) {
     );
   }
 
-  return <PropertyForm mode="create" projects={projects} onCreated={(id) => setCreatedId(id)} />;
+  return <PropertyForm mode="create" projects={projects} customers={customers} onCreated={(id) => setCreatedId(id)} />;
 }

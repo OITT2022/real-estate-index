@@ -65,16 +65,19 @@ model Property {
   metaTitle         String?
   metaDescription   String?
   projectId         String?
+  customerId        String?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   images            PropertyImage[]
   inquiries         Inquiry[]
   project           Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  customer          Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([city])
   @@index([published, status])
   @@index([featured])
   @@index([projectId])
+  @@index([customerId])
   @@index([apiEnabled, published, status])
 }
 
@@ -120,15 +123,18 @@ model Project {
   apiEnabled        Boolean        @default(false)
   metaTitle         String?
   metaDescription   String?
+  customerId        String?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   images            ProjectImage[]
   documents         ProjectDocument[]
   properties        Property[]
   inquiries         Inquiry[]
+  customer          Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([city])
   @@index([published, status])
+  @@index([customerId])
   @@index([apiEnabled, published, status])
 }
 
@@ -241,15 +247,17 @@ model ApiClient {
 }
 
 model Customer {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   companyName   String
   logoUrl       String?
   description   String?
   contactName   String?
   contactEmail  String?
   contactPhone  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  projects      Project[]
+  properties    Property[]
 
   @@index([companyName])
 }

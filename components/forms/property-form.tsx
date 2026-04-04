@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { propertyFormSchema, type PropertyFormValues } from "@/lib/validations";
 import { createProperty, updateProperty } from "@/lib/actions";
 import { LocationPicker } from "@/components/map/location-picker";
@@ -11,16 +11,18 @@ import type { Property } from "@prisma/client";
 
 type SerializedProperty = Omit<Property, "price"> & { price: number };
 
-type ProjectOption = { id: string; title: string };
+type ProjectOption = { id: string; title: string; customerId: string | null };
+type CustomerOption = { id: string; companyName: string };
 
 type PropertyFormProps = {
   mode: "create" | "edit";
   property?: SerializedProperty | null;
   projects?: ProjectOption[];
+  customers?: CustomerOption[];
   onCreated?: (id: string) => void;
 };
 
-export function PropertyForm({ mode, property, projects, onCreated }: PropertyFormProps) {
+export function PropertyForm({ mode, property, projects, customers, onCreated }: PropertyFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -62,6 +64,7 @@ export function PropertyForm({ mode, property, projects, onCreated }: PropertyFo
           metaTitle: property.metaTitle ?? "",
           metaDescription: property.metaDescription ?? "",
           projectId: property.projectId ?? "",
+          customerId: property.customerId ?? "",
         }
       : {
           published: false,
@@ -69,6 +72,7 @@ export function PropertyForm({ mode, property, projects, onCreated }: PropertyFo
           parking: false,
           balcony: false,
           currency: "EUR",
+          customerId: "",
         },
   });
 
@@ -81,6 +85,17 @@ export function PropertyForm({ mode, property, projects, onCreated }: PropertyFo
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
   }
+
+  const selectedProjectId = watch("projectId");
+
+  // Determine if customer is inherited from the selected project
+  const inheritedCustomer = useMemo(() => {
+    if (!selectedProjectId || !projects) return null;
+    const proj = projects.find((p) => p.id === selectedProjectId);
+    if (!proj?.customerId || !customers) return null;
+    const cust = customers.find((c) => c.id === proj.customerId);
+    return cust ?? null;
+  }, [selectedProjectId, projects, customers]);
 
   const [autoSlug, setAutoSlug] = useState(mode === "create");
 
@@ -226,6 +241,29 @@ export function PropertyForm({ mode, property, projects, onCreated }: PropertyFo
             ))}
           </select>
         </label>
+      )}
+
+      {customers && customers.length > 0 && (
+        inheritedCustomer ? (
+          <div>
+            <span style={{ display: "block", marginBottom: 6, fontWeight: 500, fontSize: "0.9rem" }}>Customer</span>
+            <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "#f0fdf4", color: "var(--fg)" }}>
+              <strong>{inheritedCustomer.companyName}</strong>
+              <span className="muted" style={{ marginLeft: 8, fontSize: "0.85rem" }}>inherited from project</span>
+            </div>
+            <input type="hidden" {...register("customerId")} value="" />
+          </div>
+        ) : (
+          <label>
+            <span>Customer</span>
+            <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+              <option value="">None</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>{c.companyName}</option>
+              ))}
+            </select>
+          </label>
+        )
       )}
 
       <div className="admin-form-grid">

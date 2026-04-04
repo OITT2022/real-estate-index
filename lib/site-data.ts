@@ -164,8 +164,15 @@ export async function getProjectById(id: string) {
 
 export async function getAllProjectsForSelect() {
   return db.project.findMany({
-    select: { id: true, title: true },
+    select: { id: true, title: true, customerId: true },
     orderBy: { title: "asc" },
+  });
+}
+
+export async function getAllCustomersForSelect() {
+  return db.customer.findMany({
+    select: { id: true, companyName: true },
+    orderBy: { companyName: "asc" },
   });
 }
 

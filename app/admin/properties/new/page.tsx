@@ -1,12 +1,15 @@
 import { CreatePropertyFlow } from "@/components/admin/create-property-flow";
-import { getAllProjectsForSelect } from "@/lib/site-data";
+import { getAllProjectsForSelect, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewPropertyPage() {
   await checkPageAccess("properties");
-  const projects = await getAllProjectsForSelect();
+  const [projects, customers] = await Promise.all([
+    getAllProjectsForSelect(),
+    getAllCustomersForSelect(),
+  ]);
 
   return (
     <main className="section">
@@ -14,7 +17,7 @@ export default async function NewPropertyPage() {
         <p className="eyebrow">Admin</p>
         <h1>Create property</h1>
         <p className="muted">Fill in the details and save. You will be redirected to upload images.</p>
-        <CreatePropertyFlow projects={projects} />
+        <CreatePropertyFlow projects={projects} customers={customers} />
       </div>
     </main>
   );

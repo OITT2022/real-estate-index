@@ -5,7 +5,7 @@ import { ProjectPropertiesManager } from "@/components/admin/project-properties-
 import { ProjectDocumentManager } from "@/components/admin/project-document-manager";
 import { ImageBankPicker } from "@/components/admin/image-bank-picker";
 import { AddPropertyModal } from "@/components/admin/add-property-modal";
-import { getProjectById, getAllProperties, getAllBankImages } from "@/lib/site-data";
+import { getProjectById, getAllProperties, getAllBankImages, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
@@ -13,10 +13,11 @@ export const dynamic = "force-dynamic";
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   await checkPageAccess("projects");
   const { id } = await params;
-  const [project, allProperties, bankImages] = await Promise.all([
+  const [project, allProperties, bankImages, customers] = await Promise.all([
     getProjectById(id),
     getAllProperties(),
     getAllBankImages(),
+    getAllCustomersForSelect(),
   ]);
 
   if (!project) return notFound();
@@ -67,7 +68,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           linkedProperties={linkedProperties}
           allProperties={allPropertiesSimple}
         />
-        <ProjectForm mode="edit" project={project} />
+        <ProjectForm mode="edit" project={project} customers={customers} />
       </div>
     </main>
   );
