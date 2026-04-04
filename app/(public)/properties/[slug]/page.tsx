@@ -79,7 +79,8 @@ export default async function PropertyPage({ params }: Props) {
               <div className="spec-item"><strong>Bedrooms</strong><br />{property.bedrooms ?? "-"}</div>
               <div className="spec-item"><strong>Bathrooms</strong><br />{property.bathrooms ?? "-"}</div>
               <div className="spec-item"><strong>Area</strong><br />{property.areaSqm ?? "-"} sqm</div>
-              {property.floor && <div className="spec-item"><strong>Floor</strong><br />{property.floor}</div>}
+              {property.unitNumber && <div className="spec-item"><strong>Unit</strong><br />{property.unitNumber}</div>}
+              {property.floor != null && <div className="spec-item"><strong>Floor</strong><br />{property.floor}</div>}
               <div className="spec-item"><strong>Parking</strong><br />{property.parking ? "Yes" : "No"}</div>
               <div className="spec-item"><strong>Balcony</strong><br />{property.balcony ? "Yes" : "No"}</div>
               <div className="spec-item"><strong>Seller</strong><br />{property.sellerName}</div>

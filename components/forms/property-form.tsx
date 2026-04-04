@@ -54,7 +54,8 @@ export function PropertyForm({ mode, property, projects, customers, userScope, o
           bedrooms: property.bedrooms ?? undefined,
           bathrooms: property.bathrooms ?? undefined,
           areaSqm: property.areaSqm ?? undefined,
-          floor: property.floor ?? "",
+          floor: property.floor ?? undefined,
+          unitNumber: property.unitNumber ?? "",
           parking: property.parking,
           balcony: property.balcony,
           videoUrl: property.videoUrl ?? "",
@@ -180,8 +181,12 @@ export function PropertyForm({ mode, property, projects, customers, userScope, o
           <input {...register("neighborhood")} placeholder="Optional" />
         </label>
         <label>
+          <span>Unit Number</span>
+          <input {...register("unitNumber")} placeholder="4A" />
+        </label>
+        <label>
           <span>Floor</span>
-          <input {...register("floor")} placeholder="3rd" />
+          <input {...register("floor")} type="number" placeholder="2" />
         </label>
       </div>
 

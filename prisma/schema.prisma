@@ -54,7 +54,8 @@ model Property {
   bedrooms          Int?
   bathrooms         Int?
   areaSqm           Float?
-  floor             String?
+  floor             Int?
+  unitNumber        String?
   parking           Boolean         @default(false)
   balcony           Boolean         @default(false)
   videoUrl          String?

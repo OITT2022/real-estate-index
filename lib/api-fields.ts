@@ -15,6 +15,7 @@ export const PROPERTY_API_FIELDS = [
   { key: "bathrooms", label: "Bathrooms" },
   { key: "areaSqm", label: "Area (sqm)" },
   { key: "floor", label: "Floor" },
+  { key: "unitNumber", label: "Unit Number" },
   { key: "parking", label: "Parking" },
   { key: "balcony", label: "Balcony" },
   { key: "videoUrl", label: "Video URL" },
