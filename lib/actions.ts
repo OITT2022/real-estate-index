@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { deleteImage } from "@/lib/upload";
-import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema, adminUserFormSchema } from "@/lib/validations";
+import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema, adminUserFormSchema, customerFormSchema } from "@/lib/validations";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 
@@ -400,6 +400,61 @@ export async function deleteBankImage(id: string): Promise<ActionResult> {
   if (!img) return { success: false, error: "Image not found" };
   await deleteImage(img.url);
   await db.imageBank.delete({ where: { id } });
+  return { success: true };
+}
+
+// ── Customers ────────────────────────────────────────────────
+
+export async function createCustomer(data: unknown): Promise<ActionResult> {
+  const parsed = customerFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  const customer = await db.customer.create({
+    data: {
+      companyName: parsed.data.companyName,
+      logoUrl: parsed.data.logoUrl || null,
+      description: parsed.data.description || null,
+      contactName: parsed.data.contactName || null,
+      contactEmail: parsed.data.contactEmail || null,
+      contactPhone: parsed.data.contactPhone?.trim() || null,
+    },
+  });
+
+  revalidatePath("/admin/customers");
+  return { success: true, id: customer.id };
+}
+
+export async function updateCustomer(id: string, data: unknown): Promise<ActionResult> {
+  const parsed = customerFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  await db.customer.update({
+    where: { id },
+    data: {
+      companyName: parsed.data.companyName,
+      logoUrl: parsed.data.logoUrl || null,
+      description: parsed.data.description || null,
+      contactName: parsed.data.contactName || null,
+      contactEmail: parsed.data.contactEmail || null,
+      contactPhone: parsed.data.contactPhone?.trim() || null,
+    },
+  });
+
+  revalidatePath("/admin/customers");
+  revalidatePath(`/admin/customers/${id}`);
+  return { success: true };
+}
+
+export async function deleteCustomer(id: string): Promise<ActionResult> {
+  const customer = await db.customer.findUnique({ where: { id } });
+  if (!customer) return { success: false, error: "Customer not found" };
+
+  if (customer.logoUrl) {
+    await deleteImage(customer.logoUrl);
+  }
+
+  await db.customer.delete({ where: { id } });
+  revalidatePath("/admin/customers");
   return { success: true };
 }
 

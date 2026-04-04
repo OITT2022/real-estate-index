@@ -77,6 +77,17 @@ export const apiClientFormSchema = z.object({
 
 export type ApiClientFormValues = z.infer<typeof apiClientFormSchema>;
 
+export const customerFormSchema = z.object({
+  companyName: z.string().min(2, "Company name is required"),
+  logoUrl: z.string().optional().or(z.literal("")),
+  description: z.string().optional().or(z.literal("")),
+  contactName: z.string().optional().or(z.literal("")),
+  contactEmail: z.string().email("Valid email required").optional().or(z.literal("")),
+  contactPhone: z.string().optional().or(z.literal("")),
+});
+
+export type CustomerFormValues = z.infer<typeof customerFormSchema>;
+
 export const adminUserFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Valid email required"),

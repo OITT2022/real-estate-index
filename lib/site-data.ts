@@ -190,6 +190,21 @@ export async function getInquiryById(id: string) {
   });
 }
 
+// ── Customers ─────────────────────────────────────────────────
+
+export async function getAllCustomers(search?: string) {
+  return db.customer.findMany({
+    where: search
+      ? { companyName: { contains: search, mode: "insensitive" } }
+      : undefined,
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getCustomerById(id: string) {
+  return db.customer.findUnique({ where: { id } });
+}
+
 // ── Admin Users ────────────────────────────────────────────────
 
 export async function getAllAdminUsers() {

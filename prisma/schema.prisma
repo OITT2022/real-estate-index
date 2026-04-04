@@ -240,6 +240,20 @@ model ApiClient {
   updatedAt             DateTime @updatedAt
 }
 
+model Customer {
+  id            String   @id @default(cuid())
+  companyName   String
+  logoUrl       String?
+  description   String?
+  contactName   String?
+  contactEmail  String?
+  contactPhone  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([companyName])
+}
+
 model SiteSetting {
   key       String   @id
   value     String

@@ -5,6 +5,7 @@ export const ADMIN_PAGES = [
   { key: "projects", label: "Projects", path: "/admin/projects" },
   { key: "inquiries", label: "Inquiries", path: "/admin/inquiries" },
   { key: "maps", label: "Maps", path: "/admin/maps" },
+  { key: "customers", label: "Customers", path: "/admin/customers" },
   { key: "api", label: "API Clients", path: "/admin/api" },
   { key: "users", label: "User Management", path: "/admin/users" },
 ] as const;
