@@ -123,8 +123,12 @@ export function AddPropertyModal({ projectId, projectTitle }: Props) {
               <input {...register("areaSqm")} type="number" placeholder="70" />
             </label>
             <label>
+              <span>Unit Number</span>
+              <input {...register("unitNumber")} placeholder="4A" />
+            </label>
+            <label>
               <span>Floor</span>
-              <input {...register("floor")} placeholder="2nd" />
+              <input {...register("floor")} type="number" placeholder="2" />
             </label>
             <label>
               <span>Seller Name</span>
