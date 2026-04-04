@@ -24,7 +24,8 @@ export async function GET() {
   // Storage
   checks.STORAGE_PROVIDER = process.env.STORAGE_PROVIDER ?? "not set (defaults to local)";
   checks.S3_BUCKET = process.env.S3_BUCKET ?? "not set";
-  checks.AWS_REGION = process.env.AWS_REGION ?? "not set";
+  checks.S3_REGION = process.env.S3_REGION ?? "not set";
+  checks.S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID ? "set" : "MISSING";
 
   // Test S3 write
   if (process.env.STORAGE_PROVIDER === "s3") {

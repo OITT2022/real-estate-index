@@ -55,12 +55,20 @@ class S3StorageProvider implements StorageProvider {
 
   constructor() {
     this.bucket = process.env.S3_BUCKET ?? "aradre-assets";
-    this.region = process.env.AWS_REGION ?? "eu-north-1";
+    this.region = process.env.S3_REGION ?? "eu-north-1";
   }
 
   private getClient(): S3Client {
     if (this._client) return this._client;
-    this._client = new S3Client({ region: this.region });
+    // Amplify blocks AWS_ prefix env vars — use S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY
+    const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+    this._client = new S3Client({
+      region: this.region,
+      ...(accessKeyId && secretAccessKey
+        ? { credentials: { accessKeyId, secretAccessKey } }
+        : {}),
+    });
     return this._client;
   }
 
