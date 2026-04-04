@@ -45,6 +45,12 @@ export function ProjectStructureEditor({ projectId, units, availableProperties }
   const [floors, setFloors] = useState(5);
   const [unitsPerFloor, setUnitsPerFloor] = useState(4);
 
+  // Manual add unit state
+  const [manualBuilding, setManualBuilding] = useState("1");
+  const [manualEntrance, setManualEntrance] = useState("A");
+  const [manualFloor, setManualFloor] = useState(0);
+  const [manualUnitNumber, setManualUnitNumber] = useState("");
+
   const hasUnits = units.length > 0;
 
   // Group units by building → entrance → floor
@@ -85,6 +91,19 @@ export function ProjectStructureEditor({ projectId, units, availableProperties }
     router.refresh();
   }
 
+  async function handleManualAddUnit() {
+    if (!manualUnitNumber.trim()) { setError("Unit number is required"); return; }
+    setError(null);
+    await addProjectUnit(projectId, {
+      building: manualBuilding,
+      entrance: manualEntrance,
+      floor: manualFloor,
+      unitNumber: manualUnitNumber.trim(),
+    });
+    setManualUnitNumber("");
+    router.refresh();
+  }
+
   async function handleDeleteUnit(unitId: string) {
     setError(null);
     const result = await deleteProjectUnit(unitId);
@@ -115,8 +134,25 @@ export function ProjectStructureEditor({ projectId, units, availableProperties }
     const maxFloor = existingFloors.length > 0 ? Math.max(...existingFloors) : -1;
     const newFloor = maxFloor + 1;
     const firstFloorUnits = grouped.get(building)?.get(entrance)?.values().next().value;
-    const count = firstFloorUnits?.length ?? 2;
+    const count = (firstFloorUnits as UnitData[] | undefined)?.length ?? 2;
     await addProjectFloor(projectId, building, entrance, newFloor, count);
+    router.refresh();
+  }
+
+  async function handleAddEntrance(building: string) {
+    setError(null);
+    const existingEntrances = [...(grouped.get(building)?.keys() ?? [])].sort();
+    const lastEntrance = existingEntrances.length > 0 ? existingEntrances[existingEntrances.length - 1] : "@";
+    const newEntrance = String.fromCharCode(lastEntrance.charCodeAt(0) + 1);
+    // Copy floor structure from first entrance
+    const firstEntrance = grouped.get(building)?.values().next().value as Map<number, UnitData[]> | undefined;
+    if (firstEntrance) {
+      for (const [floor, floorUnits] of firstEntrance.entries()) {
+        await addProjectFloor(projectId, building, newEntrance, floor, floorUnits.length);
+      }
+    } else {
+      await addProjectFloor(projectId, building, newEntrance, 0, 2);
+    }
     router.refresh();
   }
 
@@ -150,6 +186,7 @@ export function ProjectStructureEditor({ projectId, units, availableProperties }
 
       {error && <p className="form-error">{error}</p>}
 
+      {/* Generator — only shown when no units exist */}
       {!hasUnits && (
         <div style={{ background: "var(--bg-alt)", borderRadius: 12, padding: 20 }}>
           <p style={{ margin: "0 0 12px", fontWeight: 500 }}>Generate Initial Structure</p>
@@ -182,10 +219,40 @@ export function ProjectStructureEditor({ projectId, units, availableProperties }
         </div>
       )}
 
+      {/* Manual add unit — always available */}
+      <div style={{ background: "var(--bg-alt)", borderRadius: 12, padding: 16 }}>
+        <p style={{ margin: "0 0 8px", fontWeight: 500, fontSize: "0.9rem" }}>Add Unit Manually</p>
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
+          <label style={{ flex: "0 0 70px" }}>
+            <span style={{ fontSize: "0.8rem" }}>Building</span>
+            <input value={manualBuilding} onChange={(e) => setManualBuilding(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem" }} />
+          </label>
+          <label style={{ flex: "0 0 70px" }}>
+            <span style={{ fontSize: "0.8rem" }}>Entrance</span>
+            <input value={manualEntrance} onChange={(e) => setManualEntrance(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem" }} />
+          </label>
+          <label style={{ flex: "0 0 70px" }}>
+            <span style={{ fontSize: "0.8rem" }}>Floor</span>
+            <input type="number" value={manualFloor} onChange={(e) => setManualFloor(Number(e.target.value))} style={{ width: "100%", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem" }} />
+          </label>
+          <label style={{ flex: "1 1 100px" }}>
+            <span style={{ fontSize: "0.8rem" }}>Unit #</span>
+            <input value={manualUnitNumber} onChange={(e) => setManualUnitNumber(e.target.value)} placeholder="101" style={{ width: "100%", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem" }} />
+          </label>
+          <button type="button" className="button-primary" style={{ padding: "6px 14px", fontSize: "0.85rem" }} onClick={handleManualAddUnit}>
+            Add
+          </button>
+        </div>
+      </div>
+
+      {/* Structure display */}
       {hasUnits && [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([building, entranceMap]) => (
         <div key={building} style={{ border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" }}>
-          <div style={{ background: "var(--bg-alt)", padding: "10px 16px", fontWeight: 600 }}>
-            Building {building}
+          <div style={{ background: "var(--bg-alt)", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontWeight: 600 }}>Building {building}</span>
+            <button type="button" className="button-secondary" style={{ padding: "4px 10px", fontSize: "0.8rem" }} onClick={() => handleAddEntrance(building)}>
+              + Entrance
+            </button>
           </div>
 
           {[...entranceMap.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([entrance, floorMap]) => (

@@ -19,7 +19,7 @@ type ProjectFormProps = {
   project?: SerializedProject | null;
   customers?: CustomerOption[];
   userScope?: UserScope;
-  onCreated?: (id: string) => void;
+  onCreated?: (id: string, title?: string) => void;
 };
 
 export function ProjectForm({ mode, project, customers, userScope, onCreated }: ProjectFormProps) {
@@ -78,7 +78,7 @@ export function ProjectForm({ mode, project, customers, userScope, onCreated }: 
     }
 
     if (mode === "create" && result.id && onCreated) {
-      onCreated(result.id);
+      onCreated(result.id, values.title);
     } else if (mode === "create" && result.id) {
       router.push(`/admin/projects/${result.id}`);
     } else {
