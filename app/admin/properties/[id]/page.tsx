@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { PropertyForm } from "@/components/forms/property-form";
 import { ImageManager } from "@/components/admin/image-manager";
 import { ImageBankPicker } from "@/components/admin/image-bank-picker";
-import { getPropertyById, getAllProjectsForSelect, getAllCustomersForSelect, getAllBankImages } from "@/lib/site-data";
+import { getPropertyById, getAllProjectsForSelect, getAllCustomersForSelect, getAllBankImages, getProjectUnitsForSelect } from "@/lib/site-data";
+import { db } from "@/lib/db";
 import { checkPageAccess } from "@/lib/check-access";
 import { getSessionUser, getUserScope } from "@/lib/scope";
 
@@ -22,6 +23,17 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
 
   if (!property) return notFound();
 
+  // Load project units if property belongs to a project
+  const projectUnits = property.projectId
+    ? await getProjectUnitsForSelect(property.projectId)
+    : [];
+
+  // Find which unit this property is linked to
+  const linkedUnit = await db.projectUnit.findUnique({
+    where: { propertyId: property.id },
+    select: { id: true },
+  });
+
   const bankImagesSimple = bankImages.map((img) => ({
     id: img.id,
     url: img.url,
@@ -37,7 +49,15 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         </div>
         <ImageManager propertyId={property.id} images={property.images} />
         <ImageBankPicker bankImages={bankImagesSimple} targetType="property" targetId={property.id} />
-        <PropertyForm mode="edit" property={{ ...property, price: Number(property.price) }} projects={projects} customers={customers} userScope={userScope} />
+        <PropertyForm
+          mode="edit"
+          property={{ ...property, price: Number(property.price) }}
+          projects={projects}
+          customers={customers}
+          userScope={userScope}
+          projectUnits={projectUnits}
+          linkedUnitId={linkedUnit?.id ?? null}
+        />
       </div>
     </main>
   );

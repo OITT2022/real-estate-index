@@ -715,3 +715,124 @@ export async function toggleApiEnabled(type: "property" | "project", id: string)
   }
   return { success: true };
 }
+
+// ── Project Structure ────────────────────────────────────────
+
+export async function generateProjectStructure(
+  projectId: string,
+  config: { buildings: number; entrances: number; floors: number; unitsPerFloor: number }
+): Promise<ActionResult> {
+  const existing = await db.projectUnit.count({ where: { projectId } });
+  if (existing > 0) {
+    return { success: false, error: "Structure already exists. Clear it first or edit directly." };
+  }
+
+  const units: {
+    projectId: string;
+    building: string;
+    entrance: string;
+    floor: number;
+    unitNumber: string;
+  }[] = [];
+
+  let unitCounter = 1;
+  for (let b = 1; b <= config.buildings; b++) {
+    for (let e = 0; e < config.entrances; e++) {
+      const entranceName = String.fromCharCode(65 + e);
+      for (let f = 0; f <= config.floors; f++) {
+        for (let u = 1; u <= config.unitsPerFloor; u++) {
+          units.push({
+            projectId,
+            building: String(b),
+            entrance: entranceName,
+            floor: f,
+            unitNumber: String(unitCounter++),
+          });
+        }
+      }
+    }
+  }
+
+  await db.projectUnit.createMany({ data: units });
+  revalidatePath(`/admin/projects/${projectId}`);
+  return { success: true };
+}
+
+export async function addProjectUnit(
+  projectId: string,
+  data: { building: string; entrance: string; floor: number; unitNumber: string }
+): Promise<ActionResult> {
+  await db.projectUnit.create({ data: { projectId, ...data } });
+  revalidatePath(`/admin/projects/${projectId}`);
+  return { success: true };
+}
+
+export async function updateProjectUnit(
+  unitId: string,
+  data: { unitNumber?: string; propertyId?: string | null }
+): Promise<ActionResult> {
+  const unit = await db.projectUnit.findUnique({ where: { id: unitId } });
+  if (!unit) return { success: false, error: "Unit not found" };
+
+  if (data.propertyId) {
+    const property = await db.property.findUnique({ where: { id: data.propertyId }, select: { projectId: true } });
+    if (property && property.projectId && property.projectId !== unit.projectId) {
+      return { success: false, error: "Property belongs to a different project" };
+    }
+    const existingLink = await db.projectUnit.findUnique({ where: { propertyId: data.propertyId } });
+    if (existingLink && existingLink.id !== unitId) {
+      return { success: false, error: "Property already linked to another unit" };
+    }
+  }
+
+  await db.projectUnit.update({
+    where: { id: unitId },
+    data: {
+      ...(data.unitNumber !== undefined ? { unitNumber: data.unitNumber } : {}),
+      ...(data.propertyId !== undefined ? { propertyId: data.propertyId } : {}),
+    },
+  });
+  revalidatePath(`/admin/projects/${unit.projectId}`);
+  return { success: true };
+}
+
+export async function deleteProjectUnit(unitId: string): Promise<ActionResult> {
+  const unit = await db.projectUnit.findUnique({ where: { id: unitId } });
+  if (!unit) return { success: false, error: "Unit not found" };
+  if (unit.propertyId) return { success: false, error: "Unlink the property first" };
+  await db.projectUnit.delete({ where: { id: unitId } });
+  revalidatePath(`/admin/projects/${unit.projectId}`);
+  return { success: true };
+}
+
+export async function addProjectFloor(
+  projectId: string, building: string, entrance: string, floor: number, unitCount: number
+): Promise<ActionResult> {
+  const units = Array.from({ length: unitCount }, (_, i) => ({
+    projectId, building, entrance, floor,
+    unitNumber: `${floor}${String(i + 1).padStart(2, "0")}`,
+  }));
+  await db.projectUnit.createMany({ data: units });
+  revalidatePath(`/admin/projects/${projectId}`);
+  return { success: true };
+}
+
+export async function deleteProjectFloor(
+  projectId: string, building: string, entrance: string, floor: number
+): Promise<ActionResult> {
+  const linked = await db.projectUnit.count({
+    where: { projectId, building, entrance, floor, propertyId: { not: null } },
+  });
+  if (linked > 0) return { success: false, error: `Cannot delete: ${linked} unit(s) have linked properties` };
+  await db.projectUnit.deleteMany({ where: { projectId, building, entrance, floor } });
+  revalidatePath(`/admin/projects/${projectId}`);
+  return { success: true };
+}
+
+export async function clearProjectStructure(projectId: string): Promise<ActionResult> {
+  const linked = await db.projectUnit.count({ where: { projectId, propertyId: { not: null } } });
+  if (linked > 0) return { success: false, error: `Cannot clear: ${linked} unit(s) have linked properties` };
+  await db.projectUnit.deleteMany({ where: { projectId } });
+  revalidatePath(`/admin/projects/${projectId}`);
+  return { success: true };
+}

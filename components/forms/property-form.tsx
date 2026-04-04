@@ -16,16 +16,27 @@ type CustomerOption = { id: string; companyName: string };
 
 type UserScope = { customerId: string; customerName: string } | null;
 
+type ProjectUnitOption = {
+  id: string;
+  building: string;
+  entrance: string;
+  floor: number;
+  unitNumber: string;
+  propertyId: string | null;
+};
+
 type PropertyFormProps = {
   mode: "create" | "edit";
   property?: SerializedProperty | null;
   projects?: ProjectOption[];
   customers?: CustomerOption[];
   userScope?: UserScope;
+  projectUnits?: ProjectUnitOption[];
+  linkedUnitId?: string | null;
   onCreated?: (id: string) => void;
 };
 
-export function PropertyForm({ mode, property, projects, customers, userScope, onCreated }: PropertyFormProps) {
+export function PropertyForm({ mode, property, projects, customers, userScope, projectUnits, linkedUnitId, onCreated }: PropertyFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -247,6 +258,33 @@ export function PropertyForm({ mode, property, projects, customers, userScope, o
             {projects.map((p) => (
               <option key={p.id} value={p.id}>{p.title}</option>
             ))}
+          </select>
+        </label>
+      )}
+
+      {projectUnits && projectUnits.length > 0 && selectedProjectId && (
+        <label>
+          <span>Building Unit</span>
+          <select
+            defaultValue={linkedUnitId ?? ""}
+            onChange={async (e) => {
+              if (!property) return;
+              const { updateProjectUnit } = await import("@/lib/actions");
+              // Unlink old unit
+              if (linkedUnitId) await updateProjectUnit(linkedUnitId, { propertyId: null });
+              // Link new unit
+              if (e.target.value) await updateProjectUnit(e.target.value, { propertyId: property.id });
+            }}
+            style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}
+          >
+            <option value="">Not assigned to a unit</option>
+            {projectUnits
+              .filter((u) => !u.propertyId || u.propertyId === property?.id)
+              .map((u) => (
+                <option key={u.id} value={u.id}>
+                  Bldg {u.building} / Ent {u.entrance} / Floor {u.floor} / Unit {u.unitNumber}
+                </option>
+              ))}
           </select>
         </label>
       )}

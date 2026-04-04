@@ -181,6 +181,10 @@ export async function getProjectById(id: string) {
         include: { images: { orderBy: { sortOrder: "asc" } } },
         orderBy: { createdAt: "desc" },
       },
+      units: {
+        include: { property: { select: { id: true, title: true } } },
+        orderBy: [{ building: "asc" }, { entrance: "asc" }, { floor: "asc" }, { unitNumber: "asc" }],
+      },
     },
   });
 }
@@ -190,6 +194,14 @@ export async function getAllProjectsForSelect(user?: SessionUser) {
     where: user ? customerScope(user) : undefined,
     select: { id: true, title: true, customerId: true },
     orderBy: { title: "asc" },
+  });
+}
+
+export async function getProjectUnitsForSelect(projectId: string) {
+  return db.projectUnit.findMany({
+    where: { projectId },
+    select: { id: true, building: true, entrance: true, floor: true, unitNumber: true, propertyId: true },
+    orderBy: [{ building: "asc" }, { entrance: "asc" }, { floor: "asc" }, { unitNumber: "asc" }],
   });
 }
 

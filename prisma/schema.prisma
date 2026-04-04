@@ -75,6 +75,7 @@ model Property {
   updatedAt         DateTime        @updatedAt
   images            PropertyImage[]
   inquiries         Inquiry[]
+  projectUnit       ProjectUnit?
   project           Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
   customer          Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
@@ -134,6 +135,7 @@ model Project {
   images            ProjectImage[]
   documents         ProjectDocument[]
   properties        Property[]
+  units             ProjectUnit[]
   inquiries         Inquiry[]
   customer          Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
@@ -141,6 +143,23 @@ model Project {
   @@index([published, status])
   @@index([customerId])
   @@index([apiEnabled, published, status])
+}
+
+model ProjectUnit {
+  id          String    @id @default(cuid())
+  projectId   String
+  building    String    @default("1")
+  entrance    String    @default("A")
+  floor       Int       @default(0)
+  unitNumber  String
+  propertyId  String?   @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, building, entrance, floor])
+  @@index([propertyId])
 }
 
 model ProjectDocument {

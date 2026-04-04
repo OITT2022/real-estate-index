@@ -3,6 +3,7 @@ import { ProjectForm } from "@/components/forms/project-form";
 import { ProjectImageManager } from "@/components/admin/project-image-manager";
 import { ProjectPropertiesManager } from "@/components/admin/project-properties-manager";
 import { ProjectDocumentManager } from "@/components/admin/project-document-manager";
+import { ProjectStructureEditor } from "@/components/admin/project-structure-editor";
 import { ImageBankPicker } from "@/components/admin/image-bank-picker";
 import { AddPropertyModal } from "@/components/admin/add-property-modal";
 import { getProjectById, getAllProperties, getAllBankImages, getAllCustomersForSelect } from "@/lib/site-data";
@@ -70,6 +71,19 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           projectId={project.id}
           linkedProperties={linkedProperties}
           allProperties={allPropertiesSimple}
+        />
+        <ProjectStructureEditor
+          projectId={project.id}
+          units={project.units.map((u) => ({
+            id: u.id,
+            building: u.building,
+            entrance: u.entrance,
+            floor: u.floor,
+            unitNumber: u.unitNumber,
+            propertyId: u.propertyId,
+            propertyTitle: u.property?.title ?? null,
+          }))}
+          availableProperties={project.properties.map((p) => ({ id: p.id, title: p.title }))}
         />
         <ProjectForm mode="edit" project={project} customers={customers} userScope={userScope} />
       </div>
