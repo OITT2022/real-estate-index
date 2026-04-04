@@ -1,12 +1,15 @@
 import { ApiClientForm } from "@/components/forms/api-client-form";
-import { getAllCustomersForSelect } from "@/lib/site-data";
+import { getAllCustomersForSelect, getApiScopeCounts } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewApiClientPage() {
   await checkPageAccess("api");
-  const customers = await getAllCustomersForSelect();
+  const [customers, scopeCounts] = await Promise.all([
+    getAllCustomersForSelect(),
+    getApiScopeCounts(),
+  ]);
 
   return (
     <main className="section">
@@ -14,7 +17,7 @@ export default async function NewApiClientPage() {
         <p className="eyebrow">Admin</p>
         <h1>Create API Client</h1>
         <p className="muted">Configure which data this client can access. A token will be generated after saving.</p>
-        <ApiClientForm mode="create" customers={customers} />
+        <ApiClientForm mode="create" customers={customers} scopeCounts={scopeCounts} />
       </div>
     </main>
   );

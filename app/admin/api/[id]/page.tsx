@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ApiClientForm } from "@/components/forms/api-client-form";
-import { getApiClientById, getAllCustomersForSelect } from "@/lib/site-data";
+import { getApiClientById, getAllCustomersForSelect, getApiScopeCounts } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 
 export const dynamic = "force-dynamic";
@@ -8,9 +8,10 @@ export const dynamic = "force-dynamic";
 export default async function EditApiClientPage({ params }: { params: Promise<{ id: string }> }) {
   await checkPageAccess("api");
   const { id } = await params;
-  const [client, customers] = await Promise.all([
+  const [client, customers, scopeCounts] = await Promise.all([
     getApiClientById(id),
     getAllCustomersForSelect(),
+    getApiScopeCounts(),
   ]);
 
   if (!client) return notFound();
@@ -23,6 +24,7 @@ export default async function EditApiClientPage({ params }: { params: Promise<{ 
         <ApiClientForm
           mode="edit"
           customers={customers}
+          scopeCounts={scopeCounts}
           client={{
             id: client.id,
             name: client.name,

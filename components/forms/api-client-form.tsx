@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { apiClientFormSchema, type ApiClientFormValues } from "@/lib/validations";
 import { createApiClient, updateApiClient, regenerateApiClientToken } from "@/lib/actions";
 import { PROPERTY_API_FIELDS, PROJECT_API_FIELDS, ALL_PROPERTY_FIELD_KEYS, ALL_PROJECT_FIELD_KEYS } from "@/lib/api-fields";
@@ -24,13 +24,19 @@ type ClientData = {
 
 type CustomerOption = { id: string; companyName: string };
 
+type ScopeCounts = {
+  total: { projects: number; properties: number };
+  byCustomer: Record<string, { projects: number; properties: number }>;
+};
+
 type Props = {
   mode: "create" | "edit";
   client?: ClientData | null;
   customers?: CustomerOption[];
+  scopeCounts?: ScopeCounts;
 };
 
-export function ApiClientForm({ mode, client, customers }: Props) {
+export function ApiClientForm({ mode, client, customers, scopeCounts }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
@@ -68,8 +74,18 @@ export function ApiClientForm({ mode, client, customers }: Props) {
   });
 
   const scopeType = watch("scopeType");
+  const selectedCustomerId = watch("customerId");
   const propertyFields = watch("allowedPropertyFields");
   const projectFields = watch("allowedProjectFields");
+
+  const currentCounts = useMemo(() => {
+    if (!scopeCounts) return null;
+    if (scopeType === "all") return scopeCounts.total;
+    if (selectedCustomerId && scopeCounts.byCustomer[selectedCustomerId]) {
+      return scopeCounts.byCustomer[selectedCustomerId];
+    }
+    return null;
+  }, [scopeType, selectedCustomerId, scopeCounts]);
 
   function toggleAllPropertyFields() {
     setValue(
@@ -203,6 +219,18 @@ export function ApiClientForm({ mode, client, customers }: Props) {
             </label>
           )}
         </div>
+        {currentCounts && (
+          <div style={{ display: "flex", gap: 16 }}>
+            <div style={{ padding: "10px 16px", borderRadius: 10, background: "var(--bg-alt)", flex: 1, textAlign: "center" }}>
+              <strong style={{ fontSize: "1.2rem" }}>{currentCounts.projects}</strong>
+              <p className="muted" style={{ margin: "2px 0 0", fontSize: "0.8rem" }}>Projects</p>
+            </div>
+            <div style={{ padding: "10px 16px", borderRadius: 10, background: "var(--bg-alt)", flex: 1, textAlign: "center" }}>
+              <strong style={{ fontSize: "1.2rem" }}>{currentCounts.properties}</strong>
+              <p className="muted" style={{ margin: "2px 0 0", fontSize: "0.8rem" }}>Properties</p>
+            </div>
+          </div>
+        )}
         <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>
           {scopeType === "all"
             ? "This API client will return all eligible projects and properties across all customers."

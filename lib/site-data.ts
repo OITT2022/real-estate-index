@@ -283,3 +283,51 @@ export async function getDashboardStats(user?: SessionUser) {
   ]);
   return { total, published, inquiries, projects };
 }
+
+// ── API Scope Counts ──────────────────────────────────────────
+
+export async function getApiScopeCounts() {
+  const apiFilter = { published: true, status: "ACTIVE" as const, apiEnabled: true };
+
+  const [totalProjects, totalProperties, customers] = await Promise.all([
+    db.project.count({ where: apiFilter }),
+    db.property.count({ where: apiFilter }),
+    db.customer.findMany({
+      select: {
+        id: true,
+        _count: {
+          select: {
+            projects: { where: apiFilter },
+            properties: { where: apiFilter },
+          },
+        },
+      },
+    }),
+  ]);
+
+  // Also count properties that belong to customer via project
+  const projectCustomerPropertyCounts = await db.property.groupBy({
+    by: ["customerId"],
+    where: { ...apiFilter, project: { customerId: { not: null } } },
+    _count: true,
+  });
+
+  const byCustomer: Record<string, { projects: number; properties: number }> = {};
+  for (const c of customers) {
+    // Direct properties for this customer
+    const directProps = c._count.properties;
+    // Properties via projects: count properties where project.customerId = this customer
+    const viaProject = await db.property.count({
+      where: { ...apiFilter, project: { customerId: c.id }, customerId: { not: c.id } },
+    });
+    byCustomer[c.id] = {
+      projects: c._count.projects,
+      properties: directProps + viaProject,
+    };
+  }
+
+  return {
+    total: { projects: totalProjects, properties: totalProperties },
+    byCustomer,
+  };
+}
