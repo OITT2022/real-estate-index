@@ -788,10 +788,7 @@ export async function updateProjectUnit(
     if (property && property.projectId && property.projectId !== unit.projectId) {
       return { success: false, error: "Property belongs to a different project" };
     }
-    const existingLink = await db.projectUnit.findUnique({ where: { propertyId: data.propertyId } });
-    if (existingLink && existingLink.id !== unitId) {
-      return { success: false, error: "Property already linked to another unit" };
-    }
+    // Property can be linked to multiple units
   }
 
   await db.projectUnit.update({

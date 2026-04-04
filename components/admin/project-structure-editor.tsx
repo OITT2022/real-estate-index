@@ -171,9 +171,8 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
     router.refresh();
   }
 
-  // Properties not yet linked to any unit
-  const linkedPropertyIds = new Set(units.filter((u) => u.propertyId).map((u) => u.propertyId!));
-  const unlinkedProperties = availableProperties.filter((p) => !linkedPropertyIds.has(p.id));
+  // All properties available for linking (a property can be linked to multiple units)
+  const linkableProperties = availableProperties;
 
   return (
     <div className="card" style={{ display: "grid", gap: 16 }}>
@@ -337,7 +336,7 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
       {linkForUnit && (
         <LinkPropertyModal
           unit={linkForUnit}
-          properties={unlinkedProperties}
+          properties={linkableProperties}
           onClose={() => setLinkForUnit(null)}
           onLink={async (propertyId: string) => {
             await handleLinkProperty(linkForUnit.id, propertyId);

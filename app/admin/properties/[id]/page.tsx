@@ -29,7 +29,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
     : [];
 
   // Find which unit this property is linked to
-  const linkedUnit = await db.projectUnit.findUnique({
+  const linkedUnit = await db.projectUnit.findFirst({
     where: { propertyId: property.id },
     select: { id: true },
   });
