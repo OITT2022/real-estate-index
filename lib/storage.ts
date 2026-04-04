@@ -61,47 +61,37 @@ class VercelBlobStorageProvider implements StorageProvider {
   }
 }
 
-// ── S3 provider (lazy-loaded) ──
+// ── S3 provider ──
+
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
 
 class S3StorageProvider implements StorageProvider {
   private bucket: string;
   private region: string;
-  private _sdk: any = null;
-  private _client: any = null;
+  private _client: S3Client | null = null;
 
   constructor() {
     this.bucket = process.env.S3_BUCKET ?? "aradre-assets";
-    this.region = process.env.AWS_REGION ?? "us-east-1";
+    this.region = process.env.AWS_REGION ?? "eu-north-1";
   }
 
-  private getSdk(): any {
-    if (this._sdk) return this._sdk;
-    try {
-      const pkg = "@aws-sdk/" + "client-s3";
-      this._sdk = require(pkg);
-    } catch {
-      throw new Error(
-        "STORAGE_PROVIDER=s3 requires @aws-sdk/client-s3. Run: npm install @aws-sdk/client-s3"
-      );
-    }
-    return this._sdk;
-  }
-
-  private getClient(): any {
+  private getClient(): S3Client {
     if (this._client) return this._client;
-    const sdk = this.getSdk();
-    this._client = new sdk.S3Client({ region: this.region });
+    this._client = new S3Client({ region: this.region });
     return this._client;
   }
 
   async upload(file: File): Promise<string> {
-    const sdk = this.getSdk();
     const ext = path.extname(file.name) || ".jpg";
     const key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     await this.getClient().send(
-      new sdk.PutObjectCommand({
+      new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
         Body: buffer,
@@ -113,12 +103,10 @@ class S3StorageProvider implements StorageProvider {
   }
 
   async delete(url: string): Promise<void> {
-    const sdk = this.getSdk();
-    // Extract key from full S3 URL
     const urlObj = new URL(url);
-    const key = urlObj.pathname.slice(1); // remove leading /
+    const key = urlObj.pathname.slice(1);
     await this.getClient().send(
-      new sdk.DeleteObjectCommand({
+      new DeleteObjectCommand({
         Bucket: this.bucket,
         Key: key,
       })
