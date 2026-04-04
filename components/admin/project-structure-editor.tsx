@@ -195,58 +195,58 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
 
       {/* Generator — only shown when no units exist */}
       {!hasUnits && (
-        <div style={{ background: "var(--bg-alt)", borderRadius: 12, padding: 20 }}>
-          <p style={{ margin: "0 0 12px", fontWeight: 500 }}>Generate Initial Structure</p>
-          <div className="admin-form-grid" style={{ marginBottom: 12 }}>
-            <label>
-              <span>Buildings</span>
-              <input type="number" min={1} max={20} value={buildings} onChange={(e) => setBuildings(Number(e.target.value))} />
-            </label>
-            <label>
-              <span>Entrances per building</span>
-              <input type="number" min={1} max={10} value={entrances} onChange={(e) => setEntrances(Number(e.target.value))} />
-            </label>
-            <label>
-              <span>Floors per entrance</span>
-              <input type="number" min={1} max={50} value={floors} onChange={(e) => setFloors(Number(e.target.value))} />
-            </label>
-            <label>
-              <span>Units per floor</span>
-              <input type="number" min={1} max={20} value={unitsPerFloor} onChange={(e) => setUnitsPerFloor(Number(e.target.value))} />
-            </label>
+        <div style={{ border: "1px solid var(--line)", borderRadius: 12, padding: "14px 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ fontWeight: 600, fontSize: "0.85rem", whiteSpace: "nowrap" }}>Generate</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <input type="number" min={1} max={20} value={buildings} onChange={(e) => setBuildings(Number(e.target.value))} style={{ width: 48, padding: "8px 6px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", textAlign: "center" }} />
+              <span className="muted" style={{ fontSize: "0.8rem" }}>bldg</span>
+            </div>
+            <span className="muted" style={{ fontSize: "0.85rem" }}>×</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <input type="number" min={1} max={10} value={entrances} onChange={(e) => setEntrances(Number(e.target.value))} style={{ width: 48, padding: "8px 6px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", textAlign: "center" }} />
+              <span className="muted" style={{ fontSize: "0.8rem" }}>ent</span>
+            </div>
+            <span className="muted" style={{ fontSize: "0.85rem" }}>×</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <input type="number" min={1} max={50} value={floors} onChange={(e) => setFloors(Number(e.target.value))} style={{ width: 48, padding: "8px 6px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", textAlign: "center" }} />
+              <span className="muted" style={{ fontSize: "0.8rem" }}>floors</span>
+            </div>
+            <span className="muted" style={{ fontSize: "0.85rem" }}>×</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <input type="number" min={1} max={20} value={unitsPerFloor} onChange={(e) => setUnitsPerFloor(Number(e.target.value))} style={{ width: 48, padding: "8px 6px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", textAlign: "center" }} />
+              <span className="muted" style={{ fontSize: "0.8rem" }}>units/floor</span>
+            </div>
+            <span className="muted" style={{ fontSize: "0.8rem" }}>=</span>
+            <strong style={{ fontSize: "0.85rem" }}>{buildings * entrances * (floors + 1) * unitsPerFloor} units</strong>
+            <button type="button" className="button-primary" style={{ padding: "8px 16px", fontSize: "0.85rem", marginLeft: "auto" }} onClick={handleGenerate} disabled={loading}>
+              {loading ? "Generating..." : "Generate"}
+            </button>
           </div>
-          <p className="muted" style={{ margin: "0 0 12px", fontSize: "0.85rem" }}>
-            This will create {buildings * entrances * (floors + 1) * unitsPerFloor} units
-            ({buildings} building{buildings > 1 ? "s" : ""} × {entrances} entrance{entrances > 1 ? "s" : ""} × {floors + 1} floors × {unitsPerFloor} units).
-            Floor 0 = ground floor.
-          </p>
-          <button type="button" className="button-primary" onClick={handleGenerate} disabled={loading}>
-            {loading ? "Generating..." : "Generate Structure"}
-          </button>
         </div>
       )}
 
       {/* Manual add unit — always available */}
-      <div style={{ background: "var(--bg-alt)", borderRadius: 12, padding: 16 }}>
-        <p style={{ margin: "0 0 8px", fontWeight: 500, fontSize: "0.9rem" }}>Add Unit Manually</p>
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
-          <label style={{ flex: "0 0 70px" }}>
-            <span style={{ fontSize: "0.8rem" }}>Building</span>
-            <input value={manualBuilding} onChange={(e) => setManualBuilding(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem" }} />
-          </label>
-          <label style={{ flex: "0 0 70px" }}>
-            <span style={{ fontSize: "0.8rem" }}>Entrance</span>
-            <input value={manualEntrance} onChange={(e) => setManualEntrance(e.target.value)} style={{ width: "100%", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem" }} />
-          </label>
-          <label style={{ flex: "0 0 70px" }}>
-            <span style={{ fontSize: "0.8rem" }}>Floor</span>
-            <input type="number" value={manualFloor} onChange={(e) => setManualFloor(Number(e.target.value))} style={{ width: "100%", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem" }} />
-          </label>
-          <label style={{ flex: "1 1 100px" }}>
-            <span style={{ fontSize: "0.8rem" }}>Unit #</span>
-            <input value={manualUnitNumber} onChange={(e) => setManualUnitNumber(e.target.value)} placeholder="101" style={{ width: "100%", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem" }} />
-          </label>
-          <button type="button" className="button-primary" style={{ padding: "6px 14px", fontSize: "0.85rem" }} onClick={handleManualAddUnit}>
+      <div style={{ border: "1px solid var(--line)", borderRadius: 12, padding: "14px 16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ fontWeight: 600, fontSize: "0.85rem", whiteSpace: "nowrap" }}>Add Unit</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span className="muted" style={{ fontSize: "0.8rem" }}>Bldg</span>
+            <input value={manualBuilding} onChange={(e) => setManualBuilding(e.target.value)} style={{ width: 48, padding: "8px 6px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", textAlign: "center" }} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span className="muted" style={{ fontSize: "0.8rem" }}>Ent</span>
+            <input value={manualEntrance} onChange={(e) => setManualEntrance(e.target.value)} style={{ width: 48, padding: "8px 6px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", textAlign: "center" }} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span className="muted" style={{ fontSize: "0.8rem" }}>Floor</span>
+            <input type="number" value={manualFloor} onChange={(e) => setManualFloor(Number(e.target.value))} style={{ width: 48, padding: "8px 6px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", textAlign: "center" }} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span className="muted" style={{ fontSize: "0.8rem" }}>Unit #</span>
+            <input value={manualUnitNumber} onChange={(e) => setManualUnitNumber(e.target.value)} placeholder="101" style={{ width: 70, padding: "8px 6px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", textAlign: "center" }} />
+          </div>
+          <button type="button" className="button-primary" style={{ padding: "8px 16px", fontSize: "0.85rem", marginLeft: "auto" }} onClick={handleManualAddUnit}>
             Add
           </button>
         </div>
