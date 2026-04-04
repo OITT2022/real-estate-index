@@ -104,10 +104,25 @@ export async function getDistinctPropertyTypes() {
   return results.map((r) => r.propertyType).filter(Boolean) as string[];
 }
 
-export async function getAllProperties(user?: SessionUser) {
+export async function getAllProperties(user?: SessionUser, customerId?: string) {
+  const where: any = user ? propertyCustomerScope(user) : undefined;
+  // Additional customer filter (from URL param)
+  if (customerId) {
+    const custFilter = {
+      OR: [
+        { customerId },
+        { project: { customerId } },
+      ],
+    };
+    return db.property.findMany({
+      where: where ? { AND: [where, custFilter] } : custFilter,
+      include: { ...propertyInclude, project: { select: { title: true, customerId: true, customer: { select: { companyName: true } } } }, customer: { select: { companyName: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+  }
   return db.property.findMany({
-    where: user ? propertyCustomerScope(user) : undefined,
-    include: { ...propertyInclude, project: { select: { title: true } } },
+    where,
+    include: { ...propertyInclude, project: { select: { title: true, customerId: true, customer: { select: { companyName: true } } } }, customer: { select: { companyName: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -144,10 +159,14 @@ export async function getProjectBySlug(slug: string) {
   });
 }
 
-export async function getAllProjects(user?: SessionUser) {
+export async function getAllProjects(user?: SessionUser, customerId?: string) {
+  let where: any = user ? customerScope(user) : undefined;
+  if (customerId) {
+    where = where ? { AND: [where, { customerId }] } : { customerId };
+  }
   return db.project.findMany({
-    where: user ? customerScope(user) : undefined,
-    include: projectInclude,
+    where,
+    include: { ...projectInclude, customer: { select: { companyName: true } } },
     orderBy: { createdAt: "desc" },
   });
 }

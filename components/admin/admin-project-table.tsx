@@ -11,6 +11,7 @@ type Row = {
   title: string;
   city: string;
   developerName: string;
+  customerName: string | null;
   units: number;
   published: boolean;
   imageUrl: string | null;
@@ -22,7 +23,7 @@ export function AdminProjectTable({ rows }: { rows: Row[] }) {
     <SortableTable
       data={rows}
       getKey={(r) => r.id}
-      gridTemplate="48px 2fr 1fr 1fr 1fr 90px 60px 80px"
+      gridTemplate="48px 2fr 1fr 1fr 1.2fr 1fr 90px 60px 80px"
       emptyMessage="No projects yet. Create your first project."
       columns={[
         {
@@ -34,6 +35,7 @@ export function AdminProjectTable({ rows }: { rows: Row[] }) {
         { key: "title", label: "Title", getValue: (r) => r.title },
         { key: "city", label: "City", getValue: (r) => r.city },
         { key: "developer", label: "Developer", getValue: (r) => r.developerName },
+        { key: "customer", label: "Customer", getValue: (r) => r.customerName, render: (r) => <span className={r.customerName ? "" : "muted"}>{r.customerName ?? "—"}</span> },
         { key: "units", label: "Properties", getValue: (r) => r.units },
         {
           key: "status", label: "Status", getValue: (r) => r.published ? "Published" : "Draft",

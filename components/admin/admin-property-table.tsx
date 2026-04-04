@@ -13,6 +13,7 @@ type Row = {
   price: number;
   published: boolean;
   projectTitle: string | null;
+  customerName: string | null;
   imageUrl: string | null;
   apiEnabled: boolean;
 };
@@ -22,7 +23,7 @@ export function AdminPropertyTable({ rows }: { rows: Row[] }) {
     <SortableTable
       data={rows}
       getKey={(r) => r.id}
-      gridTemplate="48px 2fr 1fr 1fr 1fr 90px 60px 80px"
+      gridTemplate="48px 2fr 1fr 1fr 1fr 1.2fr 90px 60px 80px"
       emptyMessage="No properties yet. Create your first listing."
       columns={[
         {
@@ -35,6 +36,7 @@ export function AdminPropertyTable({ rows }: { rows: Row[] }) {
         { key: "city", label: "City", getValue: (r) => r.city },
         { key: "price", label: "Price", getValue: (r) => r.price, render: (r) => <span>€{r.price.toLocaleString()}</span> },
         { key: "project", label: "Project", getValue: (r) => r.projectTitle, render: (r) => <span className={r.projectTitle ? "" : "muted"}>{r.projectTitle ?? "—"}</span> },
+        { key: "customer", label: "Customer", getValue: (r) => r.customerName, render: (r) => <span className={r.customerName ? "" : "muted"}>{r.customerName ?? "—"}</span> },
         {
           key: "status", label: "Status", getValue: (r) => r.published ? "Published" : "Draft",
           render: (r) => <PublishToggle type="property" id={r.id} published={r.published} />,
