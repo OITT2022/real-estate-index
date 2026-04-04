@@ -74,6 +74,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         />
         <ProjectStructureEditor
           projectId={project.id}
+          projectTitle={project.title}
           units={project.units.map((u) => ({
             id: u.id,
             building: u.building,

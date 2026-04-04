@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { propertyFormSchema, type PropertyFormValues } from "@/lib/validations";
 import {
   generateProjectStructure,
   addProjectUnit,
@@ -11,6 +14,7 @@ import {
   addProjectFloor,
   deleteProjectFloor,
   clearProjectStructure,
+  createProperty,
 } from "@/lib/actions";
 
 type UnitData = {
@@ -30,14 +34,16 @@ type PropertyOption = {
 
 type Props = {
   projectId: string;
+  projectTitle?: string;
   units: UnitData[];
   availableProperties: PropertyOption[];
 };
 
-export function ProjectStructureEditor({ projectId, units, availableProperties }: Props) {
+export function ProjectStructureEditor({ projectId, projectTitle, units, availableProperties }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [createForUnit, setCreateForUnit] = useState<UnitData | null>(null);
 
   // Generator state
   const [buildings, setBuildings] = useState(1);
@@ -302,16 +308,21 @@ export function ProjectStructureEditor({ projectId, units, availableProperties }
                             </button>
                           </div>
                         ) : (
-                          <select
-                            defaultValue=""
-                            onChange={(e) => { if (e.target.value) handleLinkProperty(unit.id, e.target.value); }}
-                            style={{ flex: 1, padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", color: "var(--muted)" }}
-                          >
-                            <option value="">Link property...</option>
-                            {unlinkedProperties.map((p) => (
-                              <option key={p.id} value={p.id}>{p.title}</option>
-                            ))}
-                          </select>
+                          <div style={{ display: "flex", gap: 6, flex: 1, alignItems: "center" }}>
+                            <select
+                              defaultValue=""
+                              onChange={(e) => { if (e.target.value) handleLinkProperty(unit.id, e.target.value); }}
+                              style={{ flex: 1, padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", fontSize: "0.85rem", color: "var(--muted)" }}
+                            >
+                              <option value="">Link property...</option>
+                              {unlinkedProperties.map((p) => (
+                                <option key={p.id} value={p.id}>{p.title}</option>
+                              ))}
+                            </select>
+                            <button type="button" className="button-secondary" style={{ padding: "4px 10px", fontSize: "0.75rem", whiteSpace: "nowrap" }} onClick={() => setCreateForUnit(unit)}>
+                              + New
+                            </button>
+                          </div>
                         )}
 
                         <button type="button" className="icon-btn icon-btn-danger" style={{ padding: 4 }} onClick={() => handleDeleteUnit(unit.id)} title="Delete unit">
@@ -326,6 +337,167 @@ export function ProjectStructureEditor({ projectId, units, availableProperties }
           ))}
         </div>
       ))}
+
+      {/* Create Property Modal for a specific unit */}
+      {createForUnit && (
+        <CreatePropertyForUnitModal
+          projectId={projectId}
+          projectTitle={projectTitle ?? ""}
+          unit={createForUnit}
+          onClose={() => setCreateForUnit(null)}
+          onCreated={async (propertyId: string) => {
+            await updateProjectUnit(createForUnit.id, { propertyId });
+            setCreateForUnit(null);
+            router.refresh();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Inline create property modal ──
+
+function CreatePropertyForUnitModal({
+  projectId, projectTitle, unit, onClose, onCreated,
+}: {
+  projectId: string;
+  projectTitle: string;
+  unit: UnitData;
+  onClose: () => void;
+  onCreated: (propertyId: string) => void;
+}) {
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  function slugify(text: string) {
+    return text.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<PropertyFormValues>({
+    resolver: zodResolver(propertyFormSchema),
+    defaultValues: {
+      published: false, featured: false, parking: false, balcony: false,
+      currency: "EUR", projectId,
+      unitNumber: unit.unitNumber,
+      floor: unit.floor,
+      latitude: 34.9056, longitude: 33.6232,
+    },
+  });
+
+  async function onSubmit(values: PropertyFormValues) {
+    setServerError(null);
+    const result = await createProperty({ ...values, projectId });
+    if (!result.success) { setServerError(result.error); return; }
+    if (result.id) onCreated(result.id);
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div>
+            <h2 style={{ margin: 0 }}>Create Property for Unit {unit.unitNumber}</h2>
+            <p className="muted" style={{ margin: "4px 0 0" }}>
+              {projectTitle} — Bldg {unit.building} / Ent {unit.entrance} / Floor {unit.floor}
+            </p>
+          </div>
+          <button type="button" className="icon-btn" onClick={onClose} title="Close">
+            <span style={{ fontSize: "1.2rem" }}>&times;</span>
+          </button>
+        </div>
+
+        {serverError && <p className="form-error">{serverError}</p>}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="admin-form">
+          <div className="admin-form-grid">
+            <label>
+              <span>Title</span>
+              <input {...register("title", { onChange: (e) => setValue("slug", slugify(e.target.value)) })} placeholder="2-Bed Apartment" />
+              {errors.title && <span className="field-error">{errors.title.message}</span>}
+            </label>
+            <label>
+              <span>Slug</span>
+              <input {...register("slug")} placeholder="2-bed-apartment" />
+            </label>
+            <label>
+              <span>Price</span>
+              <input {...register("price")} type="number" placeholder="230000" />
+              {errors.price && <span className="field-error">{errors.price.message}</span>}
+            </label>
+            <label>
+              <span>Currency</span>
+              <input {...register("currency")} placeholder="EUR" />
+            </label>
+            <label>
+              <span>City</span>
+              <input {...register("city")} placeholder="Larnaca" />
+              {errors.city && <span className="field-error">{errors.city.message}</span>}
+            </label>
+            <label>
+              <span>Address</span>
+              <input {...register("address")} placeholder="Address" />
+              {errors.address && <span className="field-error">{errors.address.message}</span>}
+            </label>
+            <label>
+              <span>Property Type</span>
+              <input {...register("propertyType")} placeholder="Apartment" />
+            </label>
+            <label>
+              <span>Bedrooms</span>
+              <input {...register("bedrooms")} type="number" placeholder="2" />
+            </label>
+            <label>
+              <span>Bathrooms</span>
+              <input {...register("bathrooms")} type="number" placeholder="1" />
+            </label>
+            <label>
+              <span>Area sqm</span>
+              <input {...register("areaSqm")} type="number" placeholder="70" />
+            </label>
+            <label>
+              <span>Unit Number</span>
+              <input {...register("unitNumber")} placeholder="4A" />
+            </label>
+            <label>
+              <span>Floor</span>
+              <input {...register("floor")} type="number" placeholder="2" />
+            </label>
+            <label>
+              <span>Seller Name</span>
+              <input {...register("sellerName")} placeholder="Sales Office" />
+              {errors.sellerName && <span className="field-error">{errors.sellerName.message}</span>}
+            </label>
+            <label>
+              <span>Seller Phone</span>
+              <input {...register("sellerPhone")} placeholder="+357-99-123456" />
+              {errors.sellerPhone && <span className="field-error">{errors.sellerPhone.message}</span>}
+            </label>
+          </div>
+          <label>
+            <span>Seller Email</span>
+            <input {...register("sellerEmail")} type="email" placeholder="sales@example.com" />
+            {errors.sellerEmail && <span className="field-error">{errors.sellerEmail.message}</span>}
+          </label>
+          <label>
+            <span>Description</span>
+            <textarea {...register("description")} placeholder="Property description..." rows={3} />
+            {errors.description && <span className="field-error">{errors.description.message}</span>}
+          </label>
+          <input type="hidden" {...register("latitude")} />
+          <input type="hidden" {...register("longitude")} />
+          <div className="checkbox-row">
+            <label><input type="checkbox" {...register("published")} /> Published</label>
+            <label><input type="checkbox" {...register("parking")} /> Parking</label>
+            <label><input type="checkbox" {...register("balcony")} /> Balcony</label>
+          </div>
+          <div className="admin-actions">
+            <button type="submit" className="button-primary" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Property"}
+            </button>
+            <button type="button" className="button-secondary" onClick={onClose}>Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
