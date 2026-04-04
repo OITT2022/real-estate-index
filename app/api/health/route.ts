@@ -21,16 +21,24 @@ export async function GET() {
     checks.database = `FAILED: ${e.message?.slice(0, 200)}`;
   }
 
-  // Admin users
-  try {
-    const users = await db.adminUser.findMany({
-      select: { id: true, email: true, active: true, isSuperAdmin: true },
-    });
-    checks.adminUsers = JSON.stringify(
-      users.map((u) => ({ email: u.email, active: u.active, isSuperAdmin: u.isSuperAdmin }))
-    );
-  } catch (e: any) {
-    checks.adminUsers = `FAILED: ${e.message?.slice(0, 200)}`;
+  // Storage
+  checks.STORAGE_PROVIDER = process.env.STORAGE_PROVIDER ?? "not set (defaults to local)";
+  checks.S3_BUCKET = process.env.S3_BUCKET ?? "not set";
+  checks.AWS_REGION = process.env.AWS_REGION ?? "not set";
+
+  // Test S3 write
+  if (process.env.STORAGE_PROVIDER === "s3") {
+    try {
+      const { getStorage } = await import("@/lib/storage");
+      const storage = getStorage();
+      const testFile = new File(["test"], "health-check.txt", { type: "text/plain" });
+      const url = await storage.upload(testFile);
+      checks.s3Upload = `OK: ${url}`;
+      await storage.delete(url);
+      checks.s3Delete = "OK";
+    } catch (e: any) {
+      checks.s3Upload = `FAILED: ${e.message?.slice(0, 300)}`;
+    }
   }
 
   const allOk = checks.DATABASE_URL === "set" && checks.database === "connected";
