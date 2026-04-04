@@ -270,7 +270,7 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
                 </button>
               </div>
 
-              {[...floorMap.entries()].sort(([a], [b]) => b - a).map(([floor, floorUnits]) => (
+              {[...floorMap.entries()].sort(([a], [b]) => a - b).map(([floor, floorUnits]) => (
                 <div key={floor} style={{ borderTop: "1px solid var(--line)", padding: "8px 16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                     <span className="muted" style={{ fontSize: "0.85rem", fontWeight: 600 }}>
