@@ -957,6 +957,15 @@ textarea.inquiry-input {
   .admin-sidebar-v2 nav { max-height: 50vh; overflow-y: auto; }
 }
 
+/* ── Admin Layout: hide public header/footer ───────────────── */
+.admin-layout ~ .site-footer,
+body:has(.admin-layout) .site-header,
+body:has(.admin-layout) .site-footer {
+  display: none;
+}
+body:has(.admin-layout) { background: #f8f9fb; }
+.admin-layout .admin-shell { min-height: 100vh; }
+
 /* ── Admin UI Upgrade ───────────────────────────────────────── */
 
 .admin-topbar {
