@@ -501,6 +501,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
 
     const THREE = await import("three");
     const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
+    const { Sky } = await import("three/examples/jsm/objects/Sky.js");
 
     if (stateRef.current) {
       cancelAnimationFrame(stateRef.current.animationId);
@@ -514,28 +515,21 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
 
     const scene = new THREE.Scene();
 
-    // Procedural sky environment map — wider canvas with richer gradient
-    const skyCanvas = document.createElement("canvas");
-    skyCanvas.width = 64;
-    skyCanvas.height = 512;
-    const ctx = skyCanvas.getContext("2d")!;
-    const grad = ctx.createLinearGradient(0, 0, 0, 512);
-    grad.addColorStop(0.0, "#3a6aaa");   // deep zenith
-    grad.addColorStop(0.15, "#5b8fc9");  // upper sky
-    grad.addColorStop(0.35, "#87ceeb");  // mid sky
-    grad.addColorStop(0.55, "#b0d4ef");  // lower sky
-    grad.addColorStop(0.7, "#dce8f0");   // horizon haze
-    grad.addColorStop(0.78, "#f0e8da");  // warm horizon
-    grad.addColorStop(0.85, "#e8ddd0");  // above ground
-    grad.addColorStop(1.0, "#c8beb4");   // ground bounce
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 64, 512);
-    const skyTex = new THREE.CanvasTexture(skyCanvas);
-    skyTex.mapping = THREE.EquirectangularReflectionMapping;
-    skyTex.colorSpace = THREE.SRGBColorSpace;
-    scene.environment = skyTex;
-    scene.background = new THREE.Color(COLORS.skyBottom);
-    scene.fog = new THREE.Fog(COLORS.skyBottom, 80, 200);
+    // Physically-based sky (Preetham atmospheric model)
+    const sky = new Sky();
+    sky.scale.setScalar(10000);
+    const skyUniforms = sky.material.uniforms;
+    skyUniforms["turbidity"].value = 4;
+    skyUniforms["rayleigh"].value = 1.5;
+    skyUniforms["mieCoefficient"].value = 0.005;
+    skyUniforms["mieDirectionalG"].value = 0.8;
+    const sunPos = new THREE.Vector3();
+    const sunPhi = THREE.MathUtils.degToRad(90 - 35);   // elevation 35°
+    const sunTheta = THREE.MathUtils.degToRad(160);       // azimuth 160°
+    sunPos.setFromSphericalCoords(1, sunPhi, sunTheta);
+    skyUniforms["sunPosition"].value.copy(sunPos);
+    scene.add(sky);
+    scene.fog = new THREE.Fog(0xd4e8f7, 60, 250);
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
     const { target, distance, yaw, pitch } = spec.camera;
@@ -551,9 +545,15 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;  // slightly brighter for photo textures
+    renderer.toneMappingExposure = 0.7;
     container.innerHTML = "";
     container.appendChild(renderer.domElement);
+
+    // Generate PMREM environment map from the sky for proper PBR reflections
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    const skyRenderTarget = pmremGenerator.fromScene(scene, 0, 0.1, 10000);
+    scene.environment = skyRenderTarget.texture;
+    pmremGenerator.dispose();
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(target.x, target.y, target.z);
@@ -562,28 +562,33 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     controls.minDistance = 3;
     controls.maxDistance = distance * 3;
     controls.maxPolarAngle = Math.PI / 2 - 0.05;
+    controls.zoomToCursor = true;
     controls.update();
 
-    // --- Improved lighting ---
-    // Hemisphere: sky blue from above, warm bounce from ground
-    scene.add(new THREE.HemisphereLight(0x87ceeb, 0xb89878, 0.6));
-    // Main sun
-    const sun = new THREE.DirectionalLight(0xfff5e6, 1.0);
-    sun.position.set(20, 30, 25);
+    // --- Lighting (matched to sky sun position) ---
+    // Hemisphere: HSL-tuned sky blue above, warm earth bounce below
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.8);
+    hemiLight.color.setHSL(0.6, 0.6, 0.65);        // desaturated sky blue
+    hemiLight.groundColor.setHSL(0.095, 0.5, 0.7);  // warm sandy bounce
+    scene.add(hemiLight);
+    // Main sun — position aligned with sky shader sun
+    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+    sun.color.setHSL(0.1, 0.6, 0.95);  // warm sunlight
+    sun.position.copy(sunPos).multiplyScalar(30);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.mapSize.set(4096, 4096);
     sun.shadow.camera.left = -30;
     sun.shadow.camera.right = 30;
     sun.shadow.camera.top = 30;
     sun.shadow.camera.bottom = -5;
     sun.shadow.camera.near = 1;
     sun.shadow.camera.far = 80;
-    sun.shadow.bias = -0.001;
-    sun.shadow.normalBias = 0.02;  // prevents shadow acne on thin walls/sills
-    sun.shadow.radius = 3;
+    sun.shadow.bias = -0.0003;
+    sun.shadow.normalBias = 0.02;
+    sun.shadow.radius = 2;
     scene.add(sun);
     // Fill light from opposite side
-    const fill = new THREE.DirectionalLight(0xc0d0e0, 0.3);
+    const fill = new THREE.DirectionalLight(0xc8d8e8, 0.25);
     fill.position.set(-15, 12, -10);
     scene.add(fill);
 
@@ -733,15 +738,35 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     const apartmentMeshes: Mesh[] = [];
     const gap = 0.04;
 
+    // --- Procedural concrete roughness/bump map (canvas-generated) ---
+    let wallBumpTex: InstanceType<typeof THREE.CanvasTexture> | null = null;
+    if (!hasTextures) {
+      const bumpCanvas = document.createElement("canvas");
+      bumpCanvas.width = bumpCanvas.height = 256;
+      const bCtx = bumpCanvas.getContext("2d")!;
+      // Draw subtle noise to simulate concrete/plaster surface grain
+      for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < 256; x++) {
+          const v = 170 + Math.random() * 50 + Math.sin(x * 0.3) * 8 + Math.sin(y * 0.2) * 6;
+          bCtx.fillStyle = `rgb(${v},${v},${v})`;
+          bCtx.fillRect(x, y, 1, 1);
+        }
+      }
+      wallBumpTex = new THREE.CanvasTexture(bumpCanvas);
+      wallBumpTex.wrapS = THREE.RepeatWrapping;
+      wallBumpTex.wrapT = THREE.RepeatWrapping;
+      wallBumpTex.repeat.set(2, 2);
+    }
+
     // Shared materials for procedural mode
     const windowMat = !hasTextures ? new THREE.MeshPhysicalMaterial({
       color: COLORS.window, roughness: 0.05, metalness: 0.1,
       transparent: true, opacity: 0.7, reflectivity: 0.9,
-      clearcoat: 1.0, clearcoatRoughness: 0.05, envMapIntensity: 1.5,
+      clearcoat: 1.0, clearcoatRoughness: 0.05, envMapIntensity: 2.0,
     }) : null;
     const windowFrameMat = !hasTextures ? new THREE.MeshStandardMaterial({ color: COLORS.windowFrame, roughness: 0.6, metalness: 0.15 }) : null;
-    const recessMat = !hasTextures ? new THREE.MeshStandardMaterial({ color: 0x504840, roughness: 0.9 }) : null;
-    const balconyMat = !hasTextures ? new THREE.MeshStandardMaterial({ color: COLORS.balcony, roughness: 0.8 }) : null;
+    const recessMat = !hasTextures ? new THREE.MeshStandardMaterial({ color: 0x504840, roughness: 0.95 }) : null;
+    const balconyMat = !hasTextures ? new THREE.MeshStandardMaterial({ color: COLORS.balcony, roughness: 0.85, bumpMap: wallBumpTex, bumpScale: 0.15 }) : null;
     const recessDepth = 0.08;
     const windowCols = 2;
 
@@ -787,7 +812,10 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
           color: isSelected ? COLORS.highlighted : COLORS.apartment,
           emissive: isSelected ? COLORS.highlightEmissive : 0x000000,
           emissiveIntensity: isSelected ? 0.3 : 0,
-          roughness: 0.75, metalness: 0.05,
+          roughness: 0.78, metalness: 0.02,
+          bumpMap: wallBumpTex,
+          bumpScale: 0.2,
+          envMapIntensity: 0.3,
         });
         const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
         bodyMesh.position.set(cx, cy, cz);
