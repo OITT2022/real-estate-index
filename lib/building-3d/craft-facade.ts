@@ -79,11 +79,16 @@ async function loadImage(input: FacadeImageInput): Promise<LoadedImage | null> {
 
 // --- Step 2: Image Preprocessing ---
 
+const MAX_TEXTURE_SIZE = 2048; // GPU memory: w*h*4*1.33 bytes regardless of JPG compression
+const GPU_MEM_WARN_MB = 30;   // warn if estimated GPU mem exceeds this
+
 interface PreprocessResult {
   loaded: LoadedImage;
   brightness: number;       // 0-255 average
   contrast: number;         // 0-1 normalized std deviation
   dominantVertical: boolean; // more vertical than horizontal edges
+  oversized: boolean;        // image exceeds MAX_TEXTURE_SIZE
+  gpuMemMB: number;          // estimated GPU memory usage
   cropSuggestion: { top: number; bottom: number; left: number; right: number } | null;
 }
 
@@ -156,7 +161,11 @@ function preprocessImage(loaded: LoadedImage): PreprocessResult {
     };
   }
 
-  return { loaded, brightness, contrast, dominantVertical, cropSuggestion };
+  // Texture size analysis
+  const oversized = loaded.width > MAX_TEXTURE_SIZE || loaded.height > MAX_TEXTURE_SIZE;
+  const gpuMemMB = Math.round((loaded.width * loaded.height * 4 * 1.33) / (1024 * 1024));
+
+  return { loaded, brightness, contrast, dominantVertical, oversized, gpuMemMB, cropSuggestion };
 }
 
 // --- Step 3: Facade Matching ---
@@ -365,7 +374,8 @@ export async function craftFacades(
   // Step 2: Preprocess
   const preprocessed: PreprocessResult[] = loaded.map((l) => {
     const pp = preprocessImage(l);
-    log.push(`Preprocessed ${l.face}: brightness=${pp.brightness.toFixed(0)}, contrast=${pp.contrast.toFixed(2)}, edges=${pp.dominantVertical ? "vertical" : "horizontal"}${pp.cropSuggestion ? ", has margins" : ""}`);
+    log.push(`Preprocessed ${l.face}: ${l.width}x${l.height} (${pp.gpuMemMB}MB GPU), brightness=${pp.brightness.toFixed(0)}, contrast=${pp.contrast.toFixed(2)}, edges=${pp.dominantVertical ? "vertical" : "horizontal"}${pp.cropSuggestion ? ", has margins" : ""}`);
+    if (pp.oversized) log.push(`WARN ${l.face}: image exceeds ${MAX_TEXTURE_SIZE}px — consider resizing to reduce ${pp.gpuMemMB}MB GPU memory usage`);
     return pp;
   });
 
@@ -378,6 +388,9 @@ export async function craftFacades(
   // Steps 4-7: UV + Validate per facade
   const facades: CraftedFacade[] = matches.map((m) => {
     const { uv, warnings } = computeUV(m, geometry);
+    if (m.preprocessed.oversized) {
+      warnings.push(`Image is ${m.loaded.width}x${m.loaded.height} (${m.preprocessed.gpuMemMB}MB GPU) — consider resizing to ${MAX_TEXTURE_SIZE}px max`);
+    }
     log.push(`UV ${m.face}: oX=${uv.offsetX} oY=${uv.offsetY} rX=${uv.repeatX} rY=${uv.repeatY}`);
 
     let crafted: CraftedFacade = {

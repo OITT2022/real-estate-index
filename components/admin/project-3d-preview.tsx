@@ -555,21 +555,28 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       if (mat.map) { mat.map.dispose(); mat.map = null; }
 
       loader.load(tex.url, (loadedTex) => {
-        loadedTex.wrapS = THREE.RepeatWrapping;
-        loadedTex.wrapT = THREE.RepeatWrapping;
+        // Clamp edges — facade photos should not tile/repeat
+        loadedTex.wrapS = THREE.ClampToEdgeWrapping;
+        loadedTex.wrapT = THREE.ClampToEdgeWrapping;
         loadedTex.center.set(0.5, 0.5);
         loadedTex.colorSpace = THREE.SRGBColorSpace;
+        // Anisotropic filtering — critical for oblique viewing angles
+        loadedTex.anisotropy = state.renderer.capabilities.getMaxAnisotropy();
         loadedTex.offset.set(tex.uv.offsetX, tex.uv.offsetY);
         loadedTex.repeat.set(tex.uv.repeatX, tex.uv.repeatY);
         loadedTex.rotation = (tex.uv.rotation * Math.PI) / 180;
 
         mat.map = loadedTex;
-        mat.color.setHex(0xffffff);       // white base so texture shows true colors
-        mat.transparent = false;           // solid, not see-through
-        mat.opacity = 1.0;                 // fully opaque
-        mat.depthWrite = true;             // proper depth sorting
-        mat.side = THREE.FrontSide;        // only render outward face
+        mat.color.setHex(0xffffff);
+        mat.transparent = false;
+        mat.opacity = 1.0;
+        mat.depthWrite = true;
+        mat.side = THREE.FrontSide;
         mat.visible = true;
+        // PBR properties for realistic building surfaces
+        mat.roughness = 0.8;              // matte facade surface
+        mat.metalness = 0.0;              // non-metallic building material
+        mat.envMapIntensity = 0.4;        // subtle sky reflection
         mat.needsUpdate = true;
         mat.userData = { textureUrl: tex.url };
       });
@@ -596,19 +603,22 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
 
     const scene = new THREE.Scene();
 
-    // Procedural sky gradient environment map
-    const envScene = new THREE.Scene();
+    // Procedural sky environment map — wider canvas with richer gradient
     const skyCanvas = document.createElement("canvas");
-    skyCanvas.width = 2;
-    skyCanvas.height = 256;
+    skyCanvas.width = 64;
+    skyCanvas.height = 512;
     const ctx = skyCanvas.getContext("2d")!;
-    const grad = ctx.createLinearGradient(0, 0, 0, 256);
-    grad.addColorStop(0, "#5b8fc9");    // zenith
-    grad.addColorStop(0.4, "#87ceeb");  // mid sky
-    grad.addColorStop(0.7, "#c8dff0");  // horizon
-    grad.addColorStop(1.0, "#e8e0d8");  // ground bounce
+    const grad = ctx.createLinearGradient(0, 0, 0, 512);
+    grad.addColorStop(0.0, "#3a6aaa");   // deep zenith
+    grad.addColorStop(0.15, "#5b8fc9");  // upper sky
+    grad.addColorStop(0.35, "#87ceeb");  // mid sky
+    grad.addColorStop(0.55, "#b0d4ef");  // lower sky
+    grad.addColorStop(0.7, "#dce8f0");   // horizon haze
+    grad.addColorStop(0.78, "#f0e8da");  // warm horizon
+    grad.addColorStop(0.85, "#e8ddd0");  // above ground
+    grad.addColorStop(1.0, "#c8beb4");   // ground bounce
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 2, 256);
+    ctx.fillRect(0, 0, 64, 512);
     const skyTex = new THREE.CanvasTexture(skyCanvas);
     skyTex.mapping = THREE.EquirectangularReflectionMapping;
     skyTex.colorSpace = THREE.SRGBColorSpace;
@@ -630,7 +640,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.2;  // slightly brighter for photo textures
     container.innerHTML = "";
     container.appendChild(renderer.domElement);
 
@@ -658,6 +668,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     sun.shadow.camera.near = 1;
     sun.shadow.camera.far = 80;
     sun.shadow.bias = -0.001;
+    sun.shadow.normalBias = 0.02;  // prevents shadow acne on thin walls/sills
     sun.shadow.radius = 3;
     scene.add(sun);
     // Fill light from opposite side
