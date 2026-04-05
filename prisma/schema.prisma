@@ -25,6 +25,8 @@ model AdminUser {
   id              String    @id @default(cuid())
   name            String?
   email           String    @unique
+  phone           String?
+  profileImage    String?
   passwordHash    String
   isSuperAdmin    Boolean   @default(false)
   allowedPages    Json      @default("[]")

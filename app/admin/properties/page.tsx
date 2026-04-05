@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllProperties, getCustomerById } from "@/lib/site-data";
 import { AdminPropertyTable } from "@/components/admin/admin-property-table";
 import { checkPageAccess } from "@/lib/check-access";
@@ -32,9 +31,7 @@ export default async function AdminPropertiesPage({
   }));
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 16 }}>
           <div>
             <h1>{filterCustomer ? `Properties for ${filterCustomer.companyName}` : "Properties"}</h1>
@@ -47,6 +44,5 @@ export default async function AdminPropertiesPage({
         </div>
         <AdminPropertyTable rows={rows} />
       </section>
-    </main>
   );
 }

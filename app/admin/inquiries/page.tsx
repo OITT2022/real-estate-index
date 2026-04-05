@@ -1,4 +1,3 @@
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { AdminInquiryTable } from "@/components/admin/admin-inquiry-table";
 import { db } from "@/lib/db";
 import { checkPageAccess } from "@/lib/check-access";
@@ -43,13 +42,10 @@ export default async function AdminInquiriesPage() {
   }));
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
         <h1>Inquiries</h1>
         <p className="muted">{inquiries.length} total inquiries</p>
         <AdminInquiryTable rows={rows} />
       </section>
-    </main>
   );
 }

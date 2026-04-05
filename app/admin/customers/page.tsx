@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllCustomers } from "@/lib/site-data";
 import { CustomerTable } from "@/components/admin/customer-table";
 import { checkPageAccess } from "@/lib/check-access";
@@ -26,9 +25,7 @@ export default async function AdminCustomersPage({
   }));
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 16 }}>
           <div>
             <h1>Customers</h1>
@@ -52,6 +49,5 @@ export default async function AdminCustomersPage({
 
         <CustomerTable rows={rows} />
       </section>
-    </main>
   );
 }

@@ -1,4 +1,3 @@
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getDashboardStats, getDashboardChartData } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 import { getSessionUser } from "@/lib/scope";
@@ -16,9 +15,7 @@ export default async function AdminDashboardPage() {
   ]);
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
           <h1 style={{ marginTop: 0, marginBottom: 20 }}>Dashboard</h1>
 
           {/* Stat Cards */}
@@ -32,8 +29,7 @@ export default async function AdminDashboardPage() {
 
           {/* Charts */}
           <DashboardCharts chartData={chartData} />
-        </section>
-    </main>
+    </section>
   );
 }
 

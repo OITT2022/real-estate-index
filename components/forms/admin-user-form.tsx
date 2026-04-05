@@ -12,6 +12,8 @@ type UserData = {
   id: string;
   name: string | null;
   email: string;
+  phone: string | null;
+  profileImage: string | null;
   isSuperAdmin: boolean;
   allowedPages: unknown;
   customerId: string | null;
@@ -29,6 +31,7 @@ type Props = {
 export function AdminUserForm({ mode, user, customers }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const {
     register,
@@ -42,6 +45,8 @@ export function AdminUserForm({ mode, user, customers }: Props) {
       ? {
           name: user.name ?? "",
           email: user.email,
+          phone: user.phone ?? "",
+          profileImage: user.profileImage ?? "",
           password: "",
           isSuperAdmin: user.isSuperAdmin,
           allowedPages: (user.allowedPages as string[]) ?? [],
@@ -54,11 +59,14 @@ export function AdminUserForm({ mode, user, customers }: Props) {
           customerId: "",
           active: true,
           password: "",
+          phone: "",
+          profileImage: "",
         },
   });
 
   const isSuperAdmin = watch("isSuperAdmin");
   const allowedPages = watch("allowedPages");
+  const profileImage = watch("profileImage");
 
   function toggleAllPages() {
     setValue("allowedPages", allowedPages.length === ALL_PAGE_KEYS.length ? [] : ALL_PAGE_KEYS.slice());
@@ -69,6 +77,23 @@ export function AdminUserForm({ mode, user, customers }: Props) {
       "allowedPages",
       allowedPages.includes(key) ? allowedPages.filter((k) => k !== key) : [...allowedPages, key]
     );
+  }
+
+  async function handleImageUpload(file: File) {
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      form.set("bankImage", "true");
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      setValue("profileImage", data.url);
+    } catch {
+      setServerError("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function onSubmit(values: AdminUserFormValues) {
@@ -88,6 +113,61 @@ export function AdminUserForm({ mode, user, customers }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="admin-form" style={{ display: "grid", gap: 20, maxWidth: 700 }}>
       {serverError && <p className="form-error">{serverError}</p>}
 
+      {/* Profile Image */}
+      <div className="card" style={{ display: "grid", gap: 16 }}>
+        <p className="eyebrow">Profile</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          {profileImage ? (
+            <img
+              src={profileImage}
+              alt="Profile"
+              style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: "2px solid var(--line)" }}
+            />
+          ) : (
+            <div style={{
+              width: 72, height: 72, borderRadius: "50%",
+              background: "var(--accent)", color: "white",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "1.4rem", fontWeight: 700,
+            }}>
+              {(watch("name") || "?").charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <label
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "8px 14px", borderRadius: 8, border: "1px solid var(--line)",
+                cursor: "pointer", fontSize: "0.8rem", background: "white",
+              }}
+            >
+              {uploading ? "Uploading..." : "Upload Photo"}
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            {profileImage && (
+              <button
+                type="button"
+                onClick={() => setValue("profileImage", "")}
+                style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.75rem", cursor: "pointer", padding: 0, textAlign: "left" }}
+              >
+                Remove photo
+              </button>
+            )}
+          </div>
+          <input type="hidden" {...register("profileImage")} />
+        </div>
+      </div>
+
       <div className="card" style={{ display: "grid", gap: 16 }}>
         <p className="eyebrow">User Details</p>
         <div className="admin-form-grid">
@@ -102,10 +182,16 @@ export function AdminUserForm({ mode, user, customers }: Props) {
             {errors.email && <span className="field-error">{errors.email.message}</span>}
           </label>
         </div>
-        <label>
-          <span>{mode === "create" ? "Password" : "New Password (leave empty to keep current)"}</span>
-          <input {...register("password")} type="password" placeholder={mode === "create" ? "Enter password" : "Leave empty to keep current"} />
-        </label>
+        <div className="admin-form-grid">
+          <label>
+            <span>Phone</span>
+            <input {...register("phone")} type="tel" placeholder="+1 (555) 123-4567" />
+          </label>
+          <label>
+            <span>{mode === "create" ? "Password" : "New Password (leave empty to keep current)"}</span>
+            <input {...register("password")} type="password" placeholder={mode === "create" ? "Enter password" : "Leave empty to keep current"} />
+          </label>
+        </div>
         <div className="checkbox-row">
           <label><input type="checkbox" {...register("active")} /> Active</label>
           <label><input type="checkbox" {...register("isSuperAdmin")} /> Super Admin (full access)</label>

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllProjects, getCustomerById } from "@/lib/site-data";
 import { AdminProjectTable } from "@/components/admin/admin-project-table";
 import { checkPageAccess } from "@/lib/check-access";
@@ -32,9 +31,7 @@ export default async function AdminProjectsPage({
   }));
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 16 }}>
           <div>
             <h1>{filterCustomer ? `Projects for ${filterCustomer.companyName}` : "Projects"}</h1>
@@ -47,6 +44,5 @@ export default async function AdminProjectsPage({
         </div>
         <AdminProjectTable rows={rows} />
       </section>
-    </main>
   );
 }

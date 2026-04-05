@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { db } from "@/lib/db";
 import { AdminApiClientTable } from "@/components/admin/admin-api-client-table";
 import { checkPageAccess } from "@/lib/check-access";
@@ -27,9 +26,7 @@ export default async function AdminApiPage() {
   }));
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 16 }}>
           <div>
             <h1>API Clients</h1>
@@ -48,6 +45,5 @@ export default async function AdminApiPage() {
 
         <AdminApiClientTable rows={rows} />
       </section>
-    </main>
   );
 }

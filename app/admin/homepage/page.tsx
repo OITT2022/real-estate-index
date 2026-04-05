@@ -1,4 +1,3 @@
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { HeroImageManager } from "@/components/admin/hero-image-manager";
 import { getAllHeroImages } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
@@ -10,9 +9,7 @@ export default async function AdminHomepagePage() {
   const images = await getAllHeroImages();
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
         <h1>Home Page</h1>
         <p className="muted">
           Manage the hero image on the right side of the homepage.
@@ -23,6 +20,5 @@ export default async function AdminHomepagePage() {
           <HeroImageManager images={images} />
         </div>
       </section>
-    </main>
   );
 }

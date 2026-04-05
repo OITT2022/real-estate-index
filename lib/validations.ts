@@ -96,6 +96,8 @@ export type CustomerFormValues = z.infer<typeof customerFormSchema>;
 export const adminUserFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Valid email required"),
+  phone: z.string().optional().or(z.literal("")),
+  profileImage: z.string().optional().or(z.literal("")),
   password: z.string().optional().or(z.literal("")),
   isSuperAdmin: z.boolean(),
   allowedPages: z.array(z.string()),

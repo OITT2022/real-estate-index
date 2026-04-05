@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getInquiryById } from "@/lib/site-data";
 import { InquiryCrm } from "@/components/admin/inquiry-crm";
 import { checkPageAccess } from "@/lib/check-access";
@@ -26,11 +25,8 @@ export default async function InquiryDetailPage({ params }: { params: Promise<{ 
   };
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
         <InquiryCrm inquiry={serialized} />
       </section>
-    </main>
   );
 }

@@ -8,10 +8,11 @@ import { ADMIN_PAGES } from "@/lib/admin-pages";
 export function AdminTopbar({ inquiryCount }: { inquiryCount?: number }) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const user = session?.user as { name?: string; email?: string } | undefined;
+  const user = session?.user as { name?: string; email?: string; profileImage?: string | null } | undefined;
 
   const displayName = user?.name || user?.email || "";
   const initials = displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "A";
+  const profileImage = user?.profileImage;
 
   // Build breadcrumb from pathname
   const crumbs = buildBreadcrumb(pathname);
@@ -46,7 +47,11 @@ export function AdminTopbar({ inquiryCount }: { inquiryCount?: number }) {
         </button>
 
         <div className="admin-topbar-user">
-          <div className="admin-topbar-avatar">{initials}</div>
+          {profileImage ? (
+            <img src={profileImage} alt={displayName} className="admin-topbar-avatar" style={{ objectFit: "cover" }} />
+          ) : (
+            <div className="admin-topbar-avatar">{initials}</div>
+          )}
           <div className="admin-topbar-user-info">
             <div className="admin-topbar-user-name">{displayName}</div>
             <div className="admin-topbar-user-role">Admin</div>

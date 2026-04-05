@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getAllAdminUsers } from "@/lib/site-data";
 import { AdminUserTable } from "@/components/admin/admin-user-table";
 import { checkPageAccess } from "@/lib/check-access";
@@ -21,9 +20,7 @@ export default async function AdminUsersPage() {
   }));
 
   return (
-    <main className="admin-shell">
-      <AdminSidebar />
-      <section className="admin-content">
+    <section className="admin-content">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 16 }}>
           <div>
             <h1>User Management</h1>
@@ -33,6 +30,5 @@ export default async function AdminUsersPage() {
         </div>
         <AdminUserTable rows={rows} />
       </section>
-    </main>
   );
 }

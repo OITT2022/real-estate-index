@@ -564,6 +564,8 @@ export async function createAdminUser(data: unknown): Promise<ActionResult> {
     data: {
       name: parsed.data.name,
       email: parsed.data.email,
+      phone: parsed.data.phone || null,
+      profileImage: parsed.data.profileImage || null,
       passwordHash,
       isSuperAdmin: parsed.data.isSuperAdmin,
       allowedPages: parsed.data.allowedPages,
@@ -583,6 +585,8 @@ export async function updateAdminUser(id: string, data: unknown): Promise<Action
   const updateData: Record<string, unknown> = {
     name: parsed.data.name,
     email: parsed.data.email,
+    phone: parsed.data.phone || null,
+    profileImage: parsed.data.profileImage || null,
     isSuperAdmin: parsed.data.isSuperAdmin,
     allowedPages: parsed.data.allowedPages,
     customerId: parsed.data.customerId || null,
