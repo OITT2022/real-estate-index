@@ -4,12 +4,16 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { WebGLRenderer, Mesh, MeshStandardMaterial } from "three";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { SceneSpec } from "@/lib/building-3d/generate-scene";
+import { craftFacades } from "@/lib/building-3d/craft-facade";
+import type { CraftResult, CraftedFacade, BuildingGeometry } from "@/lib/building-3d/craft-facade";
 
 type FaceName = "front" | "left" | "right" | "back";
 
 interface FacadeTexture {
   face: FaceName;
   url: string;
+  confidence?: number;
+  warnings?: string[];
   uv: { offsetX: number; offsetY: number; repeatX: number; repeatY: number; rotation: number };
 }
 
@@ -37,9 +41,66 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
   const [uploading, setUploading] = useState<FaceName | null>(null);
   const [expandedFace, setExpandedFace] = useState<FaceName | null>(null);
 
+  // Craft pipeline state
+  const [crafting, setCrafting] = useState(false);
+  const [craftLog, setCraftLog] = useState<string[]>([]);
+  const [showDebug, setShowDebug] = useState(false);
+
   const selectedApartment = sceneSpec.apartments.find(
     (a) => a.meta.apartmentId === selectedApartmentId
   );
+
+  // Derive building geometry from sceneSpec for the pipeline
+  const buildingGeometry: BuildingGeometry | null = sceneSpec.envelopes[0]
+    ? {
+        width: sceneSpec.envelopes[0].size.x,
+        height: sceneSpec.envelopes[0].size.y,
+        depth: sceneSpec.envelopes[0].size.z,
+        floorCount: sceneSpec.envelopes[0].floorCount,
+        floorHeight: sceneSpec.envelopes[0].size.y / sceneSpec.envelopes[0].floorCount,
+        apartmentsPerFloor: Math.round(
+          sceneSpec.apartments.length / sceneSpec.envelopes[0].floorCount
+        ),
+      }
+    : null;
+
+  // Check if project already has facade images from the DB
+  const hasProjectFacades = sceneSpec.facades.length > 0;
+
+  const handleCraft = async () => {
+    if (!buildingGeometry) return;
+    setCrafting(true);
+    setCraftLog(["Starting Craft it! pipeline..."]);
+
+    try {
+      // Use project facade images from sceneSpec + any manually uploaded ones
+      const imageInputs = sceneSpec.facades.map((f) => ({ face: f.face, url: f.image }));
+
+      // Merge with manually uploaded images (manual overrides project)
+      const manualByFace = new Map(facadeTextures.map((t) => [t.face, t]));
+      const mergedInputs = imageInputs
+        .filter((i) => !manualByFace.has(i.face))
+        .concat([...manualByFace.values()].map((t) => ({ face: t.face, url: t.url })));
+
+      const result = await craftFacades(mergedInputs, buildingGeometry);
+      setCraftLog(result.log);
+
+      // Convert crafted results to FacadeTexture state
+      const newTextures: FacadeTexture[] = result.facades.map((f) => ({
+        face: f.face,
+        url: f.url,
+        confidence: f.confidence,
+        warnings: f.warnings,
+        uv: f.uv,
+      }));
+
+      setFacadeTextures(newTextures);
+    } catch (err) {
+      setCraftLog((prev) => [...prev, `ERROR: ${err instanceof Error ? err.message : "Pipeline failed"}`]);
+    } finally {
+      setCrafting(false);
+    }
+  };
 
   const handleUpload = async (face: FaceName, file: File) => {
     setUploading(face);
@@ -76,19 +137,60 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
 
   return (
     <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      {/* Header */}
       <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h3 style={{ margin: 0, fontSize: "1rem" }}>3D Building Preview</h3>
           <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.8rem" }}>
             {sceneSpec.apartments.length} units &middot; {sceneSpec.envelopes.length} building(s)
+            {facadeTextures.length > 0 && (
+              <> &middot; <span style={{ color: "#2e7d32" }}>{facadeTextures.length} texture(s)</span></>
+            )}
           </p>
         </div>
-        {facadeTextures.length > 0 && (
-          <span style={{ fontSize: "0.75rem", padding: "4px 12px", borderRadius: 10, background: "#e8f5e9", color: "#2e7d32", fontWeight: 600 }}>
-            {facadeTextures.length} texture(s) applied
-          </span>
-        )}
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {/* Debug toggle */}
+          <button
+            type="button"
+            onClick={() => setShowDebug(!showDebug)}
+            style={{
+              padding: "6px 10px", borderRadius: 6, border: "1px solid var(--line)",
+              background: showDebug ? "var(--accent)" : "var(--bg-alt)",
+              color: showDebug ? "white" : "var(--muted)",
+              fontSize: "0.7rem", cursor: "pointer", fontWeight: 600,
+            }}
+          >
+            Debug
+          </button>
+          {/* Craft it! button */}
+          <button
+            className="button-primary"
+            onClick={handleCraft}
+            disabled={crafting || (!hasProjectFacades && facadeTextures.length === 0)}
+            style={{
+              fontSize: "0.8rem", padding: "8px 20px",
+              opacity: crafting ? 0.7 : 1,
+            }}
+          >
+            {crafting ? "Crafting..." : "Craft it!"}
+          </button>
+        </div>
       </div>
+
+      {/* Debug log panel */}
+      {showDebug && craftLog.length > 0 && (
+        <div style={{
+          padding: "8px 16px", background: "#1a1a2e", color: "#a0f0a0",
+          fontSize: "0.65rem", fontFamily: "monospace", maxHeight: 120, overflowY: "auto",
+          borderBottom: "1px solid var(--line)",
+        }}>
+          {craftLog.map((line, i) => (
+            <div key={i} style={{ color: line.startsWith("WARN") ? "#f0c040" : line.startsWith("ERROR") ? "#f06060" : "#a0f0a0" }}>
+              {line}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", minHeight: 520 }}>
         {/* 3D Viewer */}
@@ -115,30 +217,21 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
         <div style={{ borderLeft: "1px solid var(--line)", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
           {/* Tab switcher */}
           <div style={{ display: "flex", borderBottom: "1px solid var(--line)" }}>
-            <button
-              type="button"
-              onClick={() => setSideTab("textures")}
-              style={{
-                flex: 1, padding: "10px", border: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600,
-                background: sideTab === "textures" ? "var(--bg)" : "var(--bg-alt)",
-                borderBottom: sideTab === "textures" ? "2px solid var(--accent)" : "2px solid transparent",
-                color: sideTab === "textures" ? "var(--fg)" : "var(--muted)",
-              }}
-            >
-              Facade Textures
-            </button>
-            <button
-              type="button"
-              onClick={() => setSideTab("unit")}
-              style={{
-                flex: 1, padding: "10px", border: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600,
-                background: sideTab === "unit" ? "var(--bg)" : "var(--bg-alt)",
-                borderBottom: sideTab === "unit" ? "2px solid var(--accent)" : "2px solid transparent",
-                color: sideTab === "unit" ? "var(--fg)" : "var(--muted)",
-              }}
-            >
-              Unit Info
-            </button>
+            {(["textures", "unit"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setSideTab(tab)}
+                style={{
+                  flex: 1, padding: "10px", border: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600,
+                  background: sideTab === tab ? "var(--bg)" : "var(--bg-alt)",
+                  borderBottom: sideTab === tab ? "2px solid var(--accent)" : "2px solid transparent",
+                  color: sideTab === tab ? "var(--fg)" : "var(--muted)",
+                }}
+              >
+                {tab === "textures" ? "Facade Textures" : "Unit Info"}
+              </button>
+            ))}
           </div>
 
           <div style={{ padding: 16, overflowY: "auto", flex: 1 }}>
@@ -168,9 +261,10 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
                   const isExpanded = expandedFace === face;
                   return (
                     <div key={face} style={{ border: "1px solid var(--line)", borderRadius: 8, overflow: "hidden" }}>
-                      {/* Face header */}
+                      {/* Face header with confidence */}
                       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", background: "var(--bg-alt)" }}>
                         <span style={{ fontSize: "0.8rem", fontWeight: 600, flex: 1 }}>{label}</span>
+                        {tex?.confidence != null && <ConfidenceBadge confidence={tex.confidence} />}
                         {tex && (
                           <button
                             type="button"
@@ -204,6 +298,20 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
                                 &times;
                               </button>
                             </div>
+
+                            {/* Warnings */}
+                            {tex.warnings && tex.warnings.length > 0 && (
+                              <div style={{ marginTop: 6, padding: "4px 6px", background: "#fff8e1", borderRadius: 4, fontSize: "0.65rem", color: "#e65100" }}>
+                                {tex.warnings.map((w, i) => <div key={i}>{w}</div>)}
+                              </div>
+                            )}
+
+                            {/* Debug UV info */}
+                            {showDebug && (
+                              <div style={{ marginTop: 4, padding: "4px 6px", background: "#f0f4f8", borderRadius: 4, fontSize: "0.6rem", fontFamily: "monospace", color: "#556" }}>
+                                UV: oX={tex.uv.offsetX.toFixed(3)} oY={tex.uv.offsetY.toFixed(3)} rX={tex.uv.repeatX.toFixed(3)} rY={tex.uv.repeatY.toFixed(3)} rot={tex.uv.rotation.toFixed(1)}
+                              </div>
+                            )}
 
                             {/* UV Adjustments */}
                             {isExpanded && (
@@ -242,17 +350,32 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
                   );
                 })}
 
-                {facadeTextures.length > 0 && (
-                  <p style={{ fontSize: "0.7rem", color: "var(--muted)", textAlign: "center", margin: "4px 0 0" }}>
-                    Textures apply automatically. Use Adjust to fine-tune.
-                  </p>
-                )}
+                <p style={{ fontSize: "0.7rem", color: "var(--muted)", textAlign: "center", margin: "4px 0 0" }}>
+                  {hasProjectFacades
+                    ? "Click \"Craft it!\" to auto-map project images."
+                    : "Upload images or add them in Media tab, then click \"Craft it!\"."}
+                </p>
               </div>
             )}
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+// --- Confidence Badge ---
+
+function ConfidenceBadge({ confidence }: { confidence: number }) {
+  const pct = Math.round(confidence * 100);
+  const isLow = confidence < 0.7;
+  const isMed = confidence >= 0.7 && confidence < 0.85;
+  const bg = isLow ? "#fce4ec" : isMed ? "#fff3e0" : "#e8f5e9";
+  const color = isLow ? "#c62828" : isMed ? "#e65100" : "#2e7d32";
+  return (
+    <span style={{ fontSize: "0.6rem", fontWeight: 700, padding: "2px 6px", borderRadius: 8, background: bg, color }}>
+      {pct}%
+    </span>
   );
 }
 
