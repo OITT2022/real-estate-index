@@ -18,6 +18,7 @@ export function AdminTopbar({ inquiryCount }: { inquiryCount?: number }) {
 
   return (
     <div className="admin-topbar">
+      <img src="/logo-icon.png" alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }} />
       <div className="admin-topbar-breadcrumb">
         {crumbs.map((crumb, i) => (
           <span key={i}>
