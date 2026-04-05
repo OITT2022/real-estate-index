@@ -633,93 +633,164 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       scene.add(canopyMesh);
     }
 
-    // --- Apartments with architectural details ---
+    // --- Shared materials for apartments ---
+    const wallMat = new THREE.MeshStandardMaterial({ color: COLORS.apartment, roughness: 0.75, metalness: 0.05 });
+    const wallSideMat = new THREE.MeshStandardMaterial({ color: COLORS.apartmentSide, roughness: 0.8, metalness: 0.03 });
+    const windowMat = new THREE.MeshPhysicalMaterial({
+      color: COLORS.window, roughness: 0.05, metalness: 0.1,
+      transparent: true, opacity: 0.7, reflectivity: 0.9,
+      clearcoat: 1.0, clearcoatRoughness: 0.05, envMapIntensity: 1.5,
+    });
+    const windowFrameMat = new THREE.MeshStandardMaterial({ color: COLORS.windowFrame, roughness: 0.6, metalness: 0.15 });
+    const recessMat = new THREE.MeshStandardMaterial({ color: 0x504840, roughness: 0.9 });
+    const balconyMat = new THREE.MeshStandardMaterial({ color: COLORS.balcony, roughness: 0.8 });
+
+    // --- Apartments with subdivided facades ---
     const apartmentMeshes: Mesh[] = [];
     const gap = 0.04;
+    const recessDepth = 0.08; // window recess depth into wall
+    const windowCols = 2;     // windows per apartment face
+
     for (const apt of spec.apartments) {
       const sx = apt.size.x - gap;
       const sy = apt.size.y - gap;
       const sz = apt.size.z - gap * 2;
-      const geo = new THREE.BoxGeometry(sx, sy, sz);
-      const isSelected = apt.meta.apartmentId === selectedIdRef.current;
-      const mat = new THREE.MeshStandardMaterial({
-        color: isSelected ? COLORS.highlighted : COLORS.apartment,
-        emissive: isSelected ? COLORS.highlightEmissive : 0x000000,
-        emissiveIntensity: isSelected ? 0.3 : 0,
-        roughness: 0.75,
-        metalness: 0.05,
-      });
-      const mesh = new THREE.Mesh(geo, mat);
       const cx = apt.position.x + apt.size.x / 2;
       const cy = apt.position.y + apt.size.y / 2;
       const cz = apt.position.z + apt.size.z / 2;
-      mesh.position.set(cx, cy, cz);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      mesh.userData = apt.meta;
-      apartmentMeshes.push(mesh);
-      scene.add(mesh);
 
-      // Apartment edge lines
-      const edgeGeo = new THREE.EdgesGeometry(geo);
-      const edgeLines = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: COLORS.edge, transparent: true, opacity: 0.5 }));
-      edgeLines.position.copy(mesh.position);
-      scene.add(edgeLines);
+      const isSelected = apt.meta.apartmentId === selectedIdRef.current;
 
-      // --- Windows on front face (Z+) ---
-      const windowW = sx * 0.3;
-      const windowH = sy * 0.45;
-      const windowD = 0.05;
-      const windowMat = new THREE.MeshPhysicalMaterial({ color: COLORS.window, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.7, reflectivity: 0.9, clearcoat: 1.0, clearcoatRoughness: 0.05, envMapIntensity: 1.5 });
-      const windowFrameMat = new THREE.MeshStandardMaterial({ color: COLORS.windowFrame, roughness: 0.6 });
+      // Main wall body — clickable mesh for raycasting
+      const bodyGeo = new THREE.BoxGeometry(sx, sy, sz);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: isSelected ? COLORS.highlighted : COLORS.apartment,
+        emissive: isSelected ? COLORS.highlightEmissive : 0x000000,
+        emissiveIntensity: isSelected ? 0.3 : 0,
+        roughness: 0.75, metalness: 0.05,
+      });
+      const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+      bodyMesh.position.set(cx, cy, cz);
+      bodyMesh.castShadow = true;
+      bodyMesh.receiveShadow = true;
+      bodyMesh.userData = apt.meta;
+      apartmentMeshes.push(bodyMesh);
+      scene.add(bodyMesh);
 
-      // Two windows per apartment front
-      for (const wxOff of [-sx * 0.2, sx * 0.2]) {
-        // Glass pane
-        const wg = new THREE.BoxGeometry(windowW, windowH, windowD);
-        const wm = new THREE.Mesh(wg, windowMat);
-        wm.position.set(cx + wxOff, cy + sy * 0.05, cz + sz / 2 + windowD / 2);
-        scene.add(wm);
-        // Frame
-        const frameGeo = new THREE.EdgesGeometry(wg);
-        const frame = new THREE.LineSegments(frameGeo, new THREE.LineBasicMaterial({ color: COLORS.windowFrame }));
-        frame.position.copy(wm.position);
-        scene.add(frame);
-        // Sill
-        const sillGeo = new THREE.BoxGeometry(windowW + 0.08, 0.04, 0.1);
-        const sill = new THREE.Mesh(sillGeo, windowFrameMat);
-        sill.position.set(cx + wxOff, cy + sy * 0.05 - windowH / 2 - 0.02, cz + sz / 2 + 0.05);
-        scene.add(sill);
+      // Window dimensions
+      const winW = sx * 0.28;
+      const winH = sy * 0.42;
+      const winMarginY = sy * 0.08; // offset windows slightly above center
+
+      // Helper: add window recess + glass + frame + sill to a face
+      const addWindowSet = (wx: number, wy: number, wz: number, faceAxis: "z" | "x", faceDir: number) => {
+        // Recess cavity (dark box pushed into the wall)
+        const rGeo = new THREE.BoxGeometry(
+          faceAxis === "z" ? winW + 0.02 : recessDepth,
+          winH + 0.02,
+          faceAxis === "z" ? recessDepth : winW + 0.02,
+        );
+        const rMesh = new THREE.Mesh(rGeo, recessMat);
+        rMesh.position.set(
+          wx + (faceAxis === "x" ? faceDir * (-recessDepth / 2 + 0.01) : 0),
+          wy,
+          wz + (faceAxis === "z" ? faceDir * (-recessDepth / 2 + 0.01) : 0),
+        );
+        rMesh.receiveShadow = true;
+        scene.add(rMesh);
+
+        // Glass pane (recessed inward from face)
+        const gGeo = new THREE.BoxGeometry(
+          faceAxis === "z" ? winW : 0.02,
+          winH,
+          faceAxis === "z" ? 0.02 : winW,
+        );
+        const gMesh = new THREE.Mesh(gGeo, windowMat);
+        gMesh.position.set(
+          wx + (faceAxis === "x" ? faceDir * (-recessDepth + 0.02) : 0),
+          wy,
+          wz + (faceAxis === "z" ? faceDir * (-recessDepth + 0.02) : 0),
+        );
+        scene.add(gMesh);
+
+        // Frame edges
+        const frameEdge = new THREE.EdgesGeometry(gGeo);
+        const frameLine = new THREE.LineSegments(frameEdge, new THREE.LineBasicMaterial({ color: COLORS.windowFrame }));
+        frameLine.position.copy(gMesh.position);
+        scene.add(frameLine);
+
+        // Sill (protruding ledge below window)
+        const sillW = faceAxis === "z" ? winW + 0.1 : 0.12;
+        const sillD = faceAxis === "z" ? 0.12 : winW + 0.1;
+        const sGeo = new THREE.BoxGeometry(sillW, 0.04, sillD);
+        const sMesh = new THREE.Mesh(sGeo, windowFrameMat);
+        sMesh.position.set(
+          wx + (faceAxis === "x" ? faceDir * 0.04 : 0),
+          wy - winH / 2 - 0.02,
+          wz + (faceAxis === "z" ? faceDir * 0.04 : 0),
+        );
+        sMesh.castShadow = true;
+        scene.add(sMesh);
+
+        // Lintel (thin ledge above window)
+        const lGeo = new THREE.BoxGeometry(sillW, 0.03, sillD);
+        const lMesh = new THREE.Mesh(lGeo, windowFrameMat);
+        lMesh.position.set(
+          wx + (faceAxis === "x" ? faceDir * 0.03 : 0),
+          wy + winH / 2 + 0.015,
+          wz + (faceAxis === "z" ? faceDir * 0.03 : 0),
+        );
+        scene.add(lMesh);
+      };
+
+      // Front face windows (Z+)
+      for (let w = 0; w < windowCols; w++) {
+        const wxOff = (w - (windowCols - 1) / 2) * (sx * 0.4);
+        addWindowSet(cx + wxOff, cy + winMarginY, cz + sz / 2, "z", 1);
       }
 
-      // --- Balcony on front (every other apartment, not ground floor) ---
+      // Back face windows (Z-)
+      for (let w = 0; w < windowCols; w++) {
+        const wxOff = (w - (windowCols - 1) / 2) * (sx * 0.4);
+        addWindowSet(cx + wxOff, cy + winMarginY, cz - sz / 2, "z", -1);
+      }
+
+      // Balcony on front (every other apartment, above ground floor)
       if (apt.meta.floorNumber > 1 && apartmentMeshes.length % 2 === 0) {
-        const balconyW = sx * 0.6;
-        const balconyD = 0.6;
-        const balconyH = 0.08;
-        const balconyFloor = new THREE.Mesh(
-          new THREE.BoxGeometry(balconyW, balconyH, balconyD),
-          new THREE.MeshStandardMaterial({ color: COLORS.balcony, roughness: 0.8 })
+        const balW = sx * 0.6;
+        const balD = 0.65;
+        const balH = 0.1;
+        // Slab
+        const slab = new THREE.Mesh(new THREE.BoxGeometry(balW, balH, balD), balconyMat);
+        slab.position.set(cx, cy - sy / 2 + balH / 2, cz + sz / 2 + balD / 2);
+        slab.castShadow = true;
+        slab.receiveShadow = true;
+        scene.add(slab);
+        // Railing — glass panel style
+        const railH = 0.55;
+        const railPanel = new THREE.Mesh(
+          new THREE.BoxGeometry(balW - 0.06, railH, 0.03),
+          new THREE.MeshPhysicalMaterial({
+            color: 0xc8e8f0, transparent: true, opacity: 0.35,
+            roughness: 0.05, metalness: 0.0, clearcoat: 0.5,
+          })
         );
-        balconyFloor.position.set(cx, cy - sy / 2 + balconyH / 2, cz + sz / 2 + balconyD / 2);
-        balconyFloor.castShadow = true;
-        balconyFloor.receiveShadow = true;
-        scene.add(balconyFloor);
-        // Railing (simple lines)
-        const railH = 0.5;
-        const railMat = new THREE.LineBasicMaterial({ color: COLORS.windowFrame });
-        // Front rail
-        const railPts = [new THREE.Vector3(-balconyW / 2, 0, 0), new THREE.Vector3(balconyW / 2, 0, 0)];
-        const railGeo = new THREE.BufferGeometry().setFromPoints(railPts);
-        const rail = new THREE.Line(railGeo, railMat);
-        rail.position.set(cx, cy - sy / 2 + balconyH + railH, cz + sz / 2 + balconyD);
-        scene.add(rail);
-        // Vertical posts
-        for (const xp of [-balconyW / 2, 0, balconyW / 2]) {
-          const postPts = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, railH, 0)];
-          const postGeo = new THREE.BufferGeometry().setFromPoints(postPts);
-          const post = new THREE.Line(postGeo, railMat);
-          post.position.set(cx + xp, cy - sy / 2 + balconyH, cz + sz / 2 + balconyD);
+        railPanel.position.set(cx, cy - sy / 2 + balH + railH / 2, cz + sz / 2 + balD - 0.015);
+        scene.add(railPanel);
+        // Top rail bar
+        const topRail = new THREE.Mesh(
+          new THREE.BoxGeometry(balW, 0.03, 0.04),
+          windowFrameMat
+        );
+        topRail.position.set(cx, cy - sy / 2 + balH + railH + 0.015, cz + sz / 2 + balD - 0.02);
+        scene.add(topRail);
+        // Side posts
+        for (const xOff of [-balW / 2 + 0.02, balW / 2 - 0.02]) {
+          const post = new THREE.Mesh(
+            new THREE.BoxGeometry(0.03, railH + balH, 0.03),
+            windowFrameMat
+          );
+          post.position.set(cx + xOff, cy - sy / 2 + (railH + balH) / 2, cz + sz / 2 + balD - 0.015);
           scene.add(post);
         }
       }
