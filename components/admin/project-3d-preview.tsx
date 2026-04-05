@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { WebGLRenderer, Mesh, MeshStandardMaterial } from "three";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import type { SceneSpec, FacadeMapping } from "@/lib/building-3d/generate-scene";
+import type { SceneSpec } from "@/lib/building-3d/generate-scene";
 
 type FaceName = "front" | "left" | "right" | "back";
 
@@ -328,13 +328,24 @@ interface ViewerProps {
 }
 
 const COLORS = {
-  background: 0xf4f6f8,
-  ground: 0xe9edf2,
-  apartment: 0xc8d0da,
-  highlighted: 0xff6b6b,
-  hovered: 0x64b5f6,
-  envelopeDefault: 0xdce3ea,
-  edge: 0x90a4ae,
+  skyTop: 0x87ceeb,
+  skyBottom: 0xd4e8f7,
+  ground: 0x8fbc8f,
+  pavement: 0xc0c0c0,
+  apartment: 0xe8e0d8,
+  apartmentSide: 0xd5cdc5,
+  highlighted: 0xe85d4a,
+  highlightEmissive: 0x441100,
+  hovered: 0x5c9fd4,
+  hoverEmissive: 0x0a1a30,
+  envelopeDefault: 0xd9d0c5,
+  edge: 0x8a8078,
+  floorLine: 0x9a918a,
+  window: 0x7ab8d4,
+  windowFrame: 0x706860,
+  entrance: 0x5a5048,
+  roof: 0xa09890,
+  balcony: 0xccc4bc,
 };
 
 function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectApartment, onReady }: ViewerProps) {
@@ -354,15 +365,22 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
   const selectedIdRef = useRef(selectedApartmentId);
   selectedIdRef.current = selectedApartmentId;
 
-  // Highlight sync
+  // Highlight sync with emissive glow
   useEffect(() => {
     const state = stateRef.current;
     if (!state) return;
     for (const mesh of state.apartmentMeshes) {
       const mat = mesh.material as MeshStandardMaterial;
       const id = mesh.userData.apartmentId as string;
-      if (id === selectedApartmentId) mat.color.setHex(COLORS.highlighted);
-      else if (mesh !== state.hoveredMesh) mat.color.setHex(COLORS.apartment);
+      if (id === selectedApartmentId) {
+        mat.color.setHex(COLORS.highlighted);
+        mat.emissive.setHex(COLORS.highlightEmissive);
+        mat.emissiveIntensity = 0.3;
+      } else if (mesh !== state.hoveredMesh) {
+        mat.color.setHex(COLORS.apartment);
+        mat.emissive.setHex(0x000000);
+        mat.emissiveIntensity = 0;
+      }
     }
   }, [selectedApartmentId]);
 
@@ -392,7 +410,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       const mat = state.envelopeMaterials[matIndex];
       if (!mat) continue;
 
-      const texture = loader.load(tex.url, (t) => {
+      loader.load(tex.url, (t) => {
         t.offset.set(tex.uv.offsetX, tex.uv.offsetY);
         t.repeat.set(tex.uv.repeatX, tex.uv.repeatY);
         t.rotation = (tex.uv.rotation * Math.PI) / 180;
@@ -427,13 +445,16 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     const height = container.clientHeight || 500;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(COLORS.background);
 
-    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 2000);
+    // Sky gradient background
+    scene.background = new THREE.Color(COLORS.skyBottom);
+    scene.fog = new THREE.Fog(COLORS.skyBottom, 80, 200);
+
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
     const { target, distance, yaw, pitch } = spec.camera;
     camera.position.set(
       target.x + distance * Math.sin(yaw) * Math.cos(pitch),
-      target.y + distance * Math.sin(pitch),
+      target.y + distance * Math.sin(pitch) + distance * 0.15,
       target.z + distance * Math.cos(yaw) * Math.cos(pitch),
     );
 
@@ -442,6 +463,8 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     renderer.setSize(width, height);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
     container.innerHTML = "";
     container.appendChild(renderer.domElement);
 
@@ -454,32 +477,46 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     controls.maxPolarAngle = Math.PI / 2 - 0.05;
     controls.update();
 
-    // Lights
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-    dir.position.set(15, 25, 20);
-    dir.castShadow = true;
-    dir.shadow.mapSize.set(1024, 1024);
-    scene.add(dir);
-    scene.add(new THREE.DirectionalLight(0xffffff, 0.3).translateX(-10).translateY(10).translateZ(-10));
+    // --- Improved lighting ---
+    // Hemisphere: sky blue from above, warm bounce from ground
+    scene.add(new THREE.HemisphereLight(0x87ceeb, 0xb89878, 0.6));
+    // Main sun
+    const sun = new THREE.DirectionalLight(0xfff5e6, 1.0);
+    sun.position.set(20, 30, 25);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.left = -30;
+    sun.shadow.camera.right = 30;
+    sun.shadow.camera.top = 30;
+    sun.shadow.camera.bottom = -5;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 80;
+    sun.shadow.bias = -0.001;
+    sun.shadow.radius = 3;
+    scene.add(sun);
+    // Fill light from opposite side
+    const fill = new THREE.DirectionalLight(0xc0d0e0, 0.3);
+    fill.position.set(-15, 12, -10);
+    scene.add(fill);
 
-    // Build 6 envelope materials: [+X right, -X left, +Y top, -Y bottom, +Z front, -Z back]
+    // --- Envelope materials (6 faces) ---
     const envelopeMaterials: MeshStandardMaterial[] = [];
     for (let i = 0; i < 6; i++) {
       const isBottom = i === 3;
+      const isTop = i === 2;
       envelopeMaterials.push(new THREE.MeshStandardMaterial({
-        color: COLORS.envelopeDefault,
+        color: isTop ? COLORS.roof : COLORS.envelopeDefault,
         transparent: true,
-        opacity: isBottom ? 0 : 0.15,
+        opacity: isBottom ? 0 : isTop ? 0.6 : 0.15,
         side: THREE.DoubleSide,
         depthWrite: false,
         visible: !isBottom,
-        roughness: 0.6,
-        metalness: 0.05,
+        roughness: isTop ? 0.9 : 0.7,
+        metalness: 0.02,
       }));
     }
 
-    // Envelopes
+    // --- Envelopes ---
     for (const env of spec.envelopes) {
       const geo = new THREE.BoxGeometry(env.size.x, env.size.y, env.size.z);
       const mesh = new THREE.Mesh(geo, envelopeMaterials);
@@ -487,33 +524,184 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       mesh.receiveShadow = true;
       scene.add(mesh);
 
+      // Envelope edges
       const edgeGeo = new THREE.EdgesGeometry(geo);
-      const edges = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: COLORS.edge, transparent: true, opacity: 0.4 }));
+      const edges = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: COLORS.edge, transparent: true, opacity: 0.35 }));
       edges.position.copy(mesh.position);
       scene.add(edges);
+
+      // --- Roof parapet (thin raised edge around rooftop) ---
+      const parapetH = 0.15;
+      const parapetT = 0.1;
+      const parapetMat = new THREE.MeshStandardMaterial({ color: COLORS.roof, roughness: 0.9 });
+      const roofY = env.position.y + env.size.y;
+      // Front + back parapets
+      for (const zOff of [0, env.size.z]) {
+        const pg = new THREE.BoxGeometry(env.size.x, parapetH, parapetT);
+        const pm = new THREE.Mesh(pg, parapetMat);
+        pm.position.set(env.position.x + env.size.x / 2, roofY + parapetH / 2, env.position.z + zOff);
+        pm.castShadow = true;
+        scene.add(pm);
+      }
+      // Left + right parapets
+      for (const xOff of [0, env.size.x]) {
+        const pg = new THREE.BoxGeometry(parapetT, parapetH, env.size.z);
+        const pm = new THREE.Mesh(pg, parapetMat);
+        pm.position.set(env.position.x + xOff, roofY + parapetH / 2, env.position.z + env.size.z / 2);
+        pm.castShadow = true;
+        scene.add(pm);
+      }
+
+      // --- Floor separator lines ---
+      const floorH = spec.apartments[0]?.size.y ? (spec.apartments[0].size.y / 0.9) : 3;
+      const floorLineMat = new THREE.MeshStandardMaterial({ color: COLORS.floorLine, roughness: 0.8 });
+      for (let f = 1; f < env.floorCount; f++) {
+        const lineY = env.position.y + f * floorH;
+        // Front line
+        const fg = new THREE.BoxGeometry(env.size.x + 0.06, 0.06, 0.06);
+        const fm = new THREE.Mesh(fg, floorLineMat);
+        fm.position.set(env.position.x + env.size.x / 2, lineY, env.position.z + env.size.z + 0.03);
+        scene.add(fm);
+        // Back line
+        const bm = fm.clone();
+        bm.position.z = env.position.z - 0.03;
+        scene.add(bm);
+      }
+
+      // --- Entrance emphasis (ground floor front) ---
+      const entranceW = 1.2;
+      const entranceH = floorH * 0.85;
+      const entranceD = 0.15;
+      const entranceMat = new THREE.MeshStandardMaterial({ color: COLORS.entrance, roughness: 0.5, metalness: 0.1 });
+      const entranceGeo = new THREE.BoxGeometry(entranceW, entranceH, entranceD);
+      const entranceMesh = new THREE.Mesh(entranceGeo, entranceMat);
+      entranceMesh.position.set(
+        env.position.x + env.size.x / 2,
+        env.position.y + entranceH / 2,
+        env.position.z + env.size.z + entranceD / 2
+      );
+      entranceMesh.castShadow = true;
+      scene.add(entranceMesh);
+      // Entrance canopy
+      const canopyGeo = new THREE.BoxGeometry(entranceW + 0.6, 0.08, 0.8);
+      const canopyMesh = new THREE.Mesh(canopyGeo, new THREE.MeshStandardMaterial({ color: COLORS.edge, roughness: 0.4, metalness: 0.2 }));
+      canopyMesh.position.set(entranceMesh.position.x, env.position.y + entranceH + 0.04, env.position.z + env.size.z + 0.4);
+      canopyMesh.castShadow = true;
+      scene.add(canopyMesh);
     }
 
-    // Apartments
+    // --- Apartments with architectural details ---
     const apartmentMeshes: Mesh[] = [];
-    const gap = 0.05;
+    const gap = 0.04;
     for (const apt of spec.apartments) {
-      const geo = new THREE.BoxGeometry(apt.size.x - gap, apt.size.y - gap, apt.size.z - gap * 2);
+      const sx = apt.size.x - gap;
+      const sy = apt.size.y - gap;
+      const sz = apt.size.z - gap * 2;
+      const geo = new THREE.BoxGeometry(sx, sy, sz);
       const isSelected = apt.meta.apartmentId === selectedIdRef.current;
-      const mat = new THREE.MeshStandardMaterial({ color: isSelected ? COLORS.highlighted : COLORS.apartment, roughness: 0.7, metalness: 0.1 });
+      const mat = new THREE.MeshStandardMaterial({
+        color: isSelected ? COLORS.highlighted : COLORS.apartment,
+        emissive: isSelected ? COLORS.highlightEmissive : 0x000000,
+        emissiveIntensity: isSelected ? 0.3 : 0,
+        roughness: 0.75,
+        metalness: 0.05,
+      });
       const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set(apt.position.x + apt.size.x / 2, apt.position.y + apt.size.y / 2, apt.position.z + apt.size.z / 2);
+      const cx = apt.position.x + apt.size.x / 2;
+      const cy = apt.position.y + apt.size.y / 2;
+      const cz = apt.position.z + apt.size.z / 2;
+      mesh.position.set(cx, cy, cz);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       mesh.userData = apt.meta;
       apartmentMeshes.push(mesh);
       scene.add(mesh);
 
+      // Apartment edge lines
       const edgeGeo = new THREE.EdgesGeometry(geo);
-      scene.add(new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: COLORS.edge, transparent: true, opacity: 0.6 })).translateX(mesh.position.x).translateY(mesh.position.y).translateZ(mesh.position.z));
+      const edgeLines = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: COLORS.edge, transparent: true, opacity: 0.5 }));
+      edgeLines.position.copy(mesh.position);
+      scene.add(edgeLines);
+
+      // --- Windows on front face (Z+) ---
+      const windowW = sx * 0.3;
+      const windowH = sy * 0.45;
+      const windowD = 0.05;
+      const windowMat = new THREE.MeshStandardMaterial({ color: COLORS.window, roughness: 0.1, metalness: 0.4, transparent: true, opacity: 0.8 });
+      const windowFrameMat = new THREE.MeshStandardMaterial({ color: COLORS.windowFrame, roughness: 0.6 });
+
+      // Two windows per apartment front
+      for (const wxOff of [-sx * 0.2, sx * 0.2]) {
+        // Glass pane
+        const wg = new THREE.BoxGeometry(windowW, windowH, windowD);
+        const wm = new THREE.Mesh(wg, windowMat);
+        wm.position.set(cx + wxOff, cy + sy * 0.05, cz + sz / 2 + windowD / 2);
+        scene.add(wm);
+        // Frame
+        const frameGeo = new THREE.EdgesGeometry(wg);
+        const frame = new THREE.LineSegments(frameGeo, new THREE.LineBasicMaterial({ color: COLORS.windowFrame }));
+        frame.position.copy(wm.position);
+        scene.add(frame);
+        // Sill
+        const sillGeo = new THREE.BoxGeometry(windowW + 0.08, 0.04, 0.1);
+        const sill = new THREE.Mesh(sillGeo, windowFrameMat);
+        sill.position.set(cx + wxOff, cy + sy * 0.05 - windowH / 2 - 0.02, cz + sz / 2 + 0.05);
+        scene.add(sill);
+      }
+
+      // --- Balcony on front (every other apartment, not ground floor) ---
+      if (apt.meta.floorNumber > 1 && apartmentMeshes.length % 2 === 0) {
+        const balconyW = sx * 0.6;
+        const balconyD = 0.6;
+        const balconyH = 0.08;
+        const balconyFloor = new THREE.Mesh(
+          new THREE.BoxGeometry(balconyW, balconyH, balconyD),
+          new THREE.MeshStandardMaterial({ color: COLORS.balcony, roughness: 0.8 })
+        );
+        balconyFloor.position.set(cx, cy - sy / 2 + balconyH / 2, cz + sz / 2 + balconyD / 2);
+        balconyFloor.castShadow = true;
+        balconyFloor.receiveShadow = true;
+        scene.add(balconyFloor);
+        // Railing (simple lines)
+        const railH = 0.5;
+        const railMat = new THREE.LineBasicMaterial({ color: COLORS.windowFrame });
+        // Front rail
+        const railPts = [new THREE.Vector3(-balconyW / 2, 0, 0), new THREE.Vector3(balconyW / 2, 0, 0)];
+        const railGeo = new THREE.BufferGeometry().setFromPoints(railPts);
+        const rail = new THREE.Line(railGeo, railMat);
+        rail.position.set(cx, cy - sy / 2 + balconyH + railH, cz + sz / 2 + balconyD);
+        scene.add(rail);
+        // Vertical posts
+        for (const xp of [-balconyW / 2, 0, balconyW / 2]) {
+          const postPts = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, railH, 0)];
+          const postGeo = new THREE.BufferGeometry().setFromPoints(postPts);
+          const post = new THREE.Line(postGeo, railMat);
+          post.position.set(cx + xp, cy - sy / 2 + balconyH, cz + sz / 2 + balconyD);
+          scene.add(post);
+        }
+      }
     }
 
-    // Ground
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: COLORS.ground }));
+    // --- Ground layers ---
+    // Pavement around building
+    const maxEnv = spec.envelopes[0];
+    if (maxEnv) {
+      const pavW = maxEnv.size.x + 6;
+      const pavD = maxEnv.size.z + 6;
+      const pavement = new THREE.Mesh(
+        new THREE.PlaneGeometry(pavW, pavD),
+        new THREE.MeshStandardMaterial({ color: COLORS.pavement, roughness: 0.9 })
+      );
+      pavement.rotation.x = -Math.PI / 2;
+      pavement.position.set(maxEnv.position.x + maxEnv.size.x / 2, -0.005, maxEnv.position.z + maxEnv.size.z / 2);
+      pavement.receiveShadow = true;
+      scene.add(pavement);
+    }
+    // Grass ground
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(200, 200),
+      new THREE.MeshStandardMaterial({ color: COLORS.ground, roughness: 0.95 })
+    );
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.01;
     ground.receiveShadow = true;
@@ -535,14 +723,20 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     const onPointerMove = (e: MouseEvent) => {
       const hit = getHit(e);
       if (hoveredMesh && hoveredMesh !== hit) {
-        (hoveredMesh.material as MeshStandardMaterial).color.setHex(
-          hoveredMesh.userData.apartmentId === selectedIdRef.current ? COLORS.highlighted : COLORS.apartment
-        );
+        const m = hoveredMesh.material as MeshStandardMaterial;
+        const isSel = hoveredMesh.userData.apartmentId === selectedIdRef.current;
+        m.color.setHex(isSel ? COLORS.highlighted : COLORS.apartment);
+        m.emissive.setHex(isSel ? COLORS.highlightEmissive : 0x000000);
+        m.emissiveIntensity = isSel ? 0.3 : 0;
         renderer.domElement.style.cursor = "default";
       }
       if (hit && hit !== hoveredMesh) {
-        if (hit.userData.apartmentId !== selectedIdRef.current)
-          (hit.material as MeshStandardMaterial).color.setHex(COLORS.hovered);
+        const m = hit.material as MeshStandardMaterial;
+        if (hit.userData.apartmentId !== selectedIdRef.current) {
+          m.color.setHex(COLORS.hovered);
+          m.emissive.setHex(COLORS.hoverEmissive);
+          m.emissiveIntensity = 0.25;
+        }
         renderer.domElement.style.cursor = "pointer";
       }
       hoveredMesh = hit;
