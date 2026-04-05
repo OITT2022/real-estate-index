@@ -473,7 +473,23 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
 
     const scene = new THREE.Scene();
 
-    // Sky gradient background
+    // Procedural sky gradient environment map
+    const envScene = new THREE.Scene();
+    const skyCanvas = document.createElement("canvas");
+    skyCanvas.width = 2;
+    skyCanvas.height = 256;
+    const ctx = skyCanvas.getContext("2d")!;
+    const grad = ctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, "#5b8fc9");    // zenith
+    grad.addColorStop(0.4, "#87ceeb");  // mid sky
+    grad.addColorStop(0.7, "#c8dff0");  // horizon
+    grad.addColorStop(1.0, "#e8e0d8");  // ground bounce
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 2, 256);
+    const skyTex = new THREE.CanvasTexture(skyCanvas);
+    skyTex.mapping = THREE.EquirectangularReflectionMapping;
+    skyTex.colorSpace = THREE.SRGBColorSpace;
+    scene.environment = skyTex;
     scene.background = new THREE.Color(COLORS.skyBottom);
     scene.fog = new THREE.Fog(COLORS.skyBottom, 80, 200);
 
@@ -654,7 +670,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       const windowW = sx * 0.3;
       const windowH = sy * 0.45;
       const windowD = 0.05;
-      const windowMat = new THREE.MeshStandardMaterial({ color: COLORS.window, roughness: 0.1, metalness: 0.4, transparent: true, opacity: 0.8 });
+      const windowMat = new THREE.MeshPhysicalMaterial({ color: COLORS.window, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.7, reflectivity: 0.9, clearcoat: 1.0, clearcoatRoughness: 0.05, envMapIntensity: 1.5 });
       const windowFrameMat = new THREE.MeshStandardMaterial({ color: COLORS.windowFrame, roughness: 0.6 });
 
       // Two windows per apartment front
@@ -782,12 +798,36 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       const h = container.clientHeight || 500;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
+      composer.setSize(w, h);
     };
     window.addEventListener("resize", onResize);
 
+    // --- Post-processing: SSAO + SMAA ---
+    const { EffectComposer, EffectPass, RenderPass, SMAAEffect, SSAOEffect, BlendFunction, SMAAPreset } = await import("postprocessing");
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+
+    const ssaoEffect = new SSAOEffect(camera, undefined, {
+      blendFunction: BlendFunction.MULTIPLY,
+      samples: 16,
+      rings: 5,
+      worldDistanceThreshold: 20,
+      worldDistanceFalloff: 5,
+      worldProximityThreshold: 0.4,
+      worldProximityFalloff: 0.1,
+      luminanceInfluence: 0.7,
+      radius: 0.04,
+      intensity: 1.8,
+      bias: 0.025,
+    });
+
+    const smaaEffect = new SMAAEffect({ preset: SMAAPreset.HIGH });
+
+    composer.addPass(new EffectPass(camera, ssaoEffect, smaaEffect));
+
     let animationId = 0;
-    const animate = () => { controls.update(); renderer.render(scene, camera); animationId = requestAnimationFrame(animate); };
+    const animate = () => { controls.update(); composer.render(); animationId = requestAnimationFrame(animate); };
     animate();
 
     stateRef.current = { renderer, controls, apartmentMeshes, envelopeMaterials, hoveredMesh, animationId, threeModule: THREE };
@@ -795,6 +835,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
 
     return () => {
       cancelAnimationFrame(animationId);
+      composer.dispose();
       renderer.domElement.removeEventListener("pointermove", onPointerMove);
       renderer.domElement.removeEventListener("click", onClick);
       window.removeEventListener("resize", onResize);

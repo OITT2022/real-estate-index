@@ -22,6 +22,7 @@
     "next": "^15.2.3",
     "next-auth": "^4.24.11",
     "pg": "^8.20.0",
+    "postprocessing": "^6.39.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.72.0",
