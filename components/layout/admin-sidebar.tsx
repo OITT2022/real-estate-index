@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import { LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { ADMIN_PAGES, PAGE_GROUPS } from "@/lib/admin-pages";
 
 export function AdminSidebar() {
@@ -22,13 +21,7 @@ export function AdminSidebar() {
     return allowedPages.includes(page.key);
   });
 
-  const displayName = user?.name || user?.email || "";
-  const initials = displayName
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "A";
+
 
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(path + "/");
@@ -64,21 +57,6 @@ export function AdminSidebar() {
         );
       })}
 
-      <div className="sidebar-user">
-        <div className="sidebar-user-avatar">{initials}</div>
-        <div className="sidebar-user-info">
-          <div className="sidebar-user-name">{displayName}</div>
-          <div className="sidebar-user-email">{user?.email || ""}</div>
-        </div>
-        <button
-          type="button"
-          className="sidebar-signout"
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
-          title="Sign out"
-        >
-          <LogOut size={16} />
-        </button>
-      </div>
     </aside>
   );
 }

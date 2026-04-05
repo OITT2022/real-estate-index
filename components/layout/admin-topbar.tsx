@@ -58,8 +58,10 @@ export function AdminTopbar({ inquiryCount }: { inquiryCount?: number }) {
           className="admin-topbar-icon"
           title="Sign out"
           onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          style={{ width: "auto", padding: "0 10px", gap: 6, display: "flex", alignItems: "center", fontSize: "0.75rem", fontWeight: 600 }}
         >
-          <LogOut size={16} />
+          <LogOut size={15} />
+          Sign out
         </button>
       </div>
     </div>
