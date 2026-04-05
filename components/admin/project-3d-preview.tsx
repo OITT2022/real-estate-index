@@ -45,6 +45,37 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
   const [crafting, setCrafting] = useState(false);
   const [craftLog, setCraftLog] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
+  const STORAGE_KEY = `facade-textures-${projectId}`;
+
+  // Load saved textures on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as FacadeTexture[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setFacadeTextures(parsed);
+          setSaveStatus(`Loaded ${parsed.length} saved texture(s)`);
+        }
+      }
+    } catch { /* ignore corrupt data */ }
+  }, [STORAGE_KEY]);
+
+  const handleSave = () => {
+    setSaving(true);
+    setSaveStatus(null);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(facadeTextures));
+      setSaveStatus(`Saved ${facadeTextures.length} texture(s)`);
+    } catch {
+      setSaveStatus("Error: failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const selectedApartment = sceneSpec.apartments.find(
     (a) => a.meta.apartmentId === selectedApartmentId
@@ -174,8 +205,35 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
           >
             {crafting ? "Crafting..." : "Craft it!"}
           </button>
+          {/* Save button */}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving || facadeTextures.length === 0}
+            style={{
+              padding: "8px 16px", borderRadius: 6, border: "1px solid var(--line)",
+              background: facadeTextures.length === 0 ? "var(--bg-alt)" : "#2e7d32",
+              color: facadeTextures.length === 0 ? "var(--muted)" : "white",
+              fontSize: "0.8rem", cursor: facadeTextures.length === 0 ? "default" : "pointer", fontWeight: 600,
+              opacity: saving ? 0.7 : 1,
+            }}
+          >
+            {saving ? "Saving..." : "Save"}
+          </button>
         </div>
       </div>
+
+      {/* Save status */}
+      {saveStatus && (
+        <div style={{
+          padding: "6px 16px", fontSize: "0.75rem", fontWeight: 500,
+          background: saveStatus.startsWith("Error") ? "#fce4ec" : "#e8f5e9",
+          color: saveStatus.startsWith("Error") ? "#c62828" : "#2e7d32",
+          borderBottom: "1px solid var(--line)",
+        }}>
+          {saveStatus}
+        </div>
+      )}
 
       {/* Debug log panel */}
       {showDebug && craftLog.length > 0 && (
@@ -501,7 +559,6 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
 
     const THREE = await import("three");
     const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
-    const { Sky } = await import("three/examples/jsm/objects/Sky.js");
 
     if (stateRef.current) {
       cancelAnimationFrame(stateRef.current.animationId);
@@ -515,21 +572,9 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
 
     const scene = new THREE.Scene();
 
-    // Physically-based sky (Preetham atmospheric model)
-    const sky = new Sky();
-    sky.scale.setScalar(10000);
-    const skyUniforms = sky.material.uniforms;
-    skyUniforms["turbidity"].value = 4;
-    skyUniforms["rayleigh"].value = 1.5;
-    skyUniforms["mieCoefficient"].value = 0.005;
-    skyUniforms["mieDirectionalG"].value = 0.8;
-    const sunPos = new THREE.Vector3();
-    const sunPhi = THREE.MathUtils.degToRad(90 - 35);   // elevation 35°
-    const sunTheta = THREE.MathUtils.degToRad(160);       // azimuth 160°
-    sunPos.setFromSphericalCoords(1, sunPhi, sunTheta);
-    skyUniforms["sunPosition"].value.copy(sunPos);
-    scene.add(sky);
-    scene.fog = new THREE.Fog(0xd4e8f7, 60, 250);
+    // Sky gradient background
+    scene.background = new THREE.Color(0xd4e8f7);
+    scene.fog = new THREE.Fog(0xd4e8f7, 80, 200);
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
     const { target, distance, yaw, pitch } = spec.camera;
@@ -545,15 +590,33 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.7;
+    renderer.toneMappingExposure = 1.2;
     container.innerHTML = "";
     container.appendChild(renderer.domElement);
 
-    // Generate PMREM environment map from the sky for proper PBR reflections
+    // PMREM environment map from gradient for proper PBR reflections
+    const envCanvas = document.createElement("canvas");
+    envCanvas.width = 64;
+    envCanvas.height = 512;
+    const envCtx = envCanvas.getContext("2d")!;
+    const envGrad = envCtx.createLinearGradient(0, 0, 0, 512);
+    envGrad.addColorStop(0.0, "#3a6aaa");
+    envGrad.addColorStop(0.15, "#5b8fc9");
+    envGrad.addColorStop(0.35, "#87ceeb");
+    envGrad.addColorStop(0.55, "#b0d4ef");
+    envGrad.addColorStop(0.7, "#dce8f0");
+    envGrad.addColorStop(0.78, "#f0e8da");
+    envGrad.addColorStop(0.85, "#e8ddd0");
+    envGrad.addColorStop(1.0, "#c8beb4");
+    envCtx.fillStyle = envGrad;
+    envCtx.fillRect(0, 0, 64, 512);
+    const envTex = new THREE.CanvasTexture(envCanvas);
+    envTex.mapping = THREE.EquirectangularReflectionMapping;
+    envTex.colorSpace = THREE.SRGBColorSpace;
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const skyRenderTarget = pmremGenerator.fromScene(scene, 0, 0.1, 10000);
-    scene.environment = skyRenderTarget.texture;
+    scene.environment = pmremGenerator.fromEquirectangular(envTex).texture;
     pmremGenerator.dispose();
+    envTex.dispose();
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(target.x, target.y, target.z);
@@ -574,7 +637,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     // Main sun — position aligned with sky shader sun
     const sun = new THREE.DirectionalLight(0xffffff, 1.2);
     sun.color.setHSL(0.1, 0.6, 0.95);  // warm sunlight
-    sun.position.copy(sunPos).multiplyScalar(30);
+    sun.position.set(20, 30, 25);
     sun.castShadow = true;
     sun.shadow.mapSize.set(4096, 4096);
     sun.shadow.camera.left = -30;
