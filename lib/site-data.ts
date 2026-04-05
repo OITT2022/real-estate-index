@@ -299,6 +299,41 @@ export async function getDashboardStats(user?: SessionUser) {
   return { total, published, inquiries, projects };
 }
 
+export async function getDashboardChartData() {
+  const [propertiesByStatus, propertiesByCity, recentInquiries, projectsCount, unitsCount] = await Promise.all([
+    db.property.groupBy({ by: ["status"], _count: true }),
+    db.property.groupBy({ by: ["city"], _count: true, orderBy: { _count: { city: "desc" } }, take: 8 }),
+    db.inquiry.findMany({
+      select: { createdAt: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.project.count(),
+    db.projectUnit.count(),
+  ]);
+
+  // Group inquiries by month
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const inquiriesByMonth: { month: string; count: number }[] = monthNames.map((m) => ({ month: m, count: 0 }));
+  for (const inq of recentInquiries) {
+    const monthIdx = new Date(inq.createdAt).getMonth();
+    inquiriesByMonth[monthIdx].count++;
+  }
+
+  return {
+    propertiesByStatus: propertiesByStatus.map((s) => ({
+      status: s.status,
+      count: s._count,
+    })),
+    propertiesByCity: propertiesByCity.map((c) => ({
+      city: c.city,
+      count: c._count,
+    })),
+    inquiriesByMonth,
+    projectsCount,
+    unitsCount,
+  };
+}
+
 // ── API Scope Counts ──────────────────────────────────────────
 
 export async function getApiScopeCounts() {
