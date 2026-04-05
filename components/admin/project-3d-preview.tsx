@@ -35,12 +35,7 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
   // Facade texture state
   const [facadeTextures, setFacadeTextures] = useState<FacadeTexture[]>([]);
   const [uploading, setUploading] = useState<FaceName | null>(null);
-  const [rendered, setRendered] = useState(false);
   const [expandedFace, setExpandedFace] = useState<FaceName | null>(null);
-
-  // Ref to pass textures to viewer without full rebuild
-  const texturesRef = useRef<FacadeTexture[]>([]);
-  texturesRef.current = facadeTextures;
 
   const selectedApartment = sceneSpec.apartments.find(
     (a) => a.meta.apartmentId === selectedApartmentId
@@ -60,7 +55,6 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
         const filtered = prev.filter((t) => t.face !== face);
         return [...filtered, { face, url: data.url, uv: { ...DEFAULT_UV } }];
       });
-      setRendered(false);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -70,7 +64,6 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
 
   const handleRemoveTexture = (face: FaceName) => {
     setFacadeTextures((prev) => prev.filter((t) => t.face !== face));
-    setRendered(false);
   };
 
   const handleUvChange = (face: FaceName, key: keyof FacadeTexture["uv"], value: number) => {
@@ -88,17 +81,12 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
           <h3 style={{ margin: 0, fontSize: "1rem" }}>3D Building Preview</h3>
           <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.8rem" }}>
             {sceneSpec.apartments.length} units &middot; {sceneSpec.envelopes.length} building(s)
-            {facadeTextures.length > 0 && ` \u00b7 ${facadeTextures.length} texture(s)`}
           </p>
         </div>
         {facadeTextures.length > 0 && (
-          <button
-            className="button-primary"
-            onClick={() => setRendered(true)}
-            style={{ fontSize: "0.8rem", padding: "8px 20px" }}
-          >
-            {rendered ? "Re-render" : "Render with Textures"}
-          </button>
+          <span style={{ fontSize: "0.75rem", padding: "4px 12px", borderRadius: 10, background: "#e8f5e9", color: "#2e7d32", fontWeight: 600 }}>
+            {facadeTextures.length} texture(s) applied
+          </span>
         )}
       </div>
 
@@ -117,7 +105,7 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
           <ThreeViewer
             sceneSpec={sceneSpec}
             selectedApartmentId={selectedApartmentId}
-            facadeTextures={rendered ? facadeTextures : []}
+            facadeTextures={facadeTextures}
             onSelectApartment={setSelectedApartmentId}
             onReady={() => setViewerReady(true)}
           />
@@ -221,15 +209,15 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
                             {isExpanded && (
                               <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 5 }}>
                                 <UvSlider label="Offset X" value={tex.uv.offsetX} min={-2} max={2} step={0.01}
-                                  onChange={(v) => { handleUvChange(face, "offsetX", v); setRendered(false); }} />
+                                  onChange={(v) => handleUvChange(face, "offsetX", v)} />
                                 <UvSlider label="Offset Y" value={tex.uv.offsetY} min={-2} max={2} step={0.01}
-                                  onChange={(v) => { handleUvChange(face, "offsetY", v); setRendered(false); }} />
+                                  onChange={(v) => handleUvChange(face, "offsetY", v)} />
                                 <UvSlider label="Repeat X" value={tex.uv.repeatX} min={0.1} max={5} step={0.05}
-                                  onChange={(v) => { handleUvChange(face, "repeatX", v); setRendered(false); }} />
+                                  onChange={(v) => handleUvChange(face, "repeatX", v)} />
                                 <UvSlider label="Repeat Y" value={tex.uv.repeatY} min={0.1} max={5} step={0.05}
-                                  onChange={(v) => { handleUvChange(face, "repeatY", v); setRendered(false); }} />
+                                  onChange={(v) => handleUvChange(face, "repeatY", v)} />
                                 <UvSlider label="Rotation" value={tex.uv.rotation} min={-180} max={180} step={1}
-                                  onChange={(v) => { handleUvChange(face, "rotation", v); setRendered(false); }} />
+                                  onChange={(v) => handleUvChange(face, "rotation", v)} />
                               </div>
                             )}
                           </div>
@@ -254,9 +242,9 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
                   );
                 })}
 
-                {facadeTextures.length > 0 && !rendered && (
+                {facadeTextures.length > 0 && (
                   <p style={{ fontSize: "0.7rem", color: "var(--muted)", textAlign: "center", margin: "4px 0 0" }}>
-                    Click &quot;Render with Textures&quot; to apply.
+                    Textures apply automatically. Use Adjust to fine-tune.
                   </p>
                 )}
               </div>
@@ -384,48 +372,87 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     }
   }, [selectedApartmentId]);
 
-  // Apply/update facade textures without full rebuild
+  // Serialize textures to a stable key so React detects URL and UV changes
+  const textureKey = JSON.stringify(
+    facadeTextures.map((t) => ({ face: t.face, url: t.url, uv: t.uv }))
+  );
+
+  // Apply/update facade textures without full scene rebuild
   useEffect(() => {
     const state = stateRef.current;
     if (!state) return;
     const THREE = state.threeModule;
     const loader = new THREE.TextureLoader();
 
-    // Reset all envelope materials to default first
+    // Build lookup of current textures by face
+    const texByFace = new Map<string, FacadeTexture>();
+    for (const t of facadeTextures) texByFace.set(t.face, t);
+
+    // Update all 6 envelope materials
+    const faceIndexEntries: [FaceName, number][] = [["right", 0], ["left", 1], ["front", 4], ["back", 5]];
+
+    // Reset non-textured faces to default
     for (let i = 0; i < 6; i++) {
       const mat = state.envelopeMaterials[i];
       if (!mat) continue;
-      if (mat.map) { mat.map.dispose(); mat.map = null; }
-      mat.color.setHex(COLORS.envelopeDefault);
-      mat.transparent = true;
-      mat.opacity = i === 3 ? 0 : 0.15; // bottom stays invisible
-      mat.visible = i !== 3;
-      mat.needsUpdate = true;
+      const isBottom = i === 3;
+      const isTop = i === 2;
+      const faceEntry = faceIndexEntries.find(([, idx]) => idx === i);
+      const hasTex = faceEntry && texByFace.has(faceEntry[0]);
+
+      if (!hasTex) {
+        // Reset to default translucent
+        if (mat.map) { mat.map.dispose(); mat.map = null; }
+        mat.color.setHex(isTop ? COLORS.roof : COLORS.envelopeDefault);
+        mat.transparent = true;
+        mat.opacity = isBottom ? 0 : isTop ? 0.6 : 0.15;
+        mat.depthWrite = false;
+        mat.visible = !isBottom;
+        mat.needsUpdate = true;
+      }
     }
 
-    // Apply textures for faces that have them
-    for (const tex of facadeTextures) {
-      const matIndex = FACE_TO_MAT_INDEX[tex.face];
-      if (matIndex === undefined) continue;
+    // Load and apply textures for faces that have them
+    for (const [face, matIndex] of faceIndexEntries) {
+      const tex = texByFace.get(face);
+      if (!tex) continue;
       const mat = state.envelopeMaterials[matIndex];
       if (!mat) continue;
 
-      loader.load(tex.url, (t) => {
-        t.offset.set(tex.uv.offsetX, tex.uv.offsetY);
-        t.repeat.set(tex.uv.repeatX, tex.uv.repeatY);
-        t.rotation = (tex.uv.rotation * Math.PI) / 180;
-        t.wrapS = THREE.RepeatWrapping;
-        t.wrapT = THREE.RepeatWrapping;
-        t.center.set(0.5, 0.5);
-        t.colorSpace = THREE.SRGBColorSpace;
-        mat.map = t;
-        mat.color.setHex(0xffffff);
-        mat.transparent = true;
-        mat.opacity = 0.95;
+      // If same URL is already loaded, just update UVs
+      if (mat.map && mat.userData?.textureUrl === tex.url) {
+        mat.map.offset.set(tex.uv.offsetX, tex.uv.offsetY);
+        mat.map.repeat.set(tex.uv.repeatX, tex.uv.repeatY);
+        mat.map.rotation = (tex.uv.rotation * Math.PI) / 180;
+        mat.map.needsUpdate = true;
+        continue;
+      }
+
+      // Load new texture
+      if (mat.map) { mat.map.dispose(); mat.map = null; }
+
+      loader.load(tex.url, (loadedTex) => {
+        loadedTex.wrapS = THREE.RepeatWrapping;
+        loadedTex.wrapT = THREE.RepeatWrapping;
+        loadedTex.center.set(0.5, 0.5);
+        loadedTex.colorSpace = THREE.SRGBColorSpace;
+        loadedTex.offset.set(tex.uv.offsetX, tex.uv.offsetY);
+        loadedTex.repeat.set(tex.uv.repeatX, tex.uv.repeatY);
+        loadedTex.rotation = (tex.uv.rotation * Math.PI) / 180;
+
+        mat.map = loadedTex;
+        mat.color.setHex(0xffffff);       // white base so texture shows true colors
+        mat.transparent = false;           // solid, not see-through
+        mat.opacity = 1.0;                 // fully opaque
+        mat.depthWrite = true;             // proper depth sorting
+        mat.side = THREE.FrontSide;        // only render outward face
+        mat.visible = true;
         mat.needsUpdate = true;
+        mat.userData = { textureUrl: tex.url };
       });
     }
-  }, [facadeTextures]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [textureKey]);
 
   const buildScene = useCallback(async (spec: SceneSpec) => {
     const container = mountRef.current;
