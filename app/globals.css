@@ -975,6 +975,9 @@ body:has(.admin-layout) { background: #f8f9fb; }
   padding: 12px 28px;
   background: white;
   border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
   min-height: 52px;
 }
 .admin-topbar-breadcrumb {
@@ -1080,6 +1083,7 @@ body:has(.admin-layout) { background: #f8f9fb; }
 .admin-sidebar-v2 .sidebar-user {
   margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--line);
   display: flex; align-items: center; gap: 10px;
+  position: sticky; bottom: 0; background: white;
 }
 .admin-sidebar-v2 .sidebar-user-avatar {
   width: 34px; height: 34px; border-radius: 50%;
