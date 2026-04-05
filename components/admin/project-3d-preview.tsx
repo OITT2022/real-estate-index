@@ -5,7 +5,7 @@ import type { WebGLRenderer, Mesh, MeshStandardMaterial } from "three";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { SceneSpec } from "@/lib/building-3d/generate-scene";
 import { craftFacades } from "@/lib/building-3d/craft-facade";
-import type { CraftResult, CraftedFacade, BuildingGeometry } from "@/lib/building-3d/craft-facade";
+import type { BuildingGeometry } from "@/lib/building-3d/craft-facade";
 
 type FaceName = "front" | "left" | "right" | "back";
 
@@ -427,9 +427,6 @@ function StatusBadge({ status }: { status?: string }) {
 
 // --- Three.js Viewer ---
 
-// Three.js BoxGeometry material indices: +X, -X, +Y, -Y, +Z, -Z
-const FACE_TO_MAT_INDEX: Record<FaceName, number> = { right: 0, left: 1, front: 4, back: 5 };
-
 interface ViewerProps {
   sceneSpec: SceneSpec;
   selectedApartmentId: string | null;
@@ -452,6 +449,7 @@ const COLORS = {
   envelopeDefault: 0xd9d0c5,
   edge: 0x8a8078,
   floorLine: 0x9a918a,
+  apartmentGrid: 0xb0c8d8,
   window: 0x7ab8d4,
   windowFrame: 0x706860,
   entrance: 0x5a5048,
@@ -465,10 +463,10 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     renderer: WebGLRenderer;
     controls: OrbitControls;
     apartmentMeshes: Mesh[];
-    envelopeMaterials: MeshStandardMaterial[];
     hoveredMesh: Mesh | null;
     animationId: number;
     threeModule: typeof import("three");
+    isTextured: boolean;
   } | null>(null);
 
   const onSelectRef = useRef(onSelectApartment);
@@ -487,104 +485,17 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
         mat.color.setHex(COLORS.highlighted);
         mat.emissive.setHex(COLORS.highlightEmissive);
         mat.emissiveIntensity = 0.3;
+        mat.opacity = state.isTextured ? 0.6 : 1.0;
       } else if (mesh !== state.hoveredMesh) {
-        mat.color.setHex(COLORS.apartment);
+        mat.color.setHex(state.isTextured ? COLORS.apartmentGrid : COLORS.apartment);
         mat.emissive.setHex(0x000000);
         mat.emissiveIntensity = 0;
+        mat.opacity = state.isTextured ? 0.08 : 1.0;
       }
     }
   }, [selectedApartmentId]);
 
-  // Serialize textures to a stable key so React detects URL and UV changes
-  const textureKey = JSON.stringify(
-    facadeTextures.map((t) => ({ face: t.face, url: t.url, uv: t.uv }))
-  );
-
-  // Apply/update facade textures without full scene rebuild
-  useEffect(() => {
-    const state = stateRef.current;
-    if (!state) return;
-    const THREE = state.threeModule;
-    const loader = new THREE.TextureLoader();
-
-    // Build lookup of current textures by face
-    const texByFace = new Map<string, FacadeTexture>();
-    for (const t of facadeTextures) texByFace.set(t.face, t);
-
-    // Update all 6 envelope materials
-    const faceIndexEntries: [FaceName, number][] = [["right", 0], ["left", 1], ["front", 4], ["back", 5]];
-
-    // Reset non-textured faces to default
-    for (let i = 0; i < 6; i++) {
-      const mat = state.envelopeMaterials[i];
-      if (!mat) continue;
-      const isBottom = i === 3;
-      const isTop = i === 2;
-      const faceEntry = faceIndexEntries.find(([, idx]) => idx === i);
-      const hasTex = faceEntry && texByFace.has(faceEntry[0]);
-
-      if (!hasTex) {
-        // Reset to default translucent
-        if (mat.map) { mat.map.dispose(); mat.map = null; }
-        mat.color.setHex(isTop ? COLORS.roof : COLORS.envelopeDefault);
-        mat.transparent = true;
-        mat.opacity = isBottom ? 0 : isTop ? 0.6 : 0.15;
-        mat.depthWrite = false;
-        mat.visible = !isBottom;
-        mat.needsUpdate = true;
-      }
-    }
-
-    // Load and apply textures for faces that have them
-    for (const [face, matIndex] of faceIndexEntries) {
-      const tex = texByFace.get(face);
-      if (!tex) continue;
-      const mat = state.envelopeMaterials[matIndex];
-      if (!mat) continue;
-
-      // If same URL is already loaded, just update UVs
-      if (mat.map && mat.userData?.textureUrl === tex.url) {
-        mat.map.offset.set(tex.uv.offsetX, tex.uv.offsetY);
-        mat.map.repeat.set(tex.uv.repeatX, tex.uv.repeatY);
-        mat.map.rotation = (tex.uv.rotation * Math.PI) / 180;
-        mat.map.needsUpdate = true;
-        continue;
-      }
-
-      // Load new texture
-      if (mat.map) { mat.map.dispose(); mat.map = null; }
-
-      loader.load(tex.url, (loadedTex) => {
-        // Clamp edges — facade photos should not tile/repeat
-        loadedTex.wrapS = THREE.ClampToEdgeWrapping;
-        loadedTex.wrapT = THREE.ClampToEdgeWrapping;
-        loadedTex.center.set(0.5, 0.5);
-        loadedTex.colorSpace = THREE.SRGBColorSpace;
-        // Anisotropic filtering — critical for oblique viewing angles
-        loadedTex.anisotropy = state.renderer.capabilities.getMaxAnisotropy();
-        loadedTex.offset.set(tex.uv.offsetX, tex.uv.offsetY);
-        loadedTex.repeat.set(tex.uv.repeatX, tex.uv.repeatY);
-        loadedTex.rotation = (tex.uv.rotation * Math.PI) / 180;
-
-        mat.map = loadedTex;
-        mat.color.setHex(0xffffff);
-        mat.transparent = false;
-        mat.opacity = 1.0;
-        mat.depthWrite = true;
-        mat.side = THREE.FrontSide;
-        mat.visible = true;
-        // PBR properties for realistic building surfaces
-        mat.roughness = 0.8;              // matte facade surface
-        mat.metalness = 0.0;              // non-metallic building material
-        mat.envMapIntensity = 0.4;        // subtle sky reflection
-        mat.needsUpdate = true;
-        mat.userData = { textureUrl: tex.url };
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textureKey]);
-
-  const buildScene = useCallback(async (spec: SceneSpec) => {
+  const buildScene = useCallback(async (spec: SceneSpec, textures: FacadeTexture[] = []) => {
     const container = mountRef.current;
     if (!container) return;
 
@@ -676,114 +587,163 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     fill.position.set(-15, 12, -10);
     scene.add(fill);
 
-    // --- Envelope materials (6 faces) ---
-    const envelopeMaterials: MeshStandardMaterial[] = [];
-    for (let i = 0; i < 6; i++) {
-      const isBottom = i === 3;
-      const isTop = i === 2;
-      envelopeMaterials.push(new THREE.MeshStandardMaterial({
-        color: isTop ? COLORS.roof : COLORS.envelopeDefault,
-        transparent: true,
-        opacity: isBottom ? 0 : isTop ? 0.6 : 0.15,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-        visible: !isBottom,
-        roughness: isTop ? 0.9 : 0.7,
-        metalness: 0.02,
-      }));
-    }
+    // --- MODE: textured (photo facades) vs procedural (generated detail) ---
+    const hasTextures = textures.length > 0;
+    const texByFace = new Map<FaceName, FacadeTexture>();
+    for (const t of textures) texByFace.set(t.face, t);
+
+    // Face index mapping for BoxGeometry: [+X right, -X left, +Y top, -Y bottom, +Z front, -Z back]
+    const faceToIndex: [FaceName, number][] = [["right", 0], ["left", 1], ["front", 4], ["back", 5]];
+    const loader = new THREE.TextureLoader();
+    const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
     // --- Envelopes ---
     for (const env of spec.envelopes) {
-      const geo = new THREE.BoxGeometry(env.size.x, env.size.y, env.size.z);
+      // In textured mode: expand envelope slightly so it sits in front of apartments
+      const expand = hasTextures ? 0.12 : 0;
+      const envW = env.size.x + expand * 2;
+      const envH = env.size.y + expand;
+      const envZ = env.size.z + expand * 2;
+
+      // Build 6 materials for the envelope box
+      const envelopeMaterials: MeshStandardMaterial[] = [];
+      for (let i = 0; i < 6; i++) {
+        const isBottom = i === 3;
+        const isTop = i === 2;
+        const faceEntry = faceToIndex.find(([, idx]) => idx === i);
+        const tex = faceEntry ? texByFace.get(faceEntry[0]) : undefined;
+
+        if (tex) {
+          // Textured face — will be populated by texture loader below
+          const mat = new THREE.MeshStandardMaterial({
+            color: COLORS.envelopeDefault,
+            side: THREE.FrontSide,
+            roughness: 0.8,
+            metalness: 0.0,
+          });
+          envelopeMaterials.push(mat);
+
+          // Load texture asynchronously
+          loader.load(tex.url, (loadedTex) => {
+            loadedTex.wrapS = THREE.ClampToEdgeWrapping;
+            loadedTex.wrapT = THREE.ClampToEdgeWrapping;
+            loadedTex.center.set(0.5, 0.5);
+            loadedTex.colorSpace = THREE.SRGBColorSpace;
+            loadedTex.anisotropy = maxAniso;
+            loadedTex.offset.set(tex.uv.offsetX, tex.uv.offsetY);
+            loadedTex.repeat.set(tex.uv.repeatX, tex.uv.repeatY);
+            loadedTex.rotation = (tex.uv.rotation * Math.PI) / 180;
+            mat.map = loadedTex;
+            mat.color.setHex(0xffffff);
+            mat.transparent = false;
+            mat.opacity = 1.0;
+            mat.depthWrite = true;
+            mat.envMapIntensity = 0.4;
+            mat.needsUpdate = true;
+          });
+        } else {
+          // Non-textured face
+          envelopeMaterials.push(new THREE.MeshStandardMaterial({
+            color: isTop ? COLORS.roof : COLORS.envelopeDefault,
+            transparent: true,
+            opacity: isBottom ? 0 : isTop ? 0.6 : 0.15,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            visible: !isBottom,
+            roughness: isTop ? 0.9 : 0.7,
+            metalness: 0.02,
+          }));
+        }
+      }
+
+      const geo = new THREE.BoxGeometry(envW, envH, envZ);
       const mesh = new THREE.Mesh(geo, envelopeMaterials);
-      mesh.position.set(env.position.x + env.size.x / 2, env.position.y + env.size.y / 2, env.position.z + env.size.z / 2);
+      mesh.position.set(
+        env.position.x + env.size.x / 2,
+        env.position.y + envH / 2,
+        env.position.z + env.size.z / 2,
+      );
       mesh.receiveShadow = true;
+      mesh.castShadow = hasTextures;
       scene.add(mesh);
 
       // Envelope edges
-      const edgeGeo = new THREE.EdgesGeometry(geo);
-      const edges = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: COLORS.edge, transparent: true, opacity: 0.35 }));
-      edges.position.copy(mesh.position);
-      scene.add(edges);
-
-      // --- Roof parapet (thin raised edge around rooftop) ---
-      const parapetH = 0.15;
-      const parapetT = 0.1;
-      const parapetMat = new THREE.MeshStandardMaterial({ color: COLORS.roof, roughness: 0.9 });
-      const roofY = env.position.y + env.size.y;
-      // Front + back parapets
-      for (const zOff of [0, env.size.z]) {
-        const pg = new THREE.BoxGeometry(env.size.x, parapetH, parapetT);
-        const pm = new THREE.Mesh(pg, parapetMat);
-        pm.position.set(env.position.x + env.size.x / 2, roofY + parapetH / 2, env.position.z + zOff);
-        pm.castShadow = true;
-        scene.add(pm);
-      }
-      // Left + right parapets
-      for (const xOff of [0, env.size.x]) {
-        const pg = new THREE.BoxGeometry(parapetT, parapetH, env.size.z);
-        const pm = new THREE.Mesh(pg, parapetMat);
-        pm.position.set(env.position.x + xOff, roofY + parapetH / 2, env.position.z + env.size.z / 2);
-        pm.castShadow = true;
-        scene.add(pm);
+      if (!hasTextures) {
+        const edgeGeo = new THREE.EdgesGeometry(geo);
+        const edges = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: COLORS.edge, transparent: true, opacity: 0.35 }));
+        edges.position.copy(mesh.position);
+        scene.add(edges);
       }
 
-      // --- Floor separator lines ---
-      const floorH = spec.apartments[0]?.size.y ? (spec.apartments[0].size.y / 0.9) : 3;
-      const floorLineMat = new THREE.MeshStandardMaterial({ color: COLORS.floorLine, roughness: 0.8 });
-      for (let f = 1; f < env.floorCount; f++) {
-        const lineY = env.position.y + f * floorH;
-        // Front line
-        const fg = new THREE.BoxGeometry(env.size.x + 0.06, 0.06, 0.06);
-        const fm = new THREE.Mesh(fg, floorLineMat);
-        fm.position.set(env.position.x + env.size.x / 2, lineY, env.position.z + env.size.z + 0.03);
-        scene.add(fm);
-        // Back line
-        const bm = fm.clone();
-        bm.position.z = env.position.z - 0.03;
-        scene.add(bm);
-      }
+      // --- Procedural details: only in non-textured mode ---
+      if (!hasTextures) {
+        // Roof parapet
+        const parapetH = 0.15;
+        const parapetT = 0.1;
+        const parapetMat = new THREE.MeshStandardMaterial({ color: COLORS.roof, roughness: 0.9 });
+        const roofY = env.position.y + env.size.y;
+        for (const zOff of [0, env.size.z]) {
+          const pm = new THREE.Mesh(new THREE.BoxGeometry(env.size.x, parapetH, parapetT), parapetMat);
+          pm.position.set(env.position.x + env.size.x / 2, roofY + parapetH / 2, env.position.z + zOff);
+          pm.castShadow = true;
+          scene.add(pm);
+        }
+        for (const xOff of [0, env.size.x]) {
+          const pm = new THREE.Mesh(new THREE.BoxGeometry(parapetT, parapetH, env.size.z), parapetMat);
+          pm.position.set(env.position.x + xOff, roofY + parapetH / 2, env.position.z + env.size.z / 2);
+          pm.castShadow = true;
+          scene.add(pm);
+        }
 
-      // --- Entrance emphasis (ground floor front) ---
-      const entranceW = 1.2;
-      const entranceH = floorH * 0.85;
-      const entranceD = 0.15;
-      const entranceMat = new THREE.MeshStandardMaterial({ color: COLORS.entrance, roughness: 0.5, metalness: 0.1 });
-      const entranceGeo = new THREE.BoxGeometry(entranceW, entranceH, entranceD);
-      const entranceMesh = new THREE.Mesh(entranceGeo, entranceMat);
-      entranceMesh.position.set(
-        env.position.x + env.size.x / 2,
-        env.position.y + entranceH / 2,
-        env.position.z + env.size.z + entranceD / 2
-      );
-      entranceMesh.castShadow = true;
-      scene.add(entranceMesh);
-      // Entrance canopy
-      const canopyGeo = new THREE.BoxGeometry(entranceW + 0.6, 0.08, 0.8);
-      const canopyMesh = new THREE.Mesh(canopyGeo, new THREE.MeshStandardMaterial({ color: COLORS.edge, roughness: 0.4, metalness: 0.2 }));
-      canopyMesh.position.set(entranceMesh.position.x, env.position.y + entranceH + 0.04, env.position.z + env.size.z + 0.4);
-      canopyMesh.castShadow = true;
-      scene.add(canopyMesh);
+        // Floor separator lines
+        const floorH = spec.apartments[0]?.size.y ? (spec.apartments[0].size.y / 0.9) : 3;
+        const floorLineMat = new THREE.MeshStandardMaterial({ color: COLORS.floorLine, roughness: 0.8 });
+        for (let f = 1; f < env.floorCount; f++) {
+          const lineY = env.position.y + f * floorH;
+          const fm = new THREE.Mesh(new THREE.BoxGeometry(env.size.x + 0.06, 0.06, 0.06), floorLineMat);
+          fm.position.set(env.position.x + env.size.x / 2, lineY, env.position.z + env.size.z + 0.03);
+          scene.add(fm);
+          const bm = fm.clone();
+          bm.position.z = env.position.z - 0.03;
+          scene.add(bm);
+        }
+
+        // Entrance
+        const entranceW = 1.2;
+        const entranceH = floorH * 0.85;
+        const entranceD = 0.15;
+        const entranceMesh = new THREE.Mesh(
+          new THREE.BoxGeometry(entranceW, entranceH, entranceD),
+          new THREE.MeshStandardMaterial({ color: COLORS.entrance, roughness: 0.5, metalness: 0.1 }),
+        );
+        entranceMesh.position.set(env.position.x + env.size.x / 2, env.position.y + entranceH / 2, env.position.z + env.size.z + entranceD / 2);
+        entranceMesh.castShadow = true;
+        scene.add(entranceMesh);
+        const canopy = new THREE.Mesh(
+          new THREE.BoxGeometry(entranceW + 0.6, 0.08, 0.8),
+          new THREE.MeshStandardMaterial({ color: COLORS.edge, roughness: 0.4, metalness: 0.2 }),
+        );
+        canopy.position.set(entranceMesh.position.x, env.position.y + entranceH + 0.04, env.position.z + env.size.z + 0.4);
+        canopy.castShadow = true;
+        scene.add(canopy);
+      }
     }
 
-    // --- Shared materials for apartments ---
-    const wallMat = new THREE.MeshStandardMaterial({ color: COLORS.apartment, roughness: 0.75, metalness: 0.05 });
-    const wallSideMat = new THREE.MeshStandardMaterial({ color: COLORS.apartmentSide, roughness: 0.8, metalness: 0.03 });
-    const windowMat = new THREE.MeshPhysicalMaterial({
+    // --- Apartment meshes ---
+    const apartmentMeshes: Mesh[] = [];
+    const gap = 0.04;
+
+    // Shared materials for procedural mode
+    const windowMat = !hasTextures ? new THREE.MeshPhysicalMaterial({
       color: COLORS.window, roughness: 0.05, metalness: 0.1,
       transparent: true, opacity: 0.7, reflectivity: 0.9,
       clearcoat: 1.0, clearcoatRoughness: 0.05, envMapIntensity: 1.5,
-    });
-    const windowFrameMat = new THREE.MeshStandardMaterial({ color: COLORS.windowFrame, roughness: 0.6, metalness: 0.15 });
-    const recessMat = new THREE.MeshStandardMaterial({ color: 0x504840, roughness: 0.9 });
-    const balconyMat = new THREE.MeshStandardMaterial({ color: COLORS.balcony, roughness: 0.8 });
-
-    // --- Apartments with subdivided facades ---
-    const apartmentMeshes: Mesh[] = [];
-    const gap = 0.04;
-    const recessDepth = 0.08; // window recess depth into wall
-    const windowCols = 2;     // windows per apartment face
+    }) : null;
+    const windowFrameMat = !hasTextures ? new THREE.MeshStandardMaterial({ color: COLORS.windowFrame, roughness: 0.6, metalness: 0.15 }) : null;
+    const recessMat = !hasTextures ? new THREE.MeshStandardMaterial({ color: 0x504840, roughness: 0.9 }) : null;
+    const balconyMat = !hasTextures ? new THREE.MeshStandardMaterial({ color: COLORS.balcony, roughness: 0.8 }) : null;
+    const recessDepth = 0.08;
+    const windowCols = 2;
 
     for (const apt of spec.apartments) {
       const sx = apt.size.x - gap;
@@ -792,140 +752,123 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       const cx = apt.position.x + apt.size.x / 2;
       const cy = apt.position.y + apt.size.y / 2;
       const cz = apt.position.z + apt.size.z / 2;
-
       const isSelected = apt.meta.apartmentId === selectedIdRef.current;
 
-      // Main wall body — clickable mesh for raycasting
-      const bodyGeo = new THREE.BoxGeometry(sx, sy, sz);
-      const bodyMat = new THREE.MeshStandardMaterial({
-        color: isSelected ? COLORS.highlighted : COLORS.apartment,
-        emissive: isSelected ? COLORS.highlightEmissive : 0x000000,
-        emissiveIntensity: isSelected ? 0.3 : 0,
-        roughness: 0.75, metalness: 0.05,
-      });
-      const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-      bodyMesh.position.set(cx, cy, cz);
-      bodyMesh.castShadow = true;
-      bodyMesh.receiveShadow = true;
-      bodyMesh.userData = apt.meta;
-      apartmentMeshes.push(bodyMesh);
-      scene.add(bodyMesh);
+      if (hasTextures) {
+        // TEXTURED MODE: apartments are transparent clickable grid cells
+        const bodyGeo = new THREE.BoxGeometry(sx, sy, sz);
+        const bodyMat = new THREE.MeshStandardMaterial({
+          color: isSelected ? COLORS.highlighted : COLORS.apartmentGrid,
+          emissive: isSelected ? COLORS.highlightEmissive : 0x000000,
+          emissiveIntensity: isSelected ? 0.3 : 0,
+          transparent: true,
+          opacity: isSelected ? 0.6 : 0.08,
+          depthWrite: false,
+          roughness: 0.5,
+        });
+        const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+        bodyMesh.position.set(cx, cy, cz);
+        bodyMesh.userData = apt.meta;
+        apartmentMeshes.push(bodyMesh);
+        scene.add(bodyMesh);
 
-      // Window dimensions
-      const winW = sx * 0.28;
-      const winH = sy * 0.42;
-      const winMarginY = sy * 0.08; // offset windows slightly above center
+        // Thin edge outlines so apartments are visible as a grid
+        const edgeGeo = new THREE.EdgesGeometry(bodyGeo);
+        const edgeLines = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({
+          color: COLORS.edge, transparent: true, opacity: 0.3,
+        }));
+        edgeLines.position.copy(bodyMesh.position);
+        scene.add(edgeLines);
 
-      // Helper: add window recess + glass + frame + sill to a face
-      const addWindowSet = (wx: number, wy: number, wz: number, faceAxis: "z" | "x", faceDir: number) => {
-        // Recess cavity (dark box pushed into the wall)
-        const rGeo = new THREE.BoxGeometry(
-          faceAxis === "z" ? winW + 0.02 : recessDepth,
-          winH + 0.02,
-          faceAxis === "z" ? recessDepth : winW + 0.02,
-        );
-        const rMesh = new THREE.Mesh(rGeo, recessMat);
-        rMesh.position.set(
-          wx + (faceAxis === "x" ? faceDir * (-recessDepth / 2 + 0.01) : 0),
-          wy,
-          wz + (faceAxis === "z" ? faceDir * (-recessDepth / 2 + 0.01) : 0),
-        );
-        rMesh.receiveShadow = true;
-        scene.add(rMesh);
+      } else {
+        // PROCEDURAL MODE: full architectural detail
+        const bodyGeo = new THREE.BoxGeometry(sx, sy, sz);
+        const bodyMat = new THREE.MeshStandardMaterial({
+          color: isSelected ? COLORS.highlighted : COLORS.apartment,
+          emissive: isSelected ? COLORS.highlightEmissive : 0x000000,
+          emissiveIntensity: isSelected ? 0.3 : 0,
+          roughness: 0.75, metalness: 0.05,
+        });
+        const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+        bodyMesh.position.set(cx, cy, cz);
+        bodyMesh.castShadow = true;
+        bodyMesh.receiveShadow = true;
+        bodyMesh.userData = apt.meta;
+        apartmentMeshes.push(bodyMesh);
+        scene.add(bodyMesh);
 
-        // Glass pane (recessed inward from face)
-        const gGeo = new THREE.BoxGeometry(
-          faceAxis === "z" ? winW : 0.02,
-          winH,
-          faceAxis === "z" ? 0.02 : winW,
-        );
-        const gMesh = new THREE.Mesh(gGeo, windowMat);
-        gMesh.position.set(
-          wx + (faceAxis === "x" ? faceDir * (-recessDepth + 0.02) : 0),
-          wy,
-          wz + (faceAxis === "z" ? faceDir * (-recessDepth + 0.02) : 0),
-        );
-        scene.add(gMesh);
+        // Window dimensions
+        const winW = sx * 0.28;
+        const winH = sy * 0.42;
+        const winMarginY = sy * 0.08;
 
-        // Frame edges
-        const frameEdge = new THREE.EdgesGeometry(gGeo);
-        const frameLine = new THREE.LineSegments(frameEdge, new THREE.LineBasicMaterial({ color: COLORS.windowFrame }));
-        frameLine.position.copy(gMesh.position);
-        scene.add(frameLine);
-
-        // Sill (protruding ledge below window)
-        const sillW = faceAxis === "z" ? winW + 0.1 : 0.12;
-        const sillD = faceAxis === "z" ? 0.12 : winW + 0.1;
-        const sGeo = new THREE.BoxGeometry(sillW, 0.04, sillD);
-        const sMesh = new THREE.Mesh(sGeo, windowFrameMat);
-        sMesh.position.set(
-          wx + (faceAxis === "x" ? faceDir * 0.04 : 0),
-          wy - winH / 2 - 0.02,
-          wz + (faceAxis === "z" ? faceDir * 0.04 : 0),
-        );
-        sMesh.castShadow = true;
-        scene.add(sMesh);
-
-        // Lintel (thin ledge above window)
-        const lGeo = new THREE.BoxGeometry(sillW, 0.03, sillD);
-        const lMesh = new THREE.Mesh(lGeo, windowFrameMat);
-        lMesh.position.set(
-          wx + (faceAxis === "x" ? faceDir * 0.03 : 0),
-          wy + winH / 2 + 0.015,
-          wz + (faceAxis === "z" ? faceDir * 0.03 : 0),
-        );
-        scene.add(lMesh);
-      };
-
-      // Front face windows (Z+)
-      for (let w = 0; w < windowCols; w++) {
-        const wxOff = (w - (windowCols - 1) / 2) * (sx * 0.4);
-        addWindowSet(cx + wxOff, cy + winMarginY, cz + sz / 2, "z", 1);
-      }
-
-      // Back face windows (Z-)
-      for (let w = 0; w < windowCols; w++) {
-        const wxOff = (w - (windowCols - 1) / 2) * (sx * 0.4);
-        addWindowSet(cx + wxOff, cy + winMarginY, cz - sz / 2, "z", -1);
-      }
-
-      // Balcony on front (every other apartment, above ground floor)
-      if (apt.meta.floorNumber > 1 && apartmentMeshes.length % 2 === 0) {
-        const balW = sx * 0.6;
-        const balD = 0.65;
-        const balH = 0.1;
-        // Slab
-        const slab = new THREE.Mesh(new THREE.BoxGeometry(balW, balH, balD), balconyMat);
-        slab.position.set(cx, cy - sy / 2 + balH / 2, cz + sz / 2 + balD / 2);
-        slab.castShadow = true;
-        slab.receiveShadow = true;
-        scene.add(slab);
-        // Railing — glass panel style
-        const railH = 0.55;
-        const railPanel = new THREE.Mesh(
-          new THREE.BoxGeometry(balW - 0.06, railH, 0.03),
-          new THREE.MeshPhysicalMaterial({
-            color: 0xc8e8f0, transparent: true, opacity: 0.35,
-            roughness: 0.05, metalness: 0.0, clearcoat: 0.5,
-          })
-        );
-        railPanel.position.set(cx, cy - sy / 2 + balH + railH / 2, cz + sz / 2 + balD - 0.015);
-        scene.add(railPanel);
-        // Top rail bar
-        const topRail = new THREE.Mesh(
-          new THREE.BoxGeometry(balW, 0.03, 0.04),
-          windowFrameMat
-        );
-        topRail.position.set(cx, cy - sy / 2 + balH + railH + 0.015, cz + sz / 2 + balD - 0.02);
-        scene.add(topRail);
-        // Side posts
-        for (const xOff of [-balW / 2 + 0.02, balW / 2 - 0.02]) {
-          const post = new THREE.Mesh(
-            new THREE.BoxGeometry(0.03, railH + balH, 0.03),
-            windowFrameMat
+        // Window recess + glass + frame + sill helper
+        const addWindowSet = (wx: number, wy: number, wz: number, axis: "z" | "x", dir: number) => {
+          // Recess cavity
+          const rMesh = new THREE.Mesh(
+            new THREE.BoxGeometry(axis === "z" ? winW + 0.02 : recessDepth, winH + 0.02, axis === "z" ? recessDepth : winW + 0.02),
+            recessMat!,
           );
-          post.position.set(cx + xOff, cy - sy / 2 + (railH + balH) / 2, cz + sz / 2 + balD - 0.015);
-          scene.add(post);
+          rMesh.position.set(wx + (axis === "x" ? dir * (-recessDepth / 2 + 0.01) : 0), wy, wz + (axis === "z" ? dir * (-recessDepth / 2 + 0.01) : 0));
+          rMesh.receiveShadow = true;
+          scene.add(rMesh);
+
+          // Glass pane
+          const gGeo = new THREE.BoxGeometry(axis === "z" ? winW : 0.02, winH, axis === "z" ? 0.02 : winW);
+          const gMesh = new THREE.Mesh(gGeo, windowMat!);
+          gMesh.position.set(wx + (axis === "x" ? dir * (-recessDepth + 0.02) : 0), wy, wz + (axis === "z" ? dir * (-recessDepth + 0.02) : 0));
+          scene.add(gMesh);
+
+          // Frame edges
+          const frameLine = new THREE.LineSegments(new THREE.EdgesGeometry(gGeo), new THREE.LineBasicMaterial({ color: COLORS.windowFrame }));
+          frameLine.position.copy(gMesh.position);
+          scene.add(frameLine);
+
+          // Sill
+          const sillW = axis === "z" ? winW + 0.1 : 0.12;
+          const sillD = axis === "z" ? 0.12 : winW + 0.1;
+          const sMesh = new THREE.Mesh(new THREE.BoxGeometry(sillW, 0.04, sillD), windowFrameMat!);
+          sMesh.position.set(wx + (axis === "x" ? dir * 0.04 : 0), wy - winH / 2 - 0.02, wz + (axis === "z" ? dir * 0.04 : 0));
+          sMesh.castShadow = true;
+          scene.add(sMesh);
+
+          // Lintel
+          const lMesh = new THREE.Mesh(new THREE.BoxGeometry(sillW, 0.03, sillD), windowFrameMat!);
+          lMesh.position.set(wx + (axis === "x" ? dir * 0.03 : 0), wy + winH / 2 + 0.015, wz + (axis === "z" ? dir * 0.03 : 0));
+          scene.add(lMesh);
+        };
+
+        // Front + back windows
+        for (let w = 0; w < windowCols; w++) {
+          const wxOff = (w - (windowCols - 1) / 2) * (sx * 0.4);
+          addWindowSet(cx + wxOff, cy + winMarginY, cz + sz / 2, "z", 1);
+          addWindowSet(cx + wxOff, cy + winMarginY, cz - sz / 2, "z", -1);
+        }
+
+        // Balcony
+        if (apt.meta.floorNumber > 1 && apartmentMeshes.length % 2 === 0) {
+          const balW = sx * 0.6;
+          const balD = 0.65;
+          const balH = 0.1;
+          const slab = new THREE.Mesh(new THREE.BoxGeometry(balW, balH, balD), balconyMat!);
+          slab.position.set(cx, cy - sy / 2 + balH / 2, cz + sz / 2 + balD / 2);
+          slab.castShadow = true; slab.receiveShadow = true;
+          scene.add(slab);
+          const railH = 0.55;
+          const railPanel = new THREE.Mesh(
+            new THREE.BoxGeometry(balW - 0.06, railH, 0.03),
+            new THREE.MeshPhysicalMaterial({ color: 0xc8e8f0, transparent: true, opacity: 0.35, roughness: 0.05, clearcoat: 0.5 }),
+          );
+          railPanel.position.set(cx, cy - sy / 2 + balH + railH / 2, cz + sz / 2 + balD - 0.015);
+          scene.add(railPanel);
+          const topRail = new THREE.Mesh(new THREE.BoxGeometry(balW, 0.03, 0.04), windowFrameMat!);
+          topRail.position.set(cx, cy - sy / 2 + balH + railH + 0.015, cz + sz / 2 + balD - 0.02);
+          scene.add(topRail);
+          for (const xOff of [-balW / 2 + 0.02, balW / 2 - 0.02]) {
+            const post = new THREE.Mesh(new THREE.BoxGeometry(0.03, railH + balH, 0.03), windowFrameMat!);
+            post.position.set(cx + xOff, cy - sy / 2 + (railH + balH) / 2, cz + sz / 2 + balD - 0.015);
+            scene.add(post);
+          }
         }
       }
     }
@@ -968,14 +911,18 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       return (raycaster.intersectObjects(apartmentMeshes)[0]?.object as Mesh) ?? null;
     };
 
+    const defaultColor = hasTextures ? COLORS.apartmentGrid : COLORS.apartment;
+    const defaultOpacity = hasTextures ? 0.08 : 1.0;
+
     const onPointerMove = (e: MouseEvent) => {
       const hit = getHit(e);
       if (hoveredMesh && hoveredMesh !== hit) {
         const m = hoveredMesh.material as MeshStandardMaterial;
         const isSel = hoveredMesh.userData.apartmentId === selectedIdRef.current;
-        m.color.setHex(isSel ? COLORS.highlighted : COLORS.apartment);
+        m.color.setHex(isSel ? COLORS.highlighted : defaultColor);
         m.emissive.setHex(isSel ? COLORS.highlightEmissive : 0x000000);
         m.emissiveIntensity = isSel ? 0.3 : 0;
+        m.opacity = isSel ? (hasTextures ? 0.6 : 1.0) : defaultOpacity;
         renderer.domElement.style.cursor = "default";
       }
       if (hit && hit !== hoveredMesh) {
@@ -984,6 +931,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
           m.color.setHex(COLORS.hovered);
           m.emissive.setHex(COLORS.hoverEmissive);
           m.emissiveIntensity = 0.25;
+          m.opacity = hasTextures ? 0.4 : 1.0;
         }
         renderer.domElement.style.cursor = "pointer";
       }
@@ -1035,7 +983,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     const animate = () => { controls.update(); composer.render(); animationId = requestAnimationFrame(animate); };
     animate();
 
-    stateRef.current = { renderer, controls, apartmentMeshes, envelopeMaterials, hoveredMesh, animationId, threeModule: THREE };
+    stateRef.current = { renderer, controls, apartmentMeshes, hoveredMesh, animationId, threeModule: THREE, isTextured: textures.length > 0 };
     onReady();
 
     return () => {
@@ -1051,11 +999,18 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     };
   }, [onReady]);
 
+  // Serialize texture state for dependency tracking
+  const textureKey = JSON.stringify(
+    facadeTextures.map((t) => ({ face: t.face, url: t.url, uv: t.uv }))
+  );
+
+  // Rebuild entire scene when sceneSpec or textures change
   useEffect(() => {
     let cleanup: (() => void) | undefined;
-    buildScene(sceneSpec).then((fn) => { cleanup = fn; });
+    buildScene(sceneSpec, facadeTextures).then((fn) => { cleanup = fn; });
     return () => { cleanup?.(); };
-  }, [sceneSpec, buildScene]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneSpec, textureKey, buildScene]);
 
   return <div ref={mountRef} style={{ width: "100%", height: 520 }} />;
 }
