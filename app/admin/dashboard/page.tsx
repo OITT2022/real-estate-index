@@ -22,7 +22,7 @@ export default async function AdminDashboardPage() {
           <h1 style={{ marginTop: 0, marginBottom: 20 }}>Dashboard</h1>
 
           {/* Stat Cards */}
-          <div className="grid grid-3" style={{ gap: 14, marginBottom: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14, marginBottom: 20 }}>
             <StatCard icon={<Building2 />} iconClass="stat-card-icon-teal" label="Properties" value={stats.total} desc="Total listings" />
             <StatCard icon={<Eye />} iconClass="stat-card-icon-blue" label="Published" value={stats.published} desc="Live on site" />
             <StatCard icon={<FolderKanban />} iconClass="stat-card-icon-amber" label="Projects" value={stats.projects} desc="Development projects" />
