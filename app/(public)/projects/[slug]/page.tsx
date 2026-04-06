@@ -5,11 +5,13 @@ import { PropertyCard } from "@/components/property/property-card";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { PropertyMap } from "@/components/map/property-map";
 import { InquiryForm } from "@/components/forms/inquiry-form";
+import { ProjectInquiryForm } from "@/components/forms/project-inquiry-form";
 import { VideoEmbed } from "@/components/property/video-embed";
 import { getProjectBySlug } from "@/lib/site-data";
 import { getMapSettings } from "@/lib/settings";
+import { Building2, Calendar, MapPin, Users, FileText } from "lucide-react";
 
-export const revalidate = 300; // ISR: revalidate every 5 minutes
+export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -30,24 +32,28 @@ export default async function ProjectDetailPage({ params }: Props) {
   if (!project) return notFound();
 
   const mapSettings = await getMapSettings();
+  const firstProperty = project.properties[0];
 
   return (
-    <main className="section">
+    <main style={{ paddingTop: 10 }}>
       <div className="container property-hero">
+        {/* ── Header ──────────────────────────────────────── */}
         <div className="property-head">
           <div>
-            <p className="eyebrow">{project.city}</p>
-            <h1>{project.title}</h1>
-            <p className="muted">{project.address}</p>
+            <p className="eyebrow" style={{ marginBottom: 2 }}>{project.city}</p>
+            <h1 style={{ margin: "0 0 2px", fontSize: "1.5rem" }}>{project.title}</h1>
+            <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{project.address}</p>
           </div>
-          <div className="card">
-            <p className="muted">Developer</p>
-            <div className="price-line" style={{ fontSize: "1rem" }}>{project.developerName}</div>
+          <div className="card" style={{ padding: "10px 18px" }}>
+            <p className="muted" style={{ margin: 0, fontSize: "0.78rem" }}>Developer</p>
+            <div className="price-line" style={{ fontSize: "0.92rem", margin: 0 }}>{project.developerName}</div>
           </div>
         </div>
 
+        {/* ── Gallery ─────────────────────────────────────── */}
         <PropertyGallery title={project.title} images={project.images} />
 
+        {/* ── Website Banner ──────────────────────────────── */}
         {project.websiteUrl && (
           <a href={project.websiteUrl} target="_blank" rel="noopener noreferrer" className="website-banner">
             <span className="website-banner-text">Visit Project Website</span>
@@ -55,31 +61,41 @@ export default async function ProjectDetailPage({ params }: Props) {
           </a>
         )}
 
-        <div className="details-grid">
-          <section className="card">
-            <p className="eyebrow">About this project</p>
-            <h2>Project Details</h2>
-            {project.shortDescription && <p>{project.shortDescription}</p>}
-            <p className="muted">{project.description}</p>
-
-            <div className="specs-grid">
-              {project.totalUnits && <div className="spec-item"><strong>Total Units</strong><br />{project.totalUnits}</div>}
-              {project.completionDate && <div className="spec-item"><strong>Completion</strong><br />{project.completionDate}</div>}
-              <div className="spec-item"><strong>Developer</strong><br />{project.developerName}</div>
-              <div className="spec-item"><strong>City</strong><br />{project.city}</div>
-              <div className="spec-item"><strong>Address</strong><br />{project.address}</div>
+        {/* ── Two-column layout ───────────────────────────── */}
+        <div className="sp-content-grid">
+          {/* LEFT COLUMN */}
+          <div className="sp-main">
+            {/* Detail & Features */}
+            <div className="sp-section-card">
+              <h2 className="sp-section-title">Project Details</h2>
+              <div className="sp-features-grid">
+                {project.totalUnits && (
+                  <div className="sp-feature"><span><Users size={18} className="sp-feat-icon" />Total Units</span><strong>{project.totalUnits}</strong></div>
+                )}
+                {project.completionDate && (
+                  <div className="sp-feature"><span><Calendar size={18} className="sp-feat-icon" />Completion</span><strong>{project.completionDate}</strong></div>
+                )}
+                <div className="sp-feature"><span><Building2 size={18} className="sp-feat-icon" />Developer</span><strong>{project.developerName}</strong></div>
+                <div className="sp-feature"><span><MapPin size={18} className="sp-feat-icon" />City</span><strong>{project.city}</strong></div>
+              </div>
             </div>
 
-            {project.videoUrl && (
-              <div style={{ marginTop: 20 }}>
-                <p className="eyebrow">Video tour</p>
-                <VideoEmbed url={project.videoUrl} />
-              </div>
-            )}
+            {/* Description */}
+            <div className="sp-section-card">
+              <h2 className="sp-section-title">Description</h2>
+              {project.shortDescription && (
+                <p style={{ fontWeight: 500, marginBottom: 12 }}>{project.shortDescription}</p>
+              )}
+              <p className="sp-description">{project.description}</p>
+            </div>
 
-            {project.documents.length > 0 && (
-              <div style={{ marginTop: 20 }}>
-                <p className="eyebrow">Downloads</p>
+            {/* Documents */}
+            <div className="sp-section-card">
+              <h2 className="sp-section-title">
+                <FileText size={18} style={{ display: "inline", verticalAlign: "middle", marginRight: 8 }} />
+                Documents &amp; Downloads
+              </h2>
+              {project.documents.length > 0 ? (
                 <div className="doc-grid">
                   {project.documents.map((doc) => (
                     <a
@@ -97,28 +113,73 @@ export default async function ProjectDetailPage({ params }: Props) {
                     </a>
                   ))}
                 </div>
+              ) : (
+                <div className="doc-grid">
+                  <div className="doc-card" style={{ opacity: 0.5, cursor: "default" }}>
+                    <span className="doc-icon">📄</span>
+                    <div>
+                      <strong>Floor Plans</strong>
+                      <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>Coming soon</p>
+                    </div>
+                  </div>
+                  <div className="doc-card" style={{ opacity: 0.5, cursor: "default" }}>
+                    <span className="doc-icon">📋</span>
+                    <div>
+                      <strong>Brochure</strong>
+                      <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>Coming soon</p>
+                    </div>
+                  </div>
+                  <div className="doc-card" style={{ opacity: 0.5, cursor: "default" }}>
+                    <span className="doc-icon">📊</span>
+                    <div>
+                      <strong>Price List</strong>
+                      <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>Coming soon</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Video */}
+            {project.videoUrl && (
+              <div className="sp-section-card">
+                <h2 className="sp-section-title">Project Video</h2>
+                <VideoEmbed url={project.videoUrl} />
               </div>
             )}
-          </section>
 
-          <div className="grid">
-            <PropertyMap
-              lat={project.latitude}
-              lng={project.longitude}
-              zoom={mapSettings.defaultZoom}
-              tileUrl={mapSettings.tileUrl}
-              tileAttribution={mapSettings.tileAttribution}
-              label={project.title}
-            />
-            {project.properties.length > 0 && (
-              <InquiryForm
-                propertyId={project.properties[0].id}
-                propertyTitle={project.title}
+            {/* Map */}
+            <div className="sp-section-card">
+              <h2 className="sp-section-title">Project Location</h2>
+              <PropertyMap
+                lat={project.latitude}
+                lng={project.longitude}
+                zoom={mapSettings.defaultZoom}
+                tileUrl={mapSettings.tileUrl}
+                tileAttribution={mapSettings.tileAttribution}
+                label={project.title}
+                address={`${project.address}, ${project.city}`}
+                bare
               />
-            )}
+            </div>
           </div>
+
+          {/* RIGHT SIDEBAR */}
+          <aside className="sp-sidebar">
+            {firstProperty ? (
+              <InquiryForm propertyId={firstProperty.id} propertyTitle={project.title} />
+            ) : (
+              <ProjectInquiryForm projectTitle={project.title} />
+            )}
+            <div className="sp-seller-card">
+              <h3 className="sp-seller-card-title">Developer</h3>
+              <div className="sp-seller-card-name">{project.developerName}</div>
+              <div className="sp-seller-card-row">{project.address}, {project.city}</div>
+            </div>
+          </aside>
         </div>
 
+        {/* ── Properties Table ────────────────────────────── */}
         <section style={{ marginTop: 12 }}>
           <p className="eyebrow">Available apartments</p>
           <h2 style={{ marginBottom: 16 }}>
@@ -143,7 +204,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                   <div>{property.bedrooms ?? "-"}</div>
                   <div>{property.areaSqm ? `${property.areaSqm} sqm` : "-"}</div>
                   <div>{property.floor != null ? property.floor : "-"}</div>
-                  <div className="price-line" style={{ fontSize: "1rem" }}>€{Number(property.price).toLocaleString()}</div>
+                  <div className="price-line" style={{ fontSize: "1rem" }}>&euro;{Number(property.price).toLocaleString()}</div>
                   <div>
                     <Link href={`/properties/${property.slug}`} className="button-primary" style={{ padding: "8px 14px", fontSize: "0.9rem" }}>
                       View
@@ -157,6 +218,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           )}
         </section>
       </div>
+      <div style={{ height: 72 }} />
     </main>
   );
 }

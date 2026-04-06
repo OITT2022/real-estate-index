@@ -9,17 +9,19 @@ export function PropertyCard({ property }: { property: PropertyWithImages }) {
   return (
     <article className="property-card">
       <Link href={`/properties/${property.slug}`}>
-        {primaryImage ? (
-          <img
-            src={primaryImage.url}
-            alt={primaryImage.altText ?? property.title}
-            className="property-card-image"
-          />
-        ) : (
-          <div className="property-image-placeholder" />
-        )}
+        <div className="property-card-image-wrap">
+          {primaryImage ? (
+            <img
+              src={primaryImage.url}
+              alt={primaryImage.altText ?? property.title}
+              className="property-card-image"
+            />
+          ) : (
+            <div className="property-image-placeholder" />
+          )}
+          <span className="property-card-badge">{property.city}</span>
+        </div>
         <div className="property-card-body">
-          <p className="eyebrow">{property.city}</p>
           <h3>{property.title}</h3>
           <p className="muted">{property.address}</p>
           <div className="property-meta-row">
@@ -27,7 +29,7 @@ export function PropertyCard({ property }: { property: PropertyWithImages }) {
             <span>{property.bathrooms ?? "-"} baths</span>
             <span>{property.areaSqm ?? "-"} sqm</span>
           </div>
-          <p className="price-line">€{Number(property.price).toLocaleString()}</p>
+          <p className="price-line">&euro;{Number(property.price).toLocaleString()}</p>
         </div>
       </Link>
     </article>

@@ -37,17 +37,28 @@ export async function getPropertyBySlug(slug: string) {
 }
 
 export async function getRelatedProperties(slug: string, city?: string) {
-  return db.property.findMany({
-    where: {
-      slug: { not: slug },
-      published: true,
-      status: "ACTIVE",
-      ...(city ? { city } : {}),
-    },
+  // First try same city
+  const sameCity = city
+    ? await db.property.findMany({
+        where: { slug: { not: slug }, published: true, status: "ACTIVE", city },
+        include: propertyInclude,
+        take: 3,
+        orderBy: { createdAt: "desc" },
+      })
+    : [];
+
+  if (sameCity.length >= 3) return sameCity;
+
+  // Fill remaining slots with other properties
+  const excludeSlugs = [slug, ...sameCity.map((p) => p.slug)];
+  const others = await db.property.findMany({
+    where: { slug: { notIn: excludeSlugs }, published: true, status: "ACTIVE" },
     include: propertyInclude,
-    take: 3,
+    take: 3 - sameCity.length,
     orderBy: { createdAt: "desc" },
   });
+
+  return [...sameCity, ...others];
 }
 
 export type SearchFilters = {

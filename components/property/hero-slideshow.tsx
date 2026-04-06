@@ -11,9 +11,10 @@ type HeroImage = {
 type Props = {
   images: HeroImage[];
   interval?: number;
+  children?: React.ReactNode;
 };
 
-export function HeroSlideshow({ images, interval = 5000 }: Props) {
+export function HeroSlideshow({ images, interval = 5000, children }: Props) {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -27,15 +28,19 @@ export function HeroSlideshow({ images, interval = 5000 }: Props) {
   if (images.length === 0) return null;
 
   return (
-    <div className="hero-slideshow">
+    <div className="hero-fullwidth">
       {images.map((img, i) => (
         <img
           key={img.id}
           src={img.url}
           alt={img.altText ?? ""}
-          className={`hero-slide ${i === current ? "hero-slide-active" : ""}`}
+          className={`hero-fullwidth-slide ${i === current ? "hero-fullwidth-slide-active" : ""}`}
         />
       ))}
+      <div className="hero-fullwidth-overlay" />
+      <div className="hero-fullwidth-content container">
+        {children}
+      </div>
       {images.length > 1 && (
         <div className="hero-dots">
           {images.map((img, i) => (

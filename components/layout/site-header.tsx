@@ -5,12 +5,14 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="container header-inner">
         <Link href="/" className="brand-mark">
-          Real Estate Index
+          <img src="/Favicon/android-chrome-192x192.png" alt="Arad Real Estate" className="brand-logo" />
+          Arad Real Estate
         </Link>
         <nav className="top-nav">
           <Link href="/">Home</Link>
           <Link href="/projects">Projects</Link>
-          <Link href="/admin/dashboard">Admin</Link>
+          <Link href="/about">About</Link>
+          <Link href="/contact">Contact</Link>
         </nav>
       </div>
     </header>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 type GalleryImage = {
   id: string;
   url: string;
@@ -19,9 +20,9 @@ export function PropertyGallery({ title, images }: Props) {
 
   if (images.length === 0) {
     return (
-      <section className="property-gallery-grid">
-        <div className="gallery-main">
-          <div className="gallery-label">No images available</div>
+      <section className="pg-hero">
+        <div className="pg-hero-main">
+          <div className="pg-hero-placeholder">No images available</div>
         </div>
       </section>
     );
@@ -32,46 +33,39 @@ export function PropertyGallery({ title, images }: Props) {
 
   return (
     <>
-      <section className="property-gallery-grid">
-        <div
-          className="gallery-main"
-          onClick={() => { setActiveIdx(0); setLightboxOpen(true); }}
-          style={{ cursor: "pointer" }}
-        >
-          <img
-            src={ordered[0].url}
-            alt={ordered[0].altText ?? title}
-            className="gallery-image"
-          />
-          {images.length > 1 && (
-            <span className="gallery-count">{images.length} photos</span>
+      {/* ── Full-width gallery hero ──────────────────────────── */}
+      <section className="pg-hero">
+        <div className="pg-hero-grid">
+          <div
+            className="pg-hero-main"
+            onClick={() => { setActiveIdx(0); setLightboxOpen(true); }}
+          >
+            <img src={ordered[0].url} alt={ordered[0].altText ?? title} />
+          </div>
+          {ordered.length > 1 && (
+            <div
+              className="pg-hero-side"
+              onClick={() => { setActiveIdx(1); setLightboxOpen(true); }}
+            >
+              <img src={ordered[1].url} alt={ordered[1].altText ?? title} />
+              {images.length > 2 && (
+                <button
+                  className="pg-view-photos"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveIdx(0);
+                    setLightboxOpen(true);
+                  }}
+                >
+                  View photos ({images.length})
+                </button>
+              )}
+            </div>
           )}
         </div>
-        {ordered.length > 1 && (
-          <div className="gallery-side-grid">
-            {ordered.slice(1, 5).map((img, i) => (
-              <div
-                key={img.id}
-                className="gallery-thumb"
-                onClick={() => { setActiveIdx(i + 1); setLightboxOpen(true); }}
-                style={{ cursor: "pointer" }}
-              >
-                <img
-                  src={img.url}
-                  alt={img.altText ?? title}
-                  className="gallery-image"
-                />
-                {i === 3 && ordered.length > 5 && (
-                  <div className="gallery-more-overlay">
-                    +{ordered.length - 5} more
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </section>
 
+      {/* ── Lightbox ─────────────────────────────────────────── */}
       {lightboxOpen && (
         <div className="lightbox-backdrop" onClick={() => setLightboxOpen(false)}>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
