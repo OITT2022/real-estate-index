@@ -32,29 +32,43 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="section">
-      <div className="container" style={{ maxWidth: 560 }}>
-        <div className="card">
-          <p className="eyebrow">Admin access</p>
-          <h1>Login</h1>
+    <div className="login-page">
+      <div className="login-container">
+        {/* Left — Illustration */}
+        <div className="login-illustration">
+          <img src="/login-illustration.png" alt="Admin panel illustration" />
+        </div>
 
-          {error && <p className="form-error">{error}</p>}
+        {/* Right — Form */}
+        <div className="login-form-side">
+          <div className="login-form-inner">
+            <div className="login-brand">
+              <img src="/Favicon/android-chrome-192x192.png" alt="Logo" className="login-logo" />
+              <span>Arad Real Estate</span>
+            </div>
 
-          <form className="admin-form" onSubmit={handleSubmit}>
-            <label>
-              <span>Email</span>
-              <input type="email" name="email" placeholder="admin@example.com" required />
-            </label>
-            <label>
-              <span>Password</span>
-              <input type="password" name="password" placeholder="••••••••" required />
-            </label>
-            <button className="button-primary" type="submit" disabled={loading}>
-              {loading ? "Signing in..." : "Login"}
-            </button>
-          </form>
+            <h1 className="login-title">Sign In</h1>
+            <p className="login-subtitle">Enter your email address and password to access admin panel.</p>
+
+            {error && <p className="form-error">{error}</p>}
+
+            <form className="login-form" onSubmit={handleSubmit}>
+              <label className="login-label">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="Enter your email" required className="login-input" />
+              </label>
+              <label className="login-label">
+                <span>Password</span>
+                <input type="password" name="password" placeholder="Enter your password" required className="login-input" />
+              </label>
+
+              <button className="login-submit" type="submit" disabled={loading}>
+                {loading ? "Signing in..." : "Sign In"}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

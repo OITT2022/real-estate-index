@@ -1213,6 +1213,133 @@ textarea.inquiry-input {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ADMIN LOGIN PAGE
+   ═══════════════════════════════════════════════════════════════ */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2f7;
+  padding: 24px;
+}
+.login-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(1000px, 100%);
+  background: white;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+.login-illustration {
+  background: #dce4f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.login-illustration img {
+  width: 100%;
+  max-width: 420px;
+  object-fit: contain;
+}
+.login-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+}
+.login-form-inner {
+  width: 100%;
+  max-width: 360px;
+}
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+.login-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+.login-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+.login-subtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 28px;
+  line-height: 1.5;
+}
+.login-form {
+  display: grid;
+  gap: 18px;
+}
+.login-label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.login-input {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 0.92rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.login-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.login-input::placeholder {
+  color: #94a3b8;
+}
+.login-submit {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-top: 4px;
+}
+.login-submit:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+.login-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .login-container { grid-template-columns: 1fr; }
+  .login-illustration { display: none; }
+  .login-form-side { padding: 36px 24px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    ADMIN (preserved as-is)
    ═══════════════════════════════════════════════════════════════ */
 .admin-shell {
