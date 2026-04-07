@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Home, Building2, FolderKanban,
-  MessageSquare, Map, Users, Key, Shield,
+  MessageSquare, CalendarDays, Map, Users, Key, Shield,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -18,6 +18,7 @@ export const ADMIN_PAGES: AdminPage[] = [
   { key: "properties", label: "Properties", path: "/admin/properties", icon: Building2, group: "listings" },
   { key: "projects", label: "Projects", path: "/admin/projects", icon: FolderKanban, group: "listings" },
   { key: "inquiries", label: "Inquiries", path: "/admin/inquiries", icon: MessageSquare, group: "crm" },
+  { key: "calendar", label: "Calendar Schedule", path: "/admin/calendar", icon: CalendarDays, group: "crm" },
   { key: "customers", label: "Customers", path: "/admin/customers", icon: Users, group: "crm" },
   { key: "maps", label: "Maps", path: "/admin/maps", icon: Map, group: "system" },
   { key: "api", label: "API Clients", path: "/admin/api", icon: Key, group: "system" },
