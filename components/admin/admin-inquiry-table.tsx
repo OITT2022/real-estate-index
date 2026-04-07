@@ -102,18 +102,14 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
               <option value="in-progress">In Progress</option>
               <option value="closed">Closed</option>
             </select>
-            {customers.length > 0 && (
-              <select value={customerFilter} onChange={(e) => setCustomerFilter(e.target.value)} className="at-filter-select">
-                <option value="">All Customers</option>
-                {customers.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            )}
-            {projects.length > 0 && (
-              <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)} className="at-filter-select">
-                <option value="">All Projects</option>
-                {projects.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-            )}
+            <select value={customerFilter} onChange={(e) => setCustomerFilter(e.target.value)} className="at-filter-select">
+              <option value="">All Customers</option>
+              {customers.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)} className="at-filter-select">
+              <option value="">All Projects</option>
+              {projects.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
             {hasFilters && <button type="button" onClick={clearFilters} className="at-filter-clear"><X size={14} /> Clear</button>}
           </div>
         </div>
