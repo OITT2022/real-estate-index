@@ -28,10 +28,15 @@ type SortKey = "name" | "email" | "property" | "status" | "date";
 export function AdminInquiryTable({ rows }: { rows: Row[] }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [customerFilter, setCustomerFilter] = useState("");
+  const [projectFilter, setProjectFilter] = useState("");
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-  const hasFilters = search || statusFilter;
+  const customers = useMemo(() => [...new Set(rows.map((r) => r.customerName).filter(Boolean) as string[])].sort(), [rows]);
+  const projects = useMemo(() => [...new Set(rows.map((r) => r.projectTitle).filter(Boolean) as string[])].sort(), [rows]);
+
+  const hasFilters = search || statusFilter || customerFilter || projectFilter;
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
@@ -40,9 +45,11 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
         if (!r.fullName.toLowerCase().includes(q) && !r.email.toLowerCase().includes(q) && !r.propertyTitle.toLowerCase().includes(q)) return false;
       }
       if (statusFilter && r.status !== statusFilter) return false;
+      if (customerFilter && r.customerName !== customerFilter) return false;
+      if (projectFilter && r.projectTitle !== projectFilter) return false;
       return true;
     });
-  }, [rows, search, statusFilter]);
+  }, [rows, search, statusFilter, customerFilter, projectFilter]);
 
   const sorted = useMemo(() => {
     if (!sortKey) return filtered;
@@ -63,7 +70,7 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
     if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
   }
-  function clearFilters() { setSearch(""); setStatusFilter(""); }
+  function clearFilters() { setSearch(""); setStatusFilter(""); setCustomerFilter(""); setProjectFilter(""); }
   function SortIcon({ col }: { col: SortKey }) {
     if (sortKey !== col) return null;
     return sortDir === "asc" ? <ChevronUp size={14} style={{ marginLeft: 2, opacity: 0.7 }} /> : <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.7 }} />;
@@ -95,6 +102,18 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
               <option value="in-progress">In Progress</option>
               <option value="closed">Closed</option>
             </select>
+            {customers.length > 0 && (
+              <select value={customerFilter} onChange={(e) => setCustomerFilter(e.target.value)} className="at-filter-select">
+                <option value="">All Customers</option>
+                {customers.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            )}
+            {projects.length > 0 && (
+              <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)} className="at-filter-select">
+                <option value="">All Projects</option>
+                {projects.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            )}
             {hasFilters && <button type="button" onClick={clearFilters} className="at-filter-clear"><X size={14} /> Clear</button>}
           </div>
         </div>
