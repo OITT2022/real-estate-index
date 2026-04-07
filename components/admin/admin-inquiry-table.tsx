@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { Search, SlidersHorizontal, ChevronUp, ChevronDown, X, MessageSquare, Eye } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, ChevronUp, ChevronDown, X, MessageSquare, Eye } from "lucide-react";
 
 type Row = {
   id: string;
@@ -111,6 +111,9 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
               {projects.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
             {hasFilters && <button type="button" onClick={clearFilters} className="at-filter-clear"><X size={14} /> Clear</button>}
+          </div>
+          <div className="at-toolbar-right">
+            <Link href="/admin/inquiries/new" className="at-btn-primary"><Plus size={16} /> Add Inquiry</Link>
           </div>
         </div>
       </div>

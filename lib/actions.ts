@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { deleteImage } from "@/lib/upload";
+import { z } from "zod";
 import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema, adminUserFormSchema, customerFormSchema } from "@/lib/validations";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
@@ -363,6 +364,37 @@ export async function removeProjectDocument(docId: string): Promise<ActionResult
 }
 
 // ── Inquiries ──────────────────────────────────────────────────
+
+export async function createAdminInquiry(data: unknown): Promise<ActionResult> {
+  const schema = z.object({
+    fullName: z.string().min(2),
+    email: z.string().email(),
+    phone: z.string().optional().or(z.literal("")),
+    message: z.string().min(5),
+    propertyId: z.string().min(1),
+    status: z.string().optional(),
+  });
+  const parsed = schema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  const property = await db.property.findUnique({ where: { id: parsed.data.propertyId }, select: { id: true, projectId: true } });
+  if (!property) return { success: false, error: "Property not found" };
+
+  await db.inquiry.create({
+    data: {
+      fullName: parsed.data.fullName,
+      email: parsed.data.email,
+      phone: parsed.data.phone || null,
+      message: parsed.data.message,
+      propertyId: property.id,
+      projectId: property.projectId,
+      status: parsed.data.status || "new",
+    },
+  });
+
+  revalidatePath("/admin/inquiries");
+  return { success: true };
+}
 
 export async function createInquiry(data: unknown): Promise<ActionResult> {
   const parsed = inquirySchema.safeParse(data);
