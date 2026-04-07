@@ -88,6 +88,8 @@ export function Project3DPreview({ sceneSpec, projectId, savedExrUrl }: Props) {
   };
 
   // Environment map upload handler (.exr / .hdr)
+  // Uses presigned S3 URL for large files (bypasses Amplify 5MB limit)
+  // Falls back to regular upload for local dev
   const handleExrUpload = async (file: File) => {
     const ext = file.name.toLowerCase().split(".").pop();
     if (ext !== "exr" && ext !== "hdr") {
@@ -97,20 +99,41 @@ export function Project3DPreview({ sceneSpec, projectId, savedExrUrl }: Props) {
     setExrUploading(true);
     setExrError(null);
     try {
-      const form = new FormData();
-      form.set("file", file);
-      form.set("projectId", projectId);
-      form.set("exrUpload", "1");
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: "Upload failed" }));
-        throw new Error(data.error || "Upload failed");
+      // Try presigned URL first (production S3)
+      const presignRes = await fetch("/api/upload/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, fileType: file.type, projectId }),
+      });
+
+      if (presignRes.ok) {
+        const { presignedUrl, finalUrl, fileName } = await presignRes.json();
+        // Upload directly to S3
+        const s3Res = await fetch(presignedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type || "application/octet-stream" },
+          body: file,
+        });
+        if (!s3Res.ok) throw new Error("S3 upload failed");
+        exrCache = { url: null, backgroundTex: null, envMap: null };
+        setExrUrl(finalUrl);
+        setExrFileName(fileName || file.name);
+      } else {
+        // Fallback: regular upload (local dev without S3)
+        const form = new FormData();
+        form.set("file", file);
+        form.set("projectId", projectId);
+        form.set("exrUpload", "1");
+        const res = await fetch("/api/upload", { method: "POST", body: form });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({ error: "Upload failed" }));
+          throw new Error(data.error || "Upload failed");
+        }
+        const data = await res.json();
+        exrCache = { url: null, backgroundTex: null, envMap: null };
+        setExrUrl(data.url);
+        setExrFileName(data.fileName || file.name);
       }
-      const data = await res.json();
-      // Clear the module-level cache so new EXR loads fresh
-      exrCache = { url: null, backgroundTex: null, envMap: null };
-      setExrUrl(data.url);
-      setExrFileName(data.fileName || file.name);
     } catch (err) {
       setExrError(err instanceof Error ? err.message : "Upload failed");
     } finally {
