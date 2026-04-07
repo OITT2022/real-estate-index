@@ -137,6 +137,7 @@ model Project {
   apiEnabled        Boolean        @default(false)
   metaTitle         String?
   metaDescription   String?
+  environmentExrUrl String?
   customerId        String?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt

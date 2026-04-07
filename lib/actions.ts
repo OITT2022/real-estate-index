@@ -349,6 +349,19 @@ export async function removeProjectImage(imageId: string): Promise<ActionResult>
   return { success: true };
 }
 
+// ── Project Environment EXR ───────────────────────────────────
+
+export async function clearProjectExr(projectId: string): Promise<ActionResult> {
+  const project = await db.project.findUnique({ where: { id: projectId }, select: { environmentExrUrl: true } });
+  if (!project) return { success: false, error: "Project not found" };
+  if (project.environmentExrUrl) {
+    await deleteImage(project.environmentExrUrl);
+  }
+  await db.project.update({ where: { id: projectId }, data: { environmentExrUrl: null } });
+  revalidatePath(`/admin/projects/${projectId}`);
+  return { success: true };
+}
+
 // ── Project Documents ─────────────────────────────────────────
 
 export async function removeProjectDocument(docId: string): Promise<ActionResult> {

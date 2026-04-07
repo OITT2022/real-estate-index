@@ -111,7 +111,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           {/* Step 4: 3D Preview */}
           <div style={{ display: "grid", gap: 20 }}>
             {sceneSpec ? (
-              <Project3DPreview sceneSpec={sceneSpec} projectId={project.id} />
+              <Project3DPreview sceneSpec={sceneSpec} projectId={project.id} savedExrUrl={project.environmentExrUrl ?? undefined} />
             ) : (
               <div className="card" style={{ textAlign: "center", padding: 40 }}>
                 <div style={{ fontSize: "2rem", marginBottom: 12, opacity: 0.3 }}>&#9632;&#9632;&#9632;</div>

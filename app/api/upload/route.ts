@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ALLOWED_DOC_TYPES = ["application/pdf", ...ALLOWED_IMAGE_TYPES];
+const MAX_EXR_SIZE = 100 * 1024 * 1024; // 100MB for EXR files
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -20,9 +21,27 @@ export async function POST(req: NextRequest) {
   const documentType = formData.get("documentType") as string | null;
   const heroImage = formData.get("heroImage") as string | null;
   const bankImage = formData.get("bankImage") as string | null;
+  const exrUpload = formData.get("exrUpload") as string | null;
 
-  if (!file || (!propertyId && !projectId && !heroImage && !bankImage)) {
+  if (!file || (!propertyId && !projectId && !heroImage && !bankImage && !exrUpload)) {
     return NextResponse.json({ error: "File and target required" }, { status: 400 });
+  }
+
+  // Environment map upload (.exr / .hdr) — larger size limit
+  if (exrUpload && projectId) {
+    const ext = file.name.toLowerCase().split(".").pop();
+    if (ext !== "exr" && ext !== "hdr") {
+      return NextResponse.json({ error: "Only .exr and .hdr files are allowed" }, { status: 400 });
+    }
+    if (file.size > MAX_EXR_SIZE) {
+      return NextResponse.json({ error: "Environment file must be under 100MB" }, { status: 400 });
+    }
+    const url = await uploadFile(file);
+    await db.project.update({
+      where: { id: projectId },
+      data: { environmentExrUrl: url },
+    });
+    return NextResponse.json({ url, fileName: file.name });
   }
 
   if (file.size > 20 * 1024 * 1024) {

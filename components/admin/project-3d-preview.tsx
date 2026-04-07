@@ -6,6 +6,7 @@ import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js
 import type { SceneSpec } from "@/lib/building-3d/generate-scene";
 import { craftFacades } from "@/lib/building-3d/craft-facade";
 import type { BuildingGeometry } from "@/lib/building-3d/craft-facade";
+import { clearProjectExr } from "@/lib/actions";
 
 type FaceName = "front" | "left" | "right" | "back";
 
@@ -20,6 +21,7 @@ interface FacadeTexture {
 interface Props {
   sceneSpec: SceneSpec;
   projectId: string;
+  savedExrUrl?: string;
 }
 
 const FACE_LABELS: { face: FaceName; label: string }[] = [
@@ -31,15 +33,23 @@ const FACE_LABELS: { face: FaceName; label: string }[] = [
 
 const DEFAULT_UV = { offsetX: 0, offsetY: 0, repeatX: 1, repeatY: 1, rotation: 0 };
 
-export function Project3DPreview({ sceneSpec, projectId }: Props) {
+export function Project3DPreview({ sceneSpec, projectId, savedExrUrl }: Props) {
   const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(null);
   const [viewerReady, setViewerReady] = useState(false);
-  const [sideTab, setSideTab] = useState<"unit" | "textures">("textures");
+  const [sideTab, setSideTab] = useState<"unit" | "textures" | "env">("textures");
 
   // Facade texture state
   const [facadeTextures, setFacadeTextures] = useState<FacadeTexture[]>([]);
   const [uploading, setUploading] = useState<FaceName | null>(null);
   const [expandedFace, setExpandedFace] = useState<FaceName | null>(null);
+
+  // Environment map state (.exr / .hdr)
+  const [exrUrl, setExrUrl] = useState<string | null>(savedExrUrl ?? null);
+  const [exrFileName, setExrFileName] = useState<string | null>(savedExrUrl ? savedExrUrl.split("/").pop() ?? null : null);
+  const [exrUploading, setExrUploading] = useState(false);
+  const [exrError, setExrError] = useState<string | null>(null);
+  const [envIntensity, setEnvIntensity] = useState(1.0);
+  const exrInputRef = useRef<HTMLInputElement>(null);
 
   // Craft pipeline state
   const [crafting, setCrafting] = useState(false);
@@ -77,6 +87,49 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
     }
   };
 
+  // Environment map upload handler (.exr / .hdr)
+  const handleExrUpload = async (file: File) => {
+    const ext = file.name.toLowerCase().split(".").pop();
+    if (ext !== "exr" && ext !== "hdr") {
+      setExrError("Only .exr and .hdr files are allowed");
+      return;
+    }
+    setExrUploading(true);
+    setExrError(null);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      form.set("projectId", projectId);
+      form.set("exrUpload", "1");
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Upload failed" }));
+        throw new Error(data.error || "Upload failed");
+      }
+      const data = await res.json();
+      // Clear the module-level cache so new EXR loads fresh
+      exrCache = { url: null, backgroundTex: null, envMap: null };
+      setExrUrl(data.url);
+      setExrFileName(data.fileName || file.name);
+    } catch (err) {
+      setExrError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setExrUploading(false);
+    }
+  };
+
+  const handleExrRemove = async () => {
+    setExrError(null);
+    const result = await clearProjectExr(projectId);
+    if (result.success) {
+      exrCache = { url: null, backgroundTex: null, envMap: null };
+      setExrUrl(null);
+      setExrFileName(null);
+    } else {
+      setExrError(result.error || "Failed to remove EXR");
+    }
+  };
+
   const selectedApartment = sceneSpec.apartments.find(
     (a) => a.meta.apartmentId === selectedApartmentId
   );
@@ -104,14 +157,13 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
     setCraftLog(["Starting Craft it! pipeline..."]);
 
     try {
-      // Use project facade images from sceneSpec + any manually uploaded ones
-      const imageInputs = sceneSpec.facades.map((f) => ({ face: f.face, url: f.image }));
-
-      // Merge with manually uploaded images (manual overrides project)
-      const manualByFace = new Map(facadeTextures.map((t) => [t.face, t]));
-      const mergedInputs = imageInputs
-        .filter((i) => !manualByFace.has(i.face))
-        .concat([...manualByFace.values()].map((t) => ({ face: t.face, url: t.url })));
+      // Use current local textures; only fall back to DB facades if nothing local exists
+      let mergedInputs: { face: FaceName; url: string }[];
+      if (facadeTextures.length > 0) {
+        mergedInputs = facadeTextures.map((t) => ({ face: t.face, url: t.url }));
+      } else {
+        mergedInputs = sceneSpec.facades.map((f) => ({ face: f.face, url: f.image }));
+      }
 
       const result = await craftFacades(mergedInputs, buildingGeometry);
       setCraftLog(result.log);
@@ -209,12 +261,12 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
           <button
             type="button"
             onClick={handleSave}
-            disabled={saving || facadeTextures.length === 0}
+            disabled={saving}
             style={{
               padding: "8px 16px", borderRadius: 6, border: "1px solid var(--line)",
-              background: facadeTextures.length === 0 ? "var(--bg-alt)" : "#2e7d32",
-              color: facadeTextures.length === 0 ? "var(--muted)" : "white",
-              fontSize: "0.8rem", cursor: facadeTextures.length === 0 ? "default" : "pointer", fontWeight: 600,
+              background: "#2e7d32",
+              color: "white",
+              fontSize: "0.8rem", cursor: saving ? "default" : "pointer", fontWeight: 600,
               opacity: saving ? 0.7 : 1,
             }}
           >
@@ -266,6 +318,8 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
             sceneSpec={sceneSpec}
             selectedApartmentId={selectedApartmentId}
             facadeTextures={facadeTextures}
+            exrUrl={exrUrl}
+            envIntensity={envIntensity}
             onSelectApartment={setSelectedApartmentId}
             onReady={() => setViewerReady(true)}
           />
@@ -275,19 +329,19 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
         <div style={{ borderLeft: "1px solid var(--line)", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
           {/* Tab switcher */}
           <div style={{ display: "flex", borderBottom: "1px solid var(--line)" }}>
-            {(["textures", "unit"] as const).map((tab) => (
+            {(["textures", "env", "unit"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setSideTab(tab)}
                 style={{
-                  flex: 1, padding: "10px", border: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600,
+                  flex: 1, padding: "10px", border: "none", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600,
                   background: sideTab === tab ? "var(--bg)" : "var(--bg-alt)",
                   borderBottom: sideTab === tab ? "2px solid var(--accent)" : "2px solid transparent",
                   color: sideTab === tab ? "var(--fg)" : "var(--muted)",
                 }}
               >
-                {tab === "textures" ? "Facade Textures" : "Unit Info"}
+                {tab === "textures" ? "Facades" : tab === "env" ? "Environment" : "Unit Info"}
               </button>
             ))}
           </div>
@@ -415,6 +469,107 @@ export function Project3DPreview({ sceneSpec, projectId }: Props) {
                 </p>
               </div>
             )}
+
+            {sideTab === "env" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
+                  Upload an HDR environment map (.exr or .hdr) for realistic lighting and background.
+                </div>
+
+                {/* Current environment display */}
+                {exrUrl && (
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "8px 10px", background: "#e8f5e9", borderRadius: 8, fontSize: "0.75rem",
+                  }}>
+                    <span style={{ color: "#2e7d32", fontWeight: 600, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {exrFileName || "Environment loaded"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleExrRemove}
+                      style={{
+                        padding: "2px 8px", borderRadius: 4, border: "1px solid #c62828",
+                        background: "white", color: "#c62828", fontSize: "0.65rem",
+                        cursor: "pointer", fontWeight: 600, flexShrink: 0,
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                {/* Upload button */}
+                <input
+                  ref={exrInputRef}
+                  type="file"
+                  accept=".exr,.hdr"
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleExrUpload(file);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => exrInputRef.current?.click()}
+                  disabled={exrUploading}
+                  style={{
+                    padding: "10px 16px", borderRadius: 8, border: "2px dashed var(--line)",
+                    background: "var(--bg-alt)", color: "var(--fg)",
+                    fontSize: "0.8rem", cursor: exrUploading ? "wait" : "pointer",
+                    fontWeight: 600, opacity: exrUploading ? 0.6 : 1,
+                    transition: "border-color 0.2s",
+                  }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.borderColor = "var(--accent)"; }}
+                  onMouseLeave={(e) => { (e.target as HTMLElement).style.borderColor = "var(--line)"; }}
+                >
+                  {exrUploading ? "Uploading..." : exrUrl ? "Replace Environment" : "Upload EXR / HDR"}
+                </button>
+
+                {/* Intensity slider — only when environment is loaded */}
+                {exrUrl && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.7rem" }}>
+                      <span style={{ color: "var(--muted)" }}>Intensity</span>
+                      <span style={{ fontWeight: 600 }}>{envIntensity.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="3"
+                      step="0.05"
+                      value={envIntensity}
+                      onChange={(e) => setEnvIntensity(parseFloat(e.target.value))}
+                      style={{ width: "100%", accentColor: "var(--accent)" }}
+                    />
+                  </div>
+                )}
+
+                {/* Error display */}
+                {exrError && (
+                  <div style={{
+                    padding: "6px 10px", fontSize: "0.7rem", fontWeight: 500,
+                    background: "#fce4ec", color: "#c62828", borderRadius: 6,
+                  }}>
+                    {exrError}
+                  </div>
+                )}
+
+                {/* Info */}
+                {!exrUrl && (
+                  <p style={{ fontSize: "0.65rem", color: "var(--muted)", margin: 0 }}>
+                    Accepted: .exr and .hdr files. Saved with the project automatically.
+                  </p>
+                )}
+                {exrUrl && (
+                  <p style={{ fontSize: "0.65rem", color: "var(--muted)", margin: 0 }}>
+                    Environment is saved with this project and loads automatically on reopen.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -489,6 +644,8 @@ interface ViewerProps {
   sceneSpec: SceneSpec;
   selectedApartmentId: string | null;
   facadeTextures: FacadeTexture[];
+  exrUrl: string | null;
+  envIntensity: number;
   onSelectApartment: (id: string) => void;
   onReady: () => void;
 }
@@ -515,11 +672,19 @@ const COLORS = {
   balcony: 0xccc4bc,
 };
 
-function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectApartment, onReady }: ViewerProps) {
+// Module-level EXR cache — survives scene rebuilds, loaded only once per URL
+let exrCache: {
+  url: string | null;
+  backgroundTex: import("three").Texture | null;
+  envMap: import("three").Texture | null;
+} = { url: null, backgroundTex: null, envMap: null };
+
+function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, exrUrl, envIntensity, onSelectApartment, onReady }: ViewerProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const stateRef = useRef<{
     renderer: WebGLRenderer;
     controls: OrbitControls;
+    scene: import("three").Scene;
     apartmentMeshes: Mesh[];
     hoveredMesh: Mesh | null;
     animationId: number;
@@ -529,6 +694,8 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
 
   const onSelectRef = useRef(onSelectApartment);
   onSelectRef.current = onSelectApartment;
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
   const selectedIdRef = useRef(selectedApartmentId);
   selectedIdRef.current = selectedApartmentId;
 
@@ -553,6 +720,14 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     }
   }, [selectedApartmentId]);
 
+  // Live environment intensity update (no scene rebuild)
+  useEffect(() => {
+    const state = stateRef.current;
+    if (!state) return;
+    state.scene.environmentIntensity = envIntensity;
+    state.scene.backgroundIntensity = envIntensity;
+  }, [envIntensity]);
+
   const buildScene = useCallback(async (spec: SceneSpec, textures: FacadeTexture[] = []) => {
     const container = mountRef.current;
     if (!container) return;
@@ -571,16 +746,18 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     const height = container.clientHeight || 500;
 
     const scene = new THREE.Scene();
+    const hasExr = !!exrUrl;
 
-    // Sky gradient background
-    scene.background = new THREE.Color(0xd4e8f7);
-    scene.fog = new THREE.Fog(0xd4e8f7, 80, 200);
+    if (!hasExr) {
+      scene.background = new THREE.Color(0xd4e8f7);
+      scene.fog = new THREE.Fog(0xd4e8f7, 80, 200);
+    }
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
+    const camera = new THREE.PerspectiveCamera(hasExr ? 40 : 45, width / height, 0.1, 2000);
     const { target, distance, yaw, pitch } = spec.camera;
     camera.position.set(
       target.x + distance * Math.sin(yaw) * Math.cos(pitch),
-      target.y + distance * Math.sin(pitch) + distance * 0.15,
+      target.y + distance * Math.sin(pitch) * (hasExr ? 0.6 : 1) + distance * (hasExr ? 0.08 : 0.15),
       target.z + distance * Math.cos(yaw) * Math.cos(pitch),
     );
 
@@ -590,33 +767,67 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = hasExr ? 1.0 : 1.2;
     container.innerHTML = "";
     container.appendChild(renderer.domElement);
 
-    // PMREM environment map from gradient for proper PBR reflections
-    const envCanvas = document.createElement("canvas");
-    envCanvas.width = 64;
-    envCanvas.height = 512;
-    const envCtx = envCanvas.getContext("2d")!;
-    const envGrad = envCtx.createLinearGradient(0, 0, 0, 512);
-    envGrad.addColorStop(0.0, "#3a6aaa");
-    envGrad.addColorStop(0.15, "#5b8fc9");
-    envGrad.addColorStop(0.35, "#87ceeb");
-    envGrad.addColorStop(0.55, "#b0d4ef");
-    envGrad.addColorStop(0.7, "#dce8f0");
-    envGrad.addColorStop(0.78, "#f0e8da");
-    envGrad.addColorStop(0.85, "#e8ddd0");
-    envGrad.addColorStop(1.0, "#c8beb4");
-    envCtx.fillStyle = envGrad;
-    envCtx.fillRect(0, 0, 64, 512);
-    const envTex = new THREE.CanvasTexture(envCanvas);
-    envTex.mapping = THREE.EquirectangularReflectionMapping;
-    envTex.colorSpace = THREE.SRGBColorSpace;
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmremGenerator.fromEquirectangular(envTex).texture;
-    pmremGenerator.dispose();
-    envTex.dispose();
+    // HDR environment from EXR/HDR — cached so scene rebuilds don't reload
+    if (hasExr) {
+      if (exrCache.backgroundTex && exrCache.envMap && exrCache.url === exrUrl) {
+        scene.environment = exrCache.envMap;
+        scene.background = exrCache.backgroundTex;
+      } else {
+        // Dispose old cached textures if URL changed
+        if (exrCache.backgroundTex) exrCache.backgroundTex.dispose();
+        if (exrCache.envMap) exrCache.envMap.dispose();
+
+        // Pick the right loader based on file extension
+        const isHdr = exrUrl!.toLowerCase().endsWith(".hdr");
+        const loader = isHdr
+          ? new (await import("three/examples/jsm/loaders/RGBELoader.js")).RGBELoader()
+          : new (await import("three/examples/jsm/loaders/EXRLoader.js")).EXRLoader();
+
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+        pmremGenerator.compileEquirectangularShader();
+        await new Promise<void>((resolve) => {
+          loader.load(exrUrl!, (hdrTex) => {
+            hdrTex.mapping = THREE.EquirectangularReflectionMapping;
+            exrCache.url = exrUrl;
+            exrCache.envMap = pmremGenerator.fromEquirectangular(hdrTex).texture;
+            exrCache.backgroundTex = hdrTex;
+            scene.environment = exrCache.envMap;
+            scene.background = exrCache.backgroundTex;
+            pmremGenerator.dispose();
+            resolve();
+          });
+        });
+      }
+      scene.environmentIntensity = envIntensity;
+      scene.backgroundIntensity = envIntensity;
+      scene.backgroundBlurriness = 0;
+      scene.backgroundRotation = new THREE.Euler(0, Math.PI * 0.75, 0);
+      scene.environmentRotation = new THREE.Euler(0, Math.PI * 0.75, 0);
+    } else {
+      // Fallback: canvas gradient for PBR reflections when no EXR
+      const envCanvas = document.createElement("canvas");
+      envCanvas.width = 64;
+      envCanvas.height = 512;
+      const envCtx = envCanvas.getContext("2d")!;
+      const envGrad = envCtx.createLinearGradient(0, 0, 0, 512);
+      envGrad.addColorStop(0.0, "#3a6aaa");
+      envGrad.addColorStop(0.35, "#87ceeb");
+      envGrad.addColorStop(0.7, "#dce8f0");
+      envGrad.addColorStop(1.0, "#c8beb4");
+      envCtx.fillStyle = envGrad;
+      envCtx.fillRect(0, 0, 64, 512);
+      const envTex = new THREE.CanvasTexture(envCanvas);
+      envTex.mapping = THREE.EquirectangularReflectionMapping;
+      envTex.colorSpace = THREE.SRGBColorSpace;
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmremGenerator.fromEquirectangular(envTex).texture;
+      pmremGenerator.dispose();
+      envTex.dispose();
+    }
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(target.x, target.y, target.z);
@@ -628,15 +839,13 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     controls.zoomToCursor = true;
     controls.update();
 
-    // --- Lighting (matched to sky sun position) ---
-    // Hemisphere: HSL-tuned sky blue above, warm earth bounce below
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.8);
-    hemiLight.color.setHSL(0.6, 0.6, 0.65);        // desaturated sky blue
-    hemiLight.groundColor.setHSL(0.095, 0.5, 0.7);  // warm sandy bounce
+    // --- Lighting (adjusted based on EXR presence) ---
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, hasExr ? 0.35 : 0.8);
+    hemiLight.color.setHSL(0.6, hasExr ? 0.4 : 0.6, hasExr ? 0.7 : 0.65);
+    hemiLight.groundColor.setHSL(0.095, hasExr ? 0.4 : 0.5, 0.65);
     scene.add(hemiLight);
-    // Main sun — position aligned with sky shader sun
-    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-    sun.color.setHSL(0.1, 0.6, 0.95);  // warm sunlight
+    const sun = new THREE.DirectionalLight(0xffffff, hasExr ? 0.9 : 1.2);
+    sun.color.setHSL(0.1, hasExr ? 0.5 : 0.6, hasExr ? 0.97 : 0.95);
     sun.position.set(20, 30, 25);
     sun.castShadow = true;
     sun.shadow.mapSize.set(4096, 4096);
@@ -650,8 +859,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     sun.shadow.normalBias = 0.02;
     sun.shadow.radius = 2;
     scene.add(sun);
-    // Fill light from opposite side
-    const fill = new THREE.DirectionalLight(0xc8d8e8, 0.25);
+    const fill = new THREE.DirectionalLight(0xc8d8e8, hasExr ? 0.15 : 0.25);
     fill.position.set(-15, 12, -10);
     scene.add(fill);
 
@@ -964,30 +1172,27 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       }
     }
 
-    // --- Ground layers ---
-    // Pavement around building
-    const maxEnv = spec.envelopes[0];
-    if (maxEnv) {
-      const pavW = maxEnv.size.x + 6;
-      const pavD = maxEnv.size.z + 6;
-      const pavement = new THREE.Mesh(
-        new THREE.PlaneGeometry(pavW, pavD),
-        new THREE.MeshStandardMaterial({ color: COLORS.pavement, roughness: 0.9 })
-      );
-      pavement.rotation.x = -Math.PI / 2;
-      pavement.position.set(maxEnv.position.x + maxEnv.size.x / 2, -0.005, maxEnv.position.z + maxEnv.size.z / 2);
-      pavement.receiveShadow = true;
-      scene.add(pavement);
-    }
-    // Grass ground
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(200, 200),
-      new THREE.MeshStandardMaterial({ color: COLORS.ground, roughness: 0.95 })
-    );
+    // --- Ground plane ---
+    const groundMat = hasExr
+      ? new THREE.ShadowMaterial({ opacity: 0.3 })
+      : new THREE.MeshStandardMaterial({ color: COLORS.ground, roughness: 0.95 });
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), groundMat);
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.01;
     ground.receiveShadow = true;
     scene.add(ground);
+    // Pavement ring around building (only without EXR)
+    if (!hasExr && spec.envelopes[0]) {
+      const maxEnv = spec.envelopes[0];
+      const pav = new THREE.Mesh(
+        new THREE.PlaneGeometry(maxEnv.size.x + 6, maxEnv.size.z + 6),
+        new THREE.MeshStandardMaterial({ color: COLORS.pavement, roughness: 0.9 }),
+      );
+      pav.rotation.x = -Math.PI / 2;
+      pav.position.set(maxEnv.position.x + maxEnv.size.x / 2, -0.005, maxEnv.position.z + maxEnv.size.z / 2);
+      pav.receiveShadow = true;
+      scene.add(pav);
+    }
 
     // Raycasting
     const raycaster = new THREE.Raycaster();
@@ -1074,8 +1279,8 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
     const animate = () => { controls.update(); composer.render(); animationId = requestAnimationFrame(animate); };
     animate();
 
-    stateRef.current = { renderer, controls, apartmentMeshes, hoveredMesh, animationId, threeModule: THREE, isTextured: textures.length > 0 };
-    onReady();
+    stateRef.current = { renderer, controls, scene, apartmentMeshes, hoveredMesh, animationId, threeModule: THREE, isTextured: textures.length > 0 };
+    onReadyRef.current();
 
     return () => {
       cancelAnimationFrame(animationId);
@@ -1088,7 +1293,7 @@ function ThreeViewer({ sceneSpec, selectedApartmentId, facadeTextures, onSelectA
       container.innerHTML = "";
       stateRef.current = null;
     };
-  }, [onReady]);
+  }, [exrUrl]);
 
   // Serialize texture state for dependency tracking
   const textureKey = JSON.stringify(
