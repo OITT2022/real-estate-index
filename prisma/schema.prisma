@@ -60,6 +60,11 @@ model Property {
   unitNumber        String?
   parking           Boolean         @default(false)
   balcony           Boolean         @default(false)
+  swimmingPool      Boolean         @default(false)
+  elevator          Boolean         @default(false)
+  fireplace         Boolean         @default(false)
+  coolingType       String?
+  heatingType       String?
   videoUrl          String?
   websiteUrl        String?
   sellerName        String
@@ -68,6 +73,7 @@ model Property {
   status            PropertyStatus  @default(DRAFT)
   published         Boolean         @default(false)
   featured          Boolean         @default(false)
+  sold              Boolean         @default(false)
   apiEnabled        Boolean         @default(false)
   metaTitle         String?
   metaDescription   String?

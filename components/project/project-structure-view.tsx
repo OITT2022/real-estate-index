@@ -12,6 +12,7 @@ type UnitProperty = {
   unitNumber: string | null;
   published: boolean;
   status: string;
+  sold: boolean;
 };
 
 type Unit = {
@@ -100,7 +101,9 @@ export function ProjectStructureView({ units }: Props) {
                     const floorUnits = floors.get(floorNum)!;
                     return floorUnits.map((unit, idx) => {
                       const p = unit.property;
-                      const isActive = p && p.published && p.status === "ACTIVE";
+                      const isSold = p?.sold === true;
+                      const isActive = p && p.published && p.status === "ACTIVE" && !isSold;
+                      const isVisible = isActive || isSold;
                       const showFloorLabel = idx === 0;
 
                       return (
@@ -110,31 +113,49 @@ export function ProjectStructureView({ units }: Props) {
                           style={{
                             gridTemplateColumns: "80px 2fr 1fr 1fr 1fr 80px",
                             padding: "12px 16px",
-                            opacity: isActive ? 1 : p ? 0.5 : 0.45,
+                            opacity: isVisible ? 1 : p ? 0.5 : 0.45,
+                            position: "relative",
+                            overflow: "hidden",
+                            ...(isSold ? { background: "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.015) 10px, rgba(0,0,0,0.015) 20px)" } : {}),
                           }}
                         >
                           <div style={{ fontWeight: showFloorLabel ? 600 : 400, color: showFloorLabel ? "var(--fg)" : "transparent" }}>
                             {showFloorLabel ? floorNum : floorNum}
                           </div>
-                          <div>
-                            <strong style={{ fontSize: "0.95rem" }}>
-                              {isActive ? p.title : `Apt ${unit.unitNumber}`}
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <strong style={{ fontSize: "0.95rem", ...(isSold ? { color: "var(--muted)" } : {}) }}>
+                              {isVisible && p ? p.title : `Apt ${unit.unitNumber}`}
                             </strong>
+                            {isSold && (
+                              <span style={{
+                                display: "inline-block",
+                                padding: "2px 10px",
+                                borderRadius: 4,
+                                background: "#dc2626",
+                                color: "#fff",
+                                fontSize: "0.72rem",
+                                fontWeight: 700,
+                                letterSpacing: "0.05em",
+                                textTransform: "uppercase",
+                              }}>
+                                Sold
+                              </span>
+                            )}
                             {!p && (
-                              <span className="muted" style={{ fontSize: "0.8rem", marginLeft: 8 }}>Not listed</span>
+                              <span className="muted" style={{ fontSize: "0.8rem" }}>Not listed</span>
                             )}
                           </div>
-                          <div>{isActive && p.bedrooms != null ? p.bedrooms : "-"}</div>
-                          <div>{isActive && p.areaSqm ? `${p.areaSqm} sqm` : "-"}</div>
+                          <div style={isSold ? { color: "var(--muted)" } : {}}>{isVisible && p && p.bedrooms != null ? p.bedrooms : "-"}</div>
+                          <div style={isSold ? { color: "var(--muted)" } : {}}>{isVisible && p && p.areaSqm ? `${p.areaSqm} sqm` : "-"}</div>
                           <div>
-                            {isActive ? (
-                              <span className="price-line" style={{ fontSize: "0.95rem" }}>
+                            {isVisible && p ? (
+                              <span className="price-line" style={{ fontSize: "0.95rem", ...(isSold ? { textDecoration: "line-through", color: "var(--muted)" } : {}) }}>
                                 &euro;{Number(p.price).toLocaleString()}
                               </span>
                             ) : "-"}
                           </div>
                           <div>
-                            {isActive ? (
+                            {isActive && p ? (
                               <Link
                                 href={`/properties/${p.slug}`}
                                 className="button-primary"

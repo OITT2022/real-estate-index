@@ -8,7 +8,7 @@ import { PropertyGallery } from "@/components/property/property-gallery";
 import { VideoEmbed } from "@/components/property/video-embed";
 import { getPropertyBySlug, getRelatedProperties } from "@/lib/site-data";
 import { getMapSettings } from "@/lib/settings";
-import { BedDouble, Bath, Ruler, Building2, Layers, Car, Fence, Home, CheckCircle2 } from "lucide-react";
+import { BedDouble, Bath, Ruler, Building2, Layers, Car, Fence, Home, CheckCircle2, Waves, ArrowUpDown, Flame, Snowflake, Heater } from "lucide-react";
 
 export const revalidate = 300;
 
@@ -112,8 +112,13 @@ export default async function PropertyPage({ params }: Props) {
                   {property.floor != null && <div className="sp-feature"><span><Layers size={18} className="sp-feat-icon" />Floor</span><strong>{property.floor}</strong></div>}
                   <div className="sp-feature"><span><Car size={18} className="sp-feat-icon" />Parking</span><strong>{property.parking ? "Yes" : "No"}</strong></div>
                   <div className="sp-feature"><span><Fence size={18} className="sp-feat-icon" />Balcony</span><strong>{property.balcony ? "Yes" : "No"}</strong></div>
+                  <div className="sp-feature"><span><Waves size={18} className="sp-feat-icon" />Swimming Pool</span><strong>{property.swimmingPool ? "Yes" : "No"}</strong></div>
+                  <div className="sp-feature"><span><ArrowUpDown size={18} className="sp-feat-icon" />Elevator</span><strong>{property.elevator ? "Yes" : "No"}</strong></div>
+                  <div className="sp-feature"><span><Flame size={18} className="sp-feat-icon" />Fireplace</span><strong>{property.fireplace ? "Yes" : "No"}</strong></div>
+                  {property.coolingType && <div className="sp-feature"><span><Snowflake size={18} className="sp-feat-icon" />Cooling</span><strong>{property.coolingType}</strong></div>}
+                  {property.heatingType && <div className="sp-feature"><span><Heater size={18} className="sp-feat-icon" />Heating</span><strong>{property.heatingType}</strong></div>}
                   {property.propertyType && <div className="sp-feature"><span><Home size={18} className="sp-feat-icon" />Type</span><strong>{property.propertyType}</strong></div>}
-                  <div className="sp-feature"><span><CheckCircle2 size={18} className="sp-feat-icon" />Status</span><strong>{property.status}</strong></div>
+                  <div className="sp-feature"><span><CheckCircle2 size={18} className="sp-feat-icon" />Status</span><strong>{property.sold ? "Sold" : property.status}</strong></div>
                 </div>
               </div>
 

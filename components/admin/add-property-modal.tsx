@@ -28,8 +28,12 @@ export function AddPropertyModal({ projectId, projectTitle }: Props) {
     defaultValues: {
       published: false,
       featured: false,
+      sold: false,
       parking: false,
       balcony: false,
+      swimmingPool: false,
+      elevator: false,
+      fireplace: false,
       currency: "EUR",
       projectId,
       latitude: 34.9056,
@@ -157,9 +161,16 @@ export function AddPropertyModal({ projectId, projectTitle }: Props) {
           <input type="hidden" {...register("longitude")} />
 
           <div className="checkbox-row">
-            <label><input type="checkbox" {...register("published")} /> Published</label>
             <label><input type="checkbox" {...register("parking")} /> Parking</label>
             <label><input type="checkbox" {...register("balcony")} /> Balcony</label>
+            <label><input type="checkbox" {...register("swimmingPool")} /> Swimming Pool</label>
+            <label><input type="checkbox" {...register("elevator")} /> Elevator</label>
+            <label><input type="checkbox" {...register("fireplace")} /> Fireplace</label>
+          </div>
+
+          <div className="checkbox-row">
+            <label><input type="checkbox" {...register("published")} /> Published</label>
+            <label><input type="checkbox" {...register("sold")} /> Sold</label>
           </div>
 
           <div className="admin-actions">

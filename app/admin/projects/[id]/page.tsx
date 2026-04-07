@@ -61,7 +61,14 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         <ProjectWizard>
           {/* Step 1: General Information */}
           <div style={{ display: "grid", gap: 20 }}>
-            <ProjectForm mode="edit" project={project} customers={customers} userScope={userScope} />
+            <ProjectForm mode="edit" project={{
+              ...project,
+              properties: undefined as any,
+              units: undefined as any,
+              images: undefined as any,
+              documents: undefined as any,
+              inquiries: undefined as any,
+            }} customers={customers} userScope={userScope} />
           </div>
 
           {/* Step 2: Media */}

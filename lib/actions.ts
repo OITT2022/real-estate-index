@@ -38,7 +38,7 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
   const sessionUser = await getSessionUser();
-  const { latitude, longitude, price, projectId, customerId, ...rest } = parsed.data;
+  const { latitude, longitude, price, projectId, customerId, sold, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
   // Resolve effective customerId: if project has a customer, inherit it; clear direct assignment
@@ -66,10 +66,11 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
       latitude,
       longitude,
       price,
+      sold,
       projectId: projectId || null,
       customerId: resolvedCustomerId,
       sellerName: rest.sellerName ?? "",
-      status: rest.published ? "ACTIVE" : "DRAFT",
+      status: sold ? "SOLD" : rest.published ? "ACTIVE" : "DRAFT",
     },
   });
 
@@ -94,7 +95,7 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
     }
   }
 
-  const { latitude, longitude, price, projectId, customerId, ...rest } = parsed.data;
+  const { latitude, longitude, price, projectId, customerId, sold, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
   // Resolve effective customerId
@@ -121,9 +122,10 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
       latitude,
       longitude,
       price,
+      sold,
       projectId: projectId || null,
       customerId: resolvedCustomerId,
-      status: rest.published ? "ACTIVE" : "DRAFT",
+      status: sold ? "SOLD" : rest.published ? "ACTIVE" : "DRAFT",
     },
   });
 

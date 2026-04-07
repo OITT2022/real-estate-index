@@ -171,7 +171,7 @@ export async function getProjectBySlug(slug: string) {
           property: {
             select: {
               id: true, title: true, slug: true, price: true, bedrooms: true,
-              areaSqm: true, floor: true, unitNumber: true, published: true, status: true,
+              areaSqm: true, floor: true, unitNumber: true, published: true, status: true, sold: true,
             },
           },
         },

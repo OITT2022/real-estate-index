@@ -69,6 +69,12 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
           unitNumber: property.unitNumber ?? "",
           parking: property.parking,
           balcony: property.balcony,
+          swimmingPool: property.swimmingPool,
+          elevator: property.elevator,
+          fireplace: property.fireplace,
+          coolingType: property.coolingType ?? "",
+          heatingType: property.heatingType ?? "",
+          sold: property.sold,
           videoUrl: property.videoUrl ?? "",
           websiteUrl: property.websiteUrl ?? "",
           sellerName: property.sellerName,
@@ -84,8 +90,12 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
       : {
           published: false,
           featured: false,
+          sold: false,
           parking: false,
           balcony: false,
+          swimmingPool: false,
+          elevator: false,
+          fireplace: false,
           currency: "EUR",
           customerId: userScope?.customerId ?? "",
         },
@@ -240,6 +250,25 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
         {errors.description && <span className="field-error">{errors.description.message}</span>}
       </label>
 
+      <div className="checkbox-row">
+        <label><input type="checkbox" {...register("parking")} /> Parking</label>
+        <label><input type="checkbox" {...register("balcony")} /> Balcony</label>
+        <label><input type="checkbox" {...register("swimmingPool")} /> Swimming Pool</label>
+        <label><input type="checkbox" {...register("elevator")} /> Elevator</label>
+        <label><input type="checkbox" {...register("fireplace")} /> Fireplace</label>
+      </div>
+
+      <div className="admin-form-grid">
+        <label>
+          <span>Cooling Type</span>
+          <input {...register("coolingType")} placeholder="Central A/C, Split unit, etc." />
+        </label>
+        <label>
+          <span>Heating Type</span>
+          <input {...register("heatingType")} placeholder="Central, Radiator, Underfloor, etc." />
+        </label>
+      </div>
+
       <label>
         <span>Video URL</span>
         <input {...register("videoUrl")} placeholder="https://example.com/video" />
@@ -335,8 +364,7 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
       <div className="checkbox-row">
         <label><input type="checkbox" {...register("published")} /> Published</label>
         <label><input type="checkbox" {...register("featured")} /> Featured</label>
-        <label><input type="checkbox" {...register("parking")} /> Parking</label>
-        <label><input type="checkbox" {...register("balcony")} /> Balcony</label>
+        <label><input type="checkbox" {...register("sold")} /> Sold</label>
       </div>
 
       <div className="admin-actions">
