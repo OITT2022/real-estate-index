@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getAllProjects, getCustomerById } from "@/lib/site-data";
 import { AdminProjectTable } from "@/components/admin/admin-project-table";
 import { checkPageAccess } from "@/lib/check-access";
@@ -21,28 +20,25 @@ export default async function AdminProjectsPage({
   const rows = projects.map((p) => ({
     id: p.id,
     title: p.title,
+    slug: p.slug,
     city: p.city,
     developerName: p.developerName,
     customerName: p.customer?.companyName ?? null,
     units: p._count.properties,
     published: p.published,
-    imageUrl: p.images.find((img) => img.isPrimary)?.url ?? p.images[0]?.url ?? null,
+    status: p.status,
+    imageUrl: p.images.find((img: any) => img.isPrimary)?.url ?? p.images[0]?.url ?? null,
     apiEnabled: p.apiEnabled,
   }));
 
   return (
     <section className="admin-content">
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 16 }}>
-          <div>
-            <h1>{filterCustomer ? `Projects for ${filterCustomer.companyName}` : "Projects"}</h1>
-            <p className="muted">{projects.length} total projects</p>
-            {filterCustomer && (
-              <Link href="/admin/projects" style={{ fontSize: "0.85rem", color: "var(--accent)" }}>Show all projects</Link>
-            )}
-          </div>
-          <Link href={customerId ? `/admin/projects/new?customerId=${customerId}` : "/admin/projects/new"} className="button-primary">Add project</Link>
-        </div>
-        <AdminProjectTable rows={rows} />
-      </section>
+      <AdminProjectTable
+        rows={rows}
+        addUrl={customerId ? `/admin/projects/new?customerId=${customerId}` : "/admin/projects/new"}
+        filterCustomerName={filterCustomer?.companyName ?? null}
+        showAllUrl={filterCustomer ? "/admin/projects" : null}
+      />
+    </section>
   );
 }

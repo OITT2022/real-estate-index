@@ -1,5 +1,5 @@
-import { AdminInquiryTable } from "@/components/admin/admin-inquiry-table";
 import { db } from "@/lib/db";
+import { AdminInquiryTable } from "@/components/admin/admin-inquiry-table";
 import { checkPageAccess } from "@/lib/check-access";
 import { getSessionUser, propertyCustomerScope } from "@/lib/scope";
 
@@ -30,6 +30,7 @@ export default async function AdminInquiriesPage() {
     id: inq.id,
     fullName: inq.fullName,
     email: inq.email,
+    phone: inq.phone ?? null,
     propertyTitle: inq.property.title,
     projectTitle: inq.project?.title ?? null,
     customerName:
@@ -43,9 +44,7 @@ export default async function AdminInquiriesPage() {
 
   return (
     <section className="admin-content">
-        <h1>Inquiries</h1>
-        <p className="muted">{inquiries.length} total inquiries</p>
-        <AdminInquiryTable rows={rows} />
-      </section>
+      <AdminInquiryTable rows={rows} />
+    </section>
   );
 }

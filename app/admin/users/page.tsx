@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getAllAdminUsers } from "@/lib/site-data";
 import { AdminUserTable } from "@/components/admin/admin-user-table";
 import { checkPageAccess } from "@/lib/check-access";
@@ -21,14 +20,7 @@ export default async function AdminUsersPage() {
 
   return (
     <section className="admin-content">
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 16 }}>
-          <div>
-            <h1>User Management</h1>
-            <p className="muted">{users.length} admin users</p>
-          </div>
-          <Link href="/admin/users/new" className="button-primary">Add user</Link>
-        </div>
-        <AdminUserTable rows={rows} />
-      </section>
+      <AdminUserTable rows={rows} />
+    </section>
   );
 }
