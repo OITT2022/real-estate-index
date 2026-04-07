@@ -99,11 +99,14 @@ export function Project3DPreview({ sceneSpec, projectId, savedExrUrl }: Props) {
     setExrUploading(true);
     setExrError(null);
     try {
+      // Use application/octet-stream consistently — browsers don't know .hdr/.exr MIME types
+      const contentType = "application/octet-stream";
+
       // Try presigned URL first (production S3)
       const presignRes = await fetch("/api/upload/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, fileType: file.type, projectId }),
+        body: JSON.stringify({ fileName: file.name, fileType: contentType, projectId }),
       });
 
       if (presignRes.ok) {
@@ -111,10 +114,13 @@ export function Project3DPreview({ sceneSpec, projectId, savedExrUrl }: Props) {
         // Upload directly to S3
         const s3Res = await fetch(presignedUrl, {
           method: "PUT",
-          headers: { "Content-Type": file.type || "application/octet-stream" },
+          headers: { "Content-Type": contentType },
           body: file,
         });
-        if (!s3Res.ok) throw new Error("S3 upload failed");
+        if (!s3Res.ok) {
+          const errText = await s3Res.text().catch(() => "");
+          throw new Error(`S3 upload failed (${s3Res.status}): ${errText.slice(0, 200)}`);
+        }
         exrCache = { url: null, backgroundTex: null, envMap: null };
         setExrUrl(finalUrl);
         setExrFileName(fileName || file.name);

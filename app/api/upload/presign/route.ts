@@ -17,9 +17,8 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { fileName, fileType, projectId } = body as {
+  const { fileName, projectId } = body as {
     fileName?: string;
-    fileType?: string;
     projectId?: string;
   };
 
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
-    ContentType: fileType || "application/octet-stream",
+    ContentType: "application/octet-stream",
   });
 
   const presignedUrl = await getSignedUrl(client, command, { expiresIn: 300 });
