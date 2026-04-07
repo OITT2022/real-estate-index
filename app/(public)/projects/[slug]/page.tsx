@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PropertyCard } from "@/components/property/property-card";
 import { PropertyGallery } from "@/components/property/property-gallery";
 import { PropertyMap } from "@/components/map/property-map";
 import { InquiryForm } from "@/components/forms/inquiry-form";
@@ -9,6 +8,7 @@ import { ProjectInquiryForm } from "@/components/forms/project-inquiry-form";
 import { VideoEmbed } from "@/components/property/video-embed";
 import { getProjectBySlug } from "@/lib/site-data";
 import { getMapSettings } from "@/lib/settings";
+import { ProjectStructureView } from "@/components/project/project-structure-view";
 import { Building2, Calendar, MapPin, Users, FileText } from "lucide-react";
 
 export const revalidate = 300;
@@ -186,7 +186,9 @@ export default async function ProjectDetailPage({ params }: Props) {
             {project.properties.length} {project.properties.length === 1 ? "Property" : "Properties"} in this project
           </h2>
 
-          {project.properties.length > 0 ? (
+          {project.units.length > 0 ? (
+            <ProjectStructureView units={project.units} />
+          ) : project.properties.length > 0 ? (
             <div className="card">
               <div className="st-row st-header muted" style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr 1fr 70px" }}>
                 <div>Name</div>

@@ -166,6 +166,17 @@ export async function getProjectBySlug(slug: string) {
         include: { images: { orderBy: { sortOrder: "asc" } } },
         orderBy: { price: "asc" },
       },
+      units: {
+        include: {
+          property: {
+            select: {
+              id: true, title: true, slug: true, price: true, bedrooms: true,
+              areaSqm: true, floor: true, unitNumber: true, published: true, status: true,
+            },
+          },
+        },
+        orderBy: [{ building: "asc" }, { entrance: "asc" }, { floor: "desc" }, { unitNumber: "asc" }],
+      },
     },
   });
 }
