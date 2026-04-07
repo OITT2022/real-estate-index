@@ -61,14 +61,17 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         <ProjectWizard>
           {/* Step 1: General Information */}
           <div style={{ display: "grid", gap: 20 }}>
-            <ProjectForm mode="edit" project={{
-              ...project,
-              properties: undefined as any,
-              units: undefined as any,
-              images: undefined as any,
-              documents: undefined as any,
-              inquiries: undefined as any,
-            }} customers={customers} userScope={userScope} />
+            <ProjectForm mode="edit" project={JSON.parse(JSON.stringify({
+              id: project.id, title: project.title, slug: project.slug,
+              shortDescription: project.shortDescription, description: project.description,
+              city: project.city, address: project.address, latitude: project.latitude,
+              longitude: project.longitude, developerName: project.developerName,
+              completionDate: project.completionDate, totalUnits: project.totalUnits,
+              videoUrl: project.videoUrl, websiteUrl: project.websiteUrl,
+              status: project.status, published: project.published, featured: project.featured,
+              apiEnabled: project.apiEnabled, metaTitle: project.metaTitle,
+              metaDescription: project.metaDescription, customerId: project.customerId,
+            }))} customers={customers} userScope={userScope} />
           </div>
 
           {/* Step 2: Media */}
