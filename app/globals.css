@@ -1776,9 +1776,7 @@ body:has(.admin-layout) { background: #f8f9fb; }
   margin-top: 12px;
 }
 .crm-timeline-item {
-  display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 12px;
+  display: block;
   padding: 12px 0;
   border-left: 2px solid var(--line);
   margin-left: 9px;
@@ -1805,6 +1803,7 @@ body:has(.admin-layout) { background: #f8f9fb; }
 }
 .crm-timeline-content {
   min-width: 0;
+  word-break: break-word;
 }
 
 .tile-layer-grid {

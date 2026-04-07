@@ -144,7 +144,7 @@ export function InquiryCrm({ inquiry }: Props) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.2fr)", gap: 20 }}>
         {/* Left: Actions */}
         <div style={{ display: "grid", gap: 16 }}>
           {/* Add Note */}
