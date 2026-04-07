@@ -27,12 +27,12 @@ export default async function AdminApiPage() {
 
   return (
     <section className="admin-content">
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 16 }}>
+        <div className="at-page-header">
           <div>
-            <h1>API Clients</h1>
-            <p className="muted">{clients.length} registered clients</p>
+            <h1 className="at-page-title">API Clients</h1>
+            <p className="at-page-subtitle">{clients.length} registered clients</p>
           </div>
-          <Link href="/admin/api/new" className="button-primary">Add client</Link>
+          <Link href="/admin/api/new" className="at-btn-primary">Add Client</Link>
         </div>
 
         <div className="card" style={{ marginBottom: 20, padding: 16 }}>

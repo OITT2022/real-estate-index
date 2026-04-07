@@ -10,8 +10,12 @@ export default async function AdminMapsPage() {
 
   return (
     <section className="admin-content">
-        <h1>Map Settings</h1>
-        <p className="muted">Configure the look and feel of property maps across the site.</p>
+        <div className="at-page-header">
+          <div>
+            <h1 className="at-page-title">Map Settings</h1>
+            <p className="at-page-subtitle">Configure the look and feel of property maps across the site</p>
+          </div>
+        </div>
         <MapSettingsForm
           currentLayer={settings.tileLayerKey}
           defaultZoom={settings.defaultZoom}

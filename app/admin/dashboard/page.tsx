@@ -16,7 +16,12 @@ export default async function AdminDashboardPage() {
 
   return (
     <section className="admin-content">
-          <h1 style={{ marginTop: 0, marginBottom: 20 }}>Dashboard</h1>
+          <div className="at-page-header">
+            <div>
+              <h1 className="at-page-title">Dashboard</h1>
+              <p className="at-page-subtitle">Overview of your real estate platform</p>
+            </div>
+          </div>
 
           {/* Stat Cards */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14, marginBottom: 20 }}>

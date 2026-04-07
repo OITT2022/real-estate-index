@@ -81,9 +81,11 @@ export default async function CalendarSchedulePage() {
 
   return (
     <section className="admin-content">
-      <div style={{ marginBottom: 20 }}>
-        <h1>Calendar Schedule</h1>
-        <p className="muted">{events.length} scheduled appointments</p>
+      <div className="at-page-header">
+        <div>
+          <h1 className="at-page-title">Calendar Schedule</h1>
+          <p className="at-page-subtitle">{events.length} scheduled appointments</p>
+        </div>
       </div>
       <CalendarView
         events={events}

@@ -10,15 +10,13 @@ export default async function AdminHomepagePage() {
 
   return (
     <section className="admin-content">
-        <h1>Home Page</h1>
-        <p className="muted">
-          Manage the hero image on the right side of the homepage.
-          Upload multiple images and toggle which ones are active.
-          If multiple images are active, they will rotate as a slideshow.
-        </p>
-        <div style={{ marginTop: 20 }}>
-          <HeroImageManager images={images} />
+        <div className="at-page-header">
+          <div>
+            <h1 className="at-page-title">Home Page</h1>
+            <p className="at-page-subtitle">Manage hero images and slideshow on the homepage</p>
+          </div>
         </div>
+        <HeroImageManager images={images} />
       </section>
   );
 }
