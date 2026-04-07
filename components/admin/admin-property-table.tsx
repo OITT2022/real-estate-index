@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { PropertyActions } from "@/components/admin/property-actions";
 import { PublishToggle } from "@/components/admin/publish-toggle";
 import { ApiToggle } from "@/components/admin/api-toggle";
-import { Search, SlidersHorizontal, Plus, ChevronUp, ChevronDown, X, Building2, Eye } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, ChevronUp, ChevronDown, X, Building2, Eye, LayoutGrid, List, BedDouble, Ruler, MapPin } from "lucide-react";
 
 type Row = {
   id: string;
@@ -39,6 +39,7 @@ export function AdminPropertyTable({ rows, addUrl, filterCustomerName, showAllUr
   const [statusFilter, setStatusFilter] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
@@ -119,12 +120,9 @@ export function AdminPropertyTable({ rows, addUrl, filterCustomerName, showAllUr
             )}
           </p>
         </div>
-        <Link href={addUrl} className="at-btn-primary">
-          <Plus size={16} /> Add Property
-        </Link>
       </div>
 
-      {/* ── Search & Filters Card ─────────────────────── */}
+      {/* ── Toolbar Card: Search + Filters + View Toggle + Add ── */}
       <div className="at-filter-card">
         <div className="at-filter-row">
           <div className="at-search-box">
@@ -169,26 +167,37 @@ export function AdminPropertyTable({ rows, addUrl, filterCustomerName, showAllUr
               </button>
             )}
           </div>
+
+          {/* View toggle + Add button */}
+          <div className="at-toolbar-right">
+            <div className="at-view-toggle">
+              <button
+                type="button"
+                className={`at-view-btn ${viewMode === "list" ? "at-view-btn-active" : ""}`}
+                onClick={() => setViewMode("list")}
+                title="List view"
+              >
+                <List size={16} />
+              </button>
+              <button
+                type="button"
+                className={`at-view-btn ${viewMode === "grid" ? "at-view-btn-active" : ""}`}
+                onClick={() => setViewMode("grid")}
+                title="Grid view"
+              >
+                <LayoutGrid size={16} />
+              </button>
+            </div>
+            <Link href={addUrl} className="at-btn-primary">
+              <Plus size={16} /> Add Property
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* ── Table Card ────────────────────────────────── */}
-      <div className="at-table-card">
-        {/* Header */}
-        <div className="at-table-head" style={{ gridTemplateColumns: gridCols }}>
-          <div></div>
-          <div className="at-th" onClick={() => toggleSort("title")}>Property <SortIcon col="title" /></div>
-          <div className="at-th" onClick={() => toggleSort("city")}>City <SortIcon col="city" /></div>
-          <div className="at-th" onClick={() => toggleSort("price")}>Price <SortIcon col="price" /></div>
-          <div className="at-th" onClick={() => toggleSort("project")}>Project <SortIcon col="project" /></div>
-          <div className="at-th" onClick={() => toggleSort("customer")}>Customer <SortIcon col="customer" /></div>
-          <div className="at-th" onClick={() => toggleSort("status")}>Status <SortIcon col="status" /></div>
-          <div className="at-th">API</div>
-          <div className="at-th">Actions</div>
-        </div>
-
-        {/* Empty State */}
-        {sorted.length === 0 && (
+      {/* ── Empty State (shared) ─────────────────────── */}
+      {sorted.length === 0 && (
+        <div className="at-table-card">
           <div className="at-empty">
             <Building2 size={40} strokeWidth={1} />
             <p className="at-empty-title">
@@ -205,77 +214,123 @@ export function AdminPropertyTable({ rows, addUrl, filterCustomerName, showAllUr
               </button>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Rows */}
-        {sorted.map((r) => (
-          <div key={r.id} className="at-table-row" style={{ gridTemplateColumns: gridCols }}>
-            {/* Thumbnail */}
-            <div>
-              {r.imageUrl
-                ? <img src={r.imageUrl} alt="" className="at-thumb" />
-                : <div className="at-thumb at-thumb-empty"><Building2 size={18} strokeWidth={1.5} /></div>
-              }
-            </div>
-
-            {/* Title */}
-            <div className="at-cell-title">
-              <span className="at-title">{r.title}</span>
-              {r.propertyType && <span className="at-subtitle">{r.propertyType}</span>}
-            </div>
-
-            {/* City */}
-            <div className="at-cell">{r.city}</div>
-
-            {/* Price */}
-            <div className="at-cell at-price">&euro;{r.price.toLocaleString()}</div>
-
-            {/* Project */}
-            <div className="at-cell">
-              {r.projectTitle
-                ? <span className="at-tag">{r.projectTitle}</span>
-                : <span className="at-muted">—</span>
-              }
-            </div>
-
-            {/* Customer */}
-            <div className="at-cell">
-              {r.customerName
-                ? <span>{r.customerName}</span>
-                : <span className="at-muted">—</span>
-              }
-            </div>
-
-            {/* Status */}
-            <div className="at-cell">
-              <PublishToggle type="property" id={r.id} published={r.published} />
-            </div>
-
-            {/* API */}
-            <div className="at-cell">
-              <ApiToggle type="property" id={r.id} enabled={r.apiEnabled} />
-            </div>
-
-            {/* Actions */}
-            <div className="at-cell at-actions">
-              <Link href={`/properties/${r.slug}`} className="icon-btn" title="View" target="_blank">
-                <Eye size={15} />
-              </Link>
-              <Link href={`/admin/properties/${r.id}`} className="icon-btn" title="Edit">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </Link>
-              <PropertyActions propertyId={r.id} published={r.published} />
-            </div>
+      {/* ── List View ─────────────────────────────────── */}
+      {sorted.length > 0 && viewMode === "list" && (
+        <div className="at-table-card">
+          <div className="at-table-head" style={{ gridTemplateColumns: gridCols }}>
+            <div></div>
+            <div className="at-th" onClick={() => toggleSort("title")}>Property <SortIcon col="title" /></div>
+            <div className="at-th" onClick={() => toggleSort("city")}>City <SortIcon col="city" /></div>
+            <div className="at-th" onClick={() => toggleSort("price")}>Price <SortIcon col="price" /></div>
+            <div className="at-th" onClick={() => toggleSort("project")}>Project <SortIcon col="project" /></div>
+            <div className="at-th" onClick={() => toggleSort("customer")}>Customer <SortIcon col="customer" /></div>
+            <div className="at-th" onClick={() => toggleSort("status")}>Status <SortIcon col="status" /></div>
+            <div className="at-th">API</div>
+            <div className="at-th">Actions</div>
           </div>
-        ))}
 
-        {/* Footer */}
-        {sorted.length > 0 && (
+          {sorted.map((r) => (
+            <div key={r.id} className="at-table-row" style={{ gridTemplateColumns: gridCols }}>
+              <div>
+                {r.imageUrl
+                  ? <img src={r.imageUrl} alt="" className="at-thumb" />
+                  : <div className="at-thumb at-thumb-empty"><Building2 size={18} strokeWidth={1.5} /></div>
+                }
+              </div>
+              <div className="at-cell-title">
+                <span className="at-title">{r.title}</span>
+                {r.propertyType && <span className="at-subtitle">{r.propertyType}</span>}
+              </div>
+              <div className="at-cell">{r.city}</div>
+              <div className="at-cell at-price">&euro;{r.price.toLocaleString()}</div>
+              <div className="at-cell">
+                {r.projectTitle ? <span className="at-tag">{r.projectTitle}</span> : <span className="at-muted">—</span>}
+              </div>
+              <div className="at-cell">
+                {r.customerName ? <span>{r.customerName}</span> : <span className="at-muted">—</span>}
+              </div>
+              <div className="at-cell"><PublishToggle type="property" id={r.id} published={r.published} /></div>
+              <div className="at-cell"><ApiToggle type="property" id={r.id} enabled={r.apiEnabled} /></div>
+              <div className="at-cell at-actions">
+                <Link href={`/properties/${r.slug}`} className="icon-btn" title="View" target="_blank"><Eye size={15} /></Link>
+                <Link href={`/admin/properties/${r.id}`} className="icon-btn" title="Edit">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </Link>
+                <PropertyActions propertyId={r.id} published={r.published} />
+              </div>
+            </div>
+          ))}
+
           <div className="at-table-footer">
             <span>Showing <strong>{sorted.length}</strong> of <strong>{rows.length}</strong> properties</span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* ── Grid / Card View ──────────────────────────── */}
+      {sorted.length > 0 && viewMode === "grid" && (
+        <>
+          <div className="at-card-grid">
+            {sorted.map((r) => (
+              <div key={r.id} className="at-property-card">
+                {/* Image */}
+                <div className="at-pcard-img-wrap">
+                  {r.imageUrl
+                    ? <img src={r.imageUrl} alt={r.title} className="at-pcard-img" />
+                    : <div className="at-pcard-img at-pcard-img-empty"><Building2 size={32} strokeWidth={1} /></div>
+                  }
+                  <div className="at-pcard-badges">
+                    <PublishToggle type="property" id={r.id} published={r.published} />
+                    {r.sold && <span className="at-pcard-sold">Sold</span>}
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className="at-pcard-body">
+                  <div className="at-pcard-price">&euro;{r.price.toLocaleString()}</div>
+                  <h3 className="at-pcard-title">{r.title}</h3>
+                  <p className="at-pcard-location"><MapPin size={13} /> {r.city}</p>
+
+                  <div className="at-pcard-specs">
+                    {r.bedrooms != null && (
+                      <span className="at-pcard-spec"><BedDouble size={14} /> {r.bedrooms} Bed{r.bedrooms !== 1 ? "s" : ""}</span>
+                    )}
+                    {r.areaSqm != null && (
+                      <span className="at-pcard-spec"><Ruler size={14} /> {r.areaSqm} sqm</span>
+                    )}
+                    {r.propertyType && (
+                      <span className="at-pcard-spec">{r.propertyType}</span>
+                    )}
+                  </div>
+
+                  {r.projectTitle && (
+                    <div style={{ marginTop: 8 }}>
+                      <span className="at-tag">{r.projectTitle}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="at-pcard-footer">
+                  <Link href={`/properties/${r.slug}`} className="icon-btn" title="View" target="_blank"><Eye size={15} /></Link>
+                  <Link href={`/admin/properties/${r.id}`} className="icon-btn" title="Edit">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </Link>
+                  <PropertyActions propertyId={r.id} published={r.published} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="at-table-card" style={{ marginTop: 16 }}>
+            <div className="at-table-footer">
+              <span>Showing <strong>{sorted.length}</strong> of <strong>{rows.length}</strong> properties</span>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
