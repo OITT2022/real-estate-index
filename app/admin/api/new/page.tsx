@@ -12,13 +12,14 @@ export default async function NewApiClientPage() {
   ]);
 
   return (
-    <main className="section">
-      <div className="container" style={{ maxWidth: 800 }}>
-        <p className="eyebrow">Admin</p>
-        <h1>Create API Client</h1>
-        <p className="muted">Configure which data this client can access. A token will be generated after saving.</p>
-        <ApiClientForm mode="create" customers={customers} scopeCounts={scopeCounts} />
+    <section className="admin-content">
+      <div className="at-page-header">
+        <div>
+          <h1 className="at-page-title">Create API Client</h1>
+          <p className="at-page-subtitle">Configure data access. A token will be generated after saving.</p>
+        </div>
       </div>
-    </main>
+      <ApiClientForm mode="create" customers={customers} scopeCounts={scopeCounts} />
+    </section>
   );
 }

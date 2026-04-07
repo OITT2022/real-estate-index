@@ -9,12 +9,14 @@ export default async function NewUserPage() {
   const customers = await getAllCustomersForSelect();
 
   return (
-    <main className="section">
-      <div className="container">
-        <p className="eyebrow">Admin</p>
-        <h1>Create User</h1>
-        <AdminUserForm mode="create" customers={customers} />
+    <section className="admin-content">
+      <div className="at-page-header">
+        <div>
+          <h1 className="at-page-title">Create User</h1>
+          <p className="at-page-subtitle">Add a new admin user</p>
+        </div>
       </div>
-    </main>
+      <AdminUserForm mode="create" customers={customers} />
+    </section>
   );
 }

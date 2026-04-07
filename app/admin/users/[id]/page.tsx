@@ -16,12 +16,14 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   if (!user) return notFound();
 
   return (
-    <main className="section">
-      <div className="container">
-        <p className="eyebrow">Admin</p>
-        <h1>Edit User</h1>
-        <AdminUserForm mode="edit" user={user} customers={customers} />
+    <section className="admin-content">
+      <div className="at-page-header">
+        <div>
+          <h1 className="at-page-title">Edit User</h1>
+          <p className="at-page-subtitle">{user.name || user.email}</p>
+        </div>
       </div>
-    </main>
+      <AdminUserForm mode="edit" user={user} customers={customers} />
+    </section>
   );
 }

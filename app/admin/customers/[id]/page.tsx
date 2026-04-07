@@ -28,12 +28,14 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
   ]);
 
   return (
-    <main className="section">
-      <div className="container" style={{ display: "grid", gap: 24 }}>
+    <section className="admin-content">
+      <div className="at-page-header">
         <div>
-          <p className="eyebrow">Admin</p>
-          <h1>Edit Customer</h1>
+          <h1 className="at-page-title">Edit Customer</h1>
+          <p className="at-page-subtitle">{customer.companyName}</p>
         </div>
+      </div>
+      <div style={{ display: "grid", gap: 20 }}>
 
         <div className="card" style={{ display: "grid", gap: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -92,6 +94,6 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
 
         <CustomerForm mode="edit" customer={customer} />
       </div>
-    </main>
+    </section>
   );
 }

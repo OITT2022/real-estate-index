@@ -51,12 +51,13 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   }));
 
   return (
-    <main className="section">
-      <div className="container">
-        <div style={{ marginBottom: 20 }}>
-          <p className="eyebrow">Admin</p>
-          <h1>Edit Project — {project.title}</h1>
+    <section className="admin-content">
+      <div className="at-page-header">
+        <div>
+          <h1 className="at-page-title">Edit Project</h1>
+          <p className="at-page-subtitle">{project.title}</p>
         </div>
+      </div>
 
         <ProjectWizard>
           {/* Step 1: General Information */}
@@ -154,7 +155,6 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
             </div>
           </div>
         </ProjectWizard>
-      </div>
-    </main>
+    </section>
   );
 }

@@ -15,13 +15,14 @@ export default async function NewPropertyPage() {
   ]);
 
   return (
-    <main className="section">
-      <div className="container">
-        <p className="eyebrow">Admin</p>
-        <h1>Create property</h1>
-        <p className="muted">Fill in the details and save. You will be redirected to upload images.</p>
-        <CreatePropertyFlow projects={projects} customers={customers} userScope={userScope} />
+    <section className="admin-content">
+      <div className="at-page-header">
+        <div>
+          <h1 className="at-page-title">Create Property</h1>
+          <p className="at-page-subtitle">Fill in the details and save. You can upload images after creation.</p>
+        </div>
       </div>
-    </main>
+      <CreatePropertyFlow projects={projects} customers={customers} userScope={userScope} />
+    </section>
   );
 }

@@ -23,12 +23,10 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
 
   if (!property) return notFound();
 
-  // Load project units if property belongs to a project
   const projectUnits = property.projectId
     ? await getProjectUnitsForSelect(property.projectId)
     : [];
 
-  // Find which unit this property is linked to
   const linkedUnit = await db.projectUnit.findFirst({
     where: { propertyId: property.id },
     select: { id: true },
@@ -41,12 +39,14 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
   }));
 
   return (
-    <main className="section">
-      <div className="container" style={{ display: "grid", gap: 24 }}>
+    <section className="admin-content">
+      <div className="at-page-header">
         <div>
-          <p className="eyebrow">Admin</p>
-          <h1>Edit property</h1>
+          <h1 className="at-page-title">Edit Property</h1>
+          <p className="at-page-subtitle">{property.title}</p>
         </div>
+      </div>
+      <div style={{ display: "grid", gap: 20 }}>
         <ImageManager propertyId={property.id} images={property.images} />
         <ImageBankPicker bankImages={bankImagesSimple} targetType="property" targetId={property.id} />
         <PropertyForm
@@ -59,6 +59,6 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
           linkedUnitId={linkedUnit?.id ?? null}
         />
       </div>
-    </main>
+    </section>
   );
 }
