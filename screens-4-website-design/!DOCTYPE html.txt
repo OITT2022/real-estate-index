@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="zxx">
+
+<body class="blue-skin">
+    <div id="root">
+        <div id="main-wrapper">
+            <div class="header  header-light head-shadow">
+                <div class="container">
+                    <nav id="navigation " class="navigation navigation-landscape">
+                        <div class="nav-header" style="line-height: 0;"><a class="nav-brand text-logo" href="https://resido-shreethemes.vercel.app/" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/logo.1d96876acb9e2ccab8dd63a9a1670cde.svg" alt="">
+                                <h5 class="fs-3 fw-bold ms-1 my-0">Resido</h5>
+                            </a>
+                            <div class="nav-toggle"></div>
+                            <div class="mobile_nav">
+                                <ul>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/users.755ea88f55a4148da590d90a4fa0c051.svg" alt=""></a></li>
+                                    <li><a class="text-primary" href="https://resido-shreethemes.vercel.app/submit-property" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/add.9ad7bda4c5480644cc58599a4036929b.svg" alt=""></a></li>
+                                    <li><a class="text-primary" href="https://resido-shreethemes.vercel.app/" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/bar.674b1f83bc8ec0ea60aefcbc95e52798.svg" alt=""></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="nav-menus-wrapper  " style="transition-property: left;"><span class="nav-menus-wrapper-close-button">✕</span>
+                            <ul class="nav-menu">
+                                <li class="active "><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Home<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg></a>
+                                    <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                        <li><a class="active" href="https://resido-shreethemes.vercel.app/" data-discover="true">Home Layout 1</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-2" data-discover="true">Home Layout 2</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-3" data-discover="true">Home Layout 3</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-4" data-discover="true">Home Layout 4</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-5" data-discover="true">Home Layout 5</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-6" data-discover="true">Home Layout 6</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-7" data-discover="true">Home Layout 7</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-8" data-discover="true">Home Layout 8</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-9" data-discover="true">Home Layout 9</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-10" data-discover="true">Home Layout 10</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/home-11" data-discover="true">Home Layout 11</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/video" data-discover="true">Video Home</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/map" data-discover="true">Map Home Layout</a></li>
+                                    </ul>
+                                </li>
+                                <li class="  "><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Listings<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg></a>
+                                    <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                        <li class=""><a href="https://resido-shreethemes.vercel.app/" data-discover="true">List Layout<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg></a>
+                                            <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/list-layout-one" data-discover="true">List Layout Simple</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/list-layout-two" data-discover="true">List Layout Modern</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/list-layout-three" data-discover="true">List Layout Advance</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/list-layout-with-map" data-discover="true">With Map</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/list-layout-full" data-discover="true">Full Width</a></li>
+                                            </ul>
+                                        </li>
+                                        <li class=""><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Grid Layout<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg></a>
+                                            <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/grid-layout-with-sidebar" data-discover="true">With Sidebar</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/classical-layout-with-sidebar" data-discover="true">Classical With Sidebar</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/grid-layout-with-map" data-discover="true">With Map</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/grid" data-discover="true">Full Width</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/classical-property" data-discover="true">Classical Full Width</a></li>
+                                            </ul>
+                                        </li>
+                                        <li class=""><a href="https://resido-shreethemes.vercel.app/" data-discover="true">With Map Property<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg></a>
+                                            <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/list-layout-with-map" data-discover="true">List With Map</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/grid-layout-with-map" data-discover="true">Grid With Map</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/classical-layout-with-map" data-discover="true">Classical With Map</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/place-search" data-discover="true">Place Search</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/half-map" data-discover="true">Half Map Search</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/half-map-2" data-discover="true">Half Map Search 02</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class=" "><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Features<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg></a>
+                                    <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                        <li class=""><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Single Property<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg></a>
+                                            <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Single Property 1</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/single-property-2" data-discover="true">Single Property 2</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/single-property-3" data-discover="true">Single Property 3</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/single-property-4" data-discover="true">Single Property 4</a></li>
+                                            </ul>
+                                        </li>
+                                        <li class=""><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Agents<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg></a>
+                                            <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/agents" data-discover="true">Agents List</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/agent-page" data-discover="true">Agent Page</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/add-agent" data-discover="true">Add Agent</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/edit-agent" data-discover="true">Edit Agent</a></li>
+                                            </ul>
+                                        </li>
+                                        <li class=""><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Agencies<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg></a>
+                                            <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/agencies" data-discover="true">Agencies List</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/agency-page" data-discover="true">Agency Page</a></li>
+                                            </ul>
+                                        </li>
+                                        <li class=""><a href="https://resido-shreethemes.vercel.app/" data-discover="true">My Account<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg></a>
+                                            <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/dashboard" data-discover="true">User Dashboard</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/create-account" data-discover="true">Create Account</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/payment" data-discover="true">Payment Confirmation</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/checkout" data-discover="true">Checkout</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/my-profile" data-discover="true">My Profile</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/my-property" data-discover="true">Property List</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/bookmark-list" data-discover="true">Bookmarked Listings</a></li>
+                                                <li><a class="" href="https://resido-shreethemes.vercel.app/change-password" data-discover="true">Change Password</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/compare-property" data-discover="true">Compare Property</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/submit-property" data-discover="true">Submit Property</a></li>
+                                    </ul>
+                                </li>
+                                <li class=" "><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Pages<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="submenu-indicator" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg></a>
+                                    <ul class="nav-dropdown nav-submenu" style="display: none; pointer-events: none;">
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/about-us" data-discover="true">About Us</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/blog" data-discover="true">Blogs Page</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/blog-detail" data-discover="true">Blog Detail</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/component" data-discover="true">Shortcodes</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/pricing" data-discover="true">Pricing</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/faq" data-discover="true">Faq</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/404" data-discover="true">Error Page</a></li>
+                                        <li><a class="" href="https://resido-shreethemes.vercel.app/contact" data-discover="true">Contacts</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <ul class="nav-menu nav-menu-social align-to-right d-none d-lg-inline-flex">
+                                <li><a data-bs-toggle="modal" data-bs-target="#login" class="fw-medium text-muted-2" href="https://resido-shreethemes.vercel.app/" data-discover="true"><span class="svg-icon svg-icon-2hx me-1"><svg width="22" height="22" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path opacity="0.3" d="M16.5 9C16.5 13.125 13.125 16.5 9 16.5C4.875 16.5 1.5 13.125 1.5 9C1.5 4.875 4.875 1.5 9 1.5C13.125 1.5 16.5 4.875 16.5 9Z" fill="currentColor"></path>
+                                                <path d="M9 16.5C10.95 16.5 12.75 15.75 14.025 14.55C13.425 12.675 11.4 11.25 9 11.25C6.6 11.25 4.57499 12.675 3.97499 14.55C5.24999 15.75 7.05 16.5 9 16.5Z" fill="currentColor"></path>
+                                                <rect x="7" y="6" width="4" height="4" rx="2" fill="currentColor"></rect>
+                                            </svg></span>SignUp or SignIn</a></li>
+                                <li class="add-listing"><a class="bg-primary" href="https://resido-shreethemes.vercel.app/submit-property" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/login.da7efbc81c448094a5c70757cad42a2e.svg" alt="" class="me-1">Post Property</a></li>
+                                <li><a class="text-primary" href="https://resido-shreethemes.vercel.app/" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="24" height="24" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <rect y="6" width="16" height="3" rx="1.5" fill="currentColor"></rect>
+                                                <rect opacity="0.3" y="12" width="8" height="3" rx="1.5" fill="currentColor"></rect>
+                                                <rect opacity="0.3" width="12" height="3" rx="1.5" fill="currentColor"></rect>
+                                            </svg></span></a></li>
+                            </ul>
+                        </div>
+                        <div class="nav-overlay-panel" style="background-color: rgba(0, 0, 0, 0.5); display: none;"></div>
+                    </nav>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="offcanvas offcanvas-end  " style="">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Compare &amp; Selected Property</h5><a href="https://resido-shreethemes.vercel.app/" data-discover="true"><span class="svg-icon text-primary svg-icon-2hx"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="10" fill="currentColor"></rect>
+                                <rect x="7" y="15.3137" width="12" height="2" rx="1" transform="rotate(-45 7 15.3137)" fill="currentColor"></rect>
+                                <rect x="8.41422" y="7" width="12" height="2" rx="1" transform="rotate(45 8.41422 7)" fill="currentColor"></rect>
+                            </svg></span></a>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="nav nav-pills sider_tab mb-3" id="pills-tab" role="tablist">
+                        <li class="nav-item"><button class="nav-link active">Compare Property</button></li>
+                        <li class="nav-item"><button class="nav-link ">Saved Property</button></li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent">
+                        <div class="tab-pane fade show active">
+                            <div class="sidebar_featured_property">
+                                <div class="sides_list_property p-2">
+                                    <div class="sides_list_property_thumb"><img src="https://resido-shreethemes.vercel.app/static/media/p-1.bd676b6eac51cb256996.jpg" class="img-fluid" alt=""></div>
+                                    <div class="sides_list_property_detail">
+                                        <h4><a href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Loss vengel New Apartment</a></h4><span class="text-muted-2"><i class="fa-solid fa-location-dot"></i>Sans Fransico</span>
+                                        <div class="lists_property_price">
+                                            <div class="lists_property_types">
+                                                <div class="property_types_vlix sale">For Sale</div>
+                                            </div>
+                                            <div class="lists_property_price_value">
+                                                <h4 class="text-primary">$4,240</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sides_list_property p-2">
+                                    <div class="sides_list_property_thumb"><img src="https://resido-shreethemes.vercel.app/static/media/p-2.868458e19dc4bdddf69c.jpg" class="img-fluid" alt=""></div>
+                                    <div class="sides_list_property_detail">
+                                        <h4><a href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Montreal Quriqe Apartment</a></h4><span class="text-muted-2"><i class="fa-solid fa-location-dot"></i>Liverpool, London</span>
+                                        <div class="lists_property_price">
+                                            <div class="lists_property_types">
+                                                <div class="property_types_vlix">For Rent</div>
+                                            </div>
+                                            <div class="lists_property_price_value">
+                                                <h4 class="text-primary">$7,380</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sides_list_property p-2">
+                                    <div class="sides_list_property_thumb"><img src="https://resido-shreethemes.vercel.app/static/media/p-3.c59de8733c4a5bd6e8e3.jpg" class="img-fluid" alt=""></div>
+                                    <div class="sides_list_property_detail">
+                                        <h4><a href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Curmic Studio For Office</a></h4><span class="text-muted-2"><i class="fa-solid fa-location-dot"></i>Montreal, Canada</span>
+                                        <div class="lists_property_price">
+                                            <div class="lists_property_types">
+                                                <div class="property_types_vlix buy">For Buy</div>
+                                            </div>
+                                            <div class="lists_property_price_value">
+                                                <h4 class="text-primary">$8,730</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sides_list_property p-2">
+                                    <div class="sides_list_property_thumb"><img src="https://resido-shreethemes.vercel.app/static/media/p-4.13de83f704124f7e0aac.jpg" class="img-fluid" alt=""></div>
+                                    <div class="sides_list_property_detail">
+                                        <h4><a href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Montreal Quebec City</a></h4><span class="text-muted-2"><i class="fa-solid fa-location-dot"></i>Sreek View, New York</span>
+                                        <div class="lists_property_price">
+                                            <div class="lists_property_types">
+                                                <div class="property_types_vlix">For Rent</div>
+                                            </div>
+                                            <div class="lists_property_price_value">
+                                                <h4 class="text-primary">$6,240</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="input-group"><a class="btn btn-light-primary fw-medium full-width" href="https://resido-shreethemes.vercel.app/compare-property" data-discover="true">View &amp; Compare</a></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade ">
+                            <div class="sidebar_featured_property">
+                                <div class="sides_list_property p-2">
+                                    <div class="sides_list_property_thumb"><img src="https://resido-shreethemes.vercel.app/static/media/p-5.19fb08d86a872b5e47e2.jpg" class="img-fluid" alt=""></div>
+                                    <div class="sides_list_property_detail">
+                                        <h4><a href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Loss vengel New Apartment</a></h4><span class="text-muted-2"><i class="fa-solid fa-location-dot"></i>Sans Fransico</span>
+                                        <div class="lists_property_price">
+                                            <div class="lists_property_types">
+                                                <div class="property_types_vlix sale">For Sale</div>
+                                            </div>
+                                            <div class="lists_property_price_value">
+                                                <h4 class="text-primary">$4,240</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sides_list_property p-2">
+                                    <div class="sides_list_property_thumb"><img src="https://resido-shreethemes.vercel.app/static/media/p-6.d10ac77df638cc48cbc7.jpg" class="img-fluid" alt=""></div>
+                                    <div class="sides_list_property_detail">
+                                        <h4><a href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Montreal Quriqe Apartment</a></h4><span class="text-muted-2"><i class="fa-solid fa-location-dot"></i>Liverpool, London</span>
+                                        <div class="lists_property_price">
+                                            <div class="lists_property_types">
+                                                <div class="property_types_vlix">For Rent</div>
+                                            </div>
+                                            <div class="lists_property_price_value">
+                                                <h4 class="text-primary">$7,380</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sides_list_property p-2">
+                                    <div class="sides_list_property_thumb"><img src="https://resido-shreethemes.vercel.app/static/media/p-7.780019f2636a1625ff40.jpg" class="img-fluid" alt=""></div>
+                                    <div class="sides_list_property_detail">
+                                        <h4><a href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Curmic Studio For Office</a></h4><span class="text-muted-2"><i class="fa-solid fa-location-dot"></i>Montreal, Canada</span>
+                                        <div class="lists_property_price">
+                                            <div class="lists_property_types">
+                                                <div class="property_types_vlix buy">For Buy</div>
+                                            </div>
+                                            <div class="lists_property_price_value">
+                                                <h4 class="text-primary">$8,730</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sides_list_property p-2">
+                                    <div class="sides_list_property_thumb"><img src="https://resido-shreethemes.vercel.app/static/media/p-8.2bec661cac8f5545bd0a.jpg" class="img-fluid" alt=""></div>
+                                    <div class="sides_list_property_detail">
+                                        <h4><a href="https://resido-shreethemes.vercel.app/single-property-1" data-discover="true">Montreal Quebec City</a></h4><span class="text-muted-2"><i class="fa-solid fa-location-dot"></i>Sreek View, New York</span>
+                                        <div class="lists_property_price">
+                                            <div class="lists_property_types">
+                                                <div class="property_types_vlix">For Rent</div>
+                                            </div>
+                                            <div class="lists_property_price_value">
+                                                <h4 class="text-primary">$6,240</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="input-group"><a class="btn btn-light-primary fw-medium full-width" href="https://resido-shreethemes.vercel.app/" data-discover="true">View &amp; Compare</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="image-cover hero-banner" style="background-image: url(&quot;/static/media/bg-1.3d44c0f627bab7c04c49.jpg&quot;); background-repeat: no-repeat;">
+                <div class="container">
+                    <div class="hero-search-wrap">
+                        <div class="hero-search">
+                            <h1>Find accessible homes to rent</h1>
+                        </div>
+                        <div class="hero-search-content side-form">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <div class="form-group">
+                                        <div class="input-with-icon"><input type="text" class="form-control" placeholder="Search for a location"><img src="https://resido-shreethemes.vercel.app/static/media/pin.28d20de9f27b79da29c7894ef184f56e.svg" width="18" alt=""></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6">
+                                    <div class="form-group"><label class="mb-2">Min Price</label>
+                                        <div class="form-control css-b62m3t-container"><span id="react-select-2-live-region" class="css-7pg0cj-a11yText"></span><span aria-live="polite" aria-atomic="false" aria-relevant="additions text" role="log" class="css-7pg0cj-a11yText"></span>
+                                            <div class="css-13cymwt-control">
+                                                <div class="css-hlgwow">
+                                                    <div class="css-1jqq78o-placeholder" id="react-select-2-placeholder">No Min</div>
+                                                    <div class="css-19bb58m" data-value=""><input class="" autocapitalize="none" autocomplete="off" autocorrect="off" id="react-select-2-input" spellcheck="false" tabindex="0" type="text" aria-autocomplete="list" aria-expanded="false" aria-haspopup="true" role="combobox" aria-activedescendant="" aria-describedby="react-select-2-placeholder" value="" style="color: inherit; background: 0px center; opacity: 1; width: 100%; grid-area: 1 / 2; font: inherit; min-width: 2px; border: 0px; margin: 0px; outline: 0px; padding: 0px;"></div>
+                                                </div>
+                                                <div class="css-1wy0on6"><span class="css-1u9des2-indicatorSeparator"></span>
+                                                    <div class="css-1xc3v61-indicatorContainer" aria-hidden="true"><svg height="20" width="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" class="css-8mmkcg">
+                                                            <path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"></path>
+                                                        </svg></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6">
+                                    <div class="form-group"><label class="mb-2">Max Price</label>
+                                        <div class="form-control css-b62m3t-container"><span id="react-select-3-live-region" class="css-7pg0cj-a11yText"></span><span aria-live="polite" aria-atomic="false" aria-relevant="additions text" role="log" class="css-7pg0cj-a11yText"></span>
+                                            <div class="css-13cymwt-control">
+                                                <div class="css-hlgwow">
+                                                    <div class="css-1jqq78o-placeholder" id="react-select-3-placeholder">No Max</div>
+                                                    <div class="css-19bb58m" data-value=""><input class="" autocapitalize="none" autocomplete="off" autocorrect="off" id="react-select-3-input" spellcheck="false" tabindex="0" type="text" aria-autocomplete="list" aria-expanded="false" aria-haspopup="true" role="combobox" aria-activedescendant="" aria-describedby="react-select-3-placeholder" value="" style="color: inherit; background: 0px center; opacity: 1; width: 100%; grid-area: 1 / 2; font: inherit; min-width: 2px; border: 0px; margin: 0px; outline: 0px; padding: 0px;"></div>
+                                                </div>
+                                                <div class="css-1wy0on6"><span class="css-1u9des2-indicatorSeparator"></span>
+                                                    <div class="css-1xc3v61-indicatorContainer" aria-hidden="true"><svg height="20" width="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" class="css-8mmkcg">
+                                                            <path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"></path>
+                                                        </svg></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6">
+                                    <div class="form-group"><label class="mb-2">Property Type</label>
+                                        <div class="form-control css-b62m3t-container"><span id="react-select-4-live-region" class="css-7pg0cj-a11yText"></span><span aria-live="polite" aria-atomic="false" aria-relevant="additions text" role="log" class="css-7pg0cj-a11yText"></span>
+                                            <div class="css-13cymwt-control">
+                                                <div class="css-hlgwow">
+                                                    <div class="css-1jqq78o-placeholder" id="react-select-4-placeholder">Show All</div>
+                                                    <div class="css-19bb58m" data-value=""><input class="" autocapitalize="none" autocomplete="off" autocorrect="off" id="react-select-4-input" spellcheck="false" tabindex="0" type="text" aria-autocomplete="list" aria-expanded="false" aria-haspopup="true" role="combobox" aria-activedescendant="" aria-describedby="react-select-4-placeholder" value="" style="color: inherit; background: 0px center; opacity: 1; width: 100%; grid-area: 1 / 2; font: inherit; min-width: 2px; border: 0px; margin: 0px; outline: 0px; padding: 0px;"></div>
+                                                </div>
+                                                <div class="css-1wy0on6"><span class="css-1u9des2-indicatorSeparator"></span>
+                                                    <div class="css-1xc3v61-indicatorContainer" aria-hidden="true"><svg height="20" width="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" class="css-8mmkcg">
+                                                            <path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"></path>
+                                                        </svg></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6">
+                                    <div class="form-group"><label class="mb-2">Bed Rooms</label>
+                                        <div class="form-control css-b62m3t-container"><span id="react-select-5-live-region" class="css-7pg0cj-a11yText"></span><span aria-live="polite" aria-atomic="false" aria-relevant="additions text" role="log" class="css-7pg0cj-a11yText"></span>
+                                            <div class="css-13cymwt-control">
+                                                <div class="css-hlgwow">
+                                                    <div class="css-1jqq78o-placeholder" id="react-select-5-placeholder">Bedrooms</div>
+                                                    <div class="css-19bb58m" data-value=""><input class="" autocapitalize="none" autocomplete="off" autocorrect="off" id="react-select-5-input" spellcheck="false" tabindex="0" type="text" aria-autocomplete="list" aria-expanded="false" aria-haspopup="true" role="combobox" aria-activedescendant="" aria-describedby="react-select-5-placeholder" value="" style="color: inherit; background: 0px center; opacity: 1; width: 100%; grid-area: 1 / 2; font: inherit; min-width: 2px; border: 0px; margin: 0px; outline: 0px; padding: 0px;"></div>
+                                                </div>
+                                                <div class="css-1wy0on6"><span class="css-1u9des2-indicatorSeparator"></span>
+                                                    <div class="css-1xc3v61-indicatorContainer" aria-hidden="true"><svg height="20" width="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" class="css-8mmkcg">
+                                                            <path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"></path>
+                                                        </svg></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <div class="form-group"><label class="mb-2">Property Location</label>
+                                        <div class="form-control css-b62m3t-container"><span id="react-select-6-live-region" class="css-7pg0cj-a11yText"></span><span aria-live="polite" aria-atomic="false" aria-relevant="additions text" role="log" class="css-7pg0cj-a11yText"></span>
+                                            <div class="css-13cymwt-control">
+                                                <div class="css-hlgwow">
+                                                    <div class="css-1jqq78o-placeholder" id="react-select-6-placeholder">All Cities</div>
+                                                    <div class="css-19bb58m" data-value=""><input class="" autocapitalize="none" autocomplete="off" autocorrect="off" id="react-select-6-input" spellcheck="false" tabindex="0" type="text" aria-autocomplete="list" aria-expanded="false" aria-haspopup="true" role="combobox" aria-activedescendant="" aria-describedby="react-select-6-placeholder" value="" style="color: inherit; background: 0px center; opacity: 1; width: 100%; grid-area: 1 / 2; font: inherit; min-width: 2px; border: 0px; margin: 0px; outline: 0px; padding: 0px;"></div>
+                                                </div>
+                                                <div class="css-1wy0on6"><span class="css-1u9des2-indicatorSeparator"></span>
+                                                    <div class="css-1xc3v61-indicatorContainer" aria-hidden="true"><svg height="20" width="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false" class="css-8mmkcg">
+                                                            <path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"></path>
+                                                        </svg></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hero-search-action"><a class="btn full-width btn-primary" href="https://resido-shreethemes.vercel.app/" data-discover="true">Search Result</a></div>
+                    </div>
+                </div>
+            </div>
+            <section>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-6 col-lg-7 col-md-10 text-center">
+                            <div class="sec-heading center">
+                                <h2>How It Works?</h2>
+                                <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center g-4">
+                        <div class="col-lg-4 col-md-4">
+                            <div class="middle-icon-features-item ">
+                                <div class="icon-features-wrap">
+                                    <div class="middle-icon-large-features-box f-light-success"><img src="https://resido-shreethemes.vercel.app/static/media/work-1.0a82c4b16ba4ec67ebc4e3dbc47f3345.svg" alt=""></div>
+                                </div>
+                                <div class="middle-icon-features-content">
+                                    <h4>Evaluate Property</h4>
+                                    <p>Cicero famously orated against his political opponent Lucius Sergius Catilina. Occasionally the first Oration against Catiline is taken specimens.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="middle-icon-features-item ">
+                                <div class="icon-features-wrap">
+                                    <div class="middle-icon-large-features-box f-light-warning"><img src="https://resido-shreethemes.vercel.app/static/media/work-2.ba318652c6e2e05ef62e8162e2b43347.svg" alt=""></div>
+                                </div>
+                                <div class="middle-icon-features-content">
+                                    <h4>Meet Your Agent</h4>
+                                    <p>Cicero famously orated against his political opponent Lucius Sergius Catilina. Occasionally the first Oration against Catiline is taken specimens.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="middle-icon-features-item remove">
+                                <div class="icon-features-wrap">
+                                    <div class="middle-icon-large-features-box f-light-purple"><img src="https://resido-shreethemes.vercel.app/static/media/work-3.86317a9ac90e343c75ce9443dd49aba6.svg" alt=""></div>
+                                </div>
+                                <div class="middle-icon-features-content">
+                                    <h4>Close The Deal</h4>
+                                    <p>Cicero famously orated against his political opponent Lucius Sergius Catilina. Occasionally the first Oration against Catiline is taken specimens.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="bg-light">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-6 col-lg-7 col-md-10 text-center">
+                            <div class="sec-heading center">
+                                <h2>Explore Recent properties</h2>
+                                <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center g-4">
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
+                            <div class="property-listing card rounded-3 border-0">
+                                <div class="listing-img-wrapper p-3 ">
+                                    <div class="list-img-slide position-relative">
+                                        <div class="position-absolute top-0 left-0 ms-3 mt-3 z-1">
+                                            <div class="label text-light d-inline-flex align-items-center justify-content-center mx-1 bg-success  "><img src="https://resido-shreethemes.vercel.app/static/media/verified.242169a62e8f6591475384d3d250d336.svg" alt="" class="me-1">Verified</div>
+                                        </div>
+                                        <div class="click rounded-3 overflow-hidden mb-0">
+                                            <div class="tns-outer" id="tns1-ow">
+                                                <div class="tns-liveregion tns-visually-hidden" aria-live="polite" aria-atomic="true">slide <span class="current">2</span> of 3</div>
+                                                <div id="tns1-mw" class="tns-ovh">
+                                                    <div class="tns-inner" id="tns1-iw">
+                                                        <div class="  tns-slider tns-carousel tns-subpixel tns-calc tns-horizontal" id="tns1" style="transform: translate3d(-33.3333%, 0px, 0px);">
+                                                            <div class="tns-item" id="tns1-item0" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/1" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-1.bd676b6eac51cb256996.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item tns-slide-active" id="tns1-item1"><a href="https://resido-shreethemes.vercel.app/single-property-1/1" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-9.1dbb88d422a95a0d5137.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item" id="tns1-item2" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/1" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-10.fea6b9a99b8890655aa6.jpg" class="img-fluid" alt=""></a></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tns-nav" aria-label="Carousel Pagination"><button type="button" data-nav="0" aria-controls="tns1" style="" aria-label="Carousel Page 1" class="" tabindex="-1"></button><button type="button" data-nav="1" aria-controls="tns1" style="" aria-label="Carousel Page 2 (Current Slide)" class="tns-nav-active"></button><button type="button" data-nav="2" tabindex="-1" aria-controls="tns1" style="" aria-label="Carousel Page 3"></button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="listing-caption-wrapper px-3">
+                                    <div class="listing-detail-wrapper">
+                                        <div class="listing-short-detail-wrap">
+                                            <div class="listing-short-detail">
+                                                <div class="d-flex align-items-center"><span class="label bg-light-success text-success prt-type me-2">For Rent</span><span class="label bg-light-purple text-purple property-cats">Apartment</span></div>
+                                                <h4 class="listing-name fw-semibold fs-5 mb-2 mt-3"><a href="https://resido-shreethemes.vercel.app/single-property-1/1" data-discover="true">The Green Canton Chrysler</a></h4>
+                                                <div class="prt-location text-muted-2 d-flex"><img src="https://resido-shreethemes.vercel.app/static/media/map-1.b961e6739abd52a5eb607995fbddda27.svg" alt="">210 Zirak Road, Canada</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="price-features-wrapper">
+                                        <div class="list-fx-features d-flex align-items-center justify-content-between">
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-building-shield fs-xs"></i></div><span class="text-muted-2 fs-sm">3BHK</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-bed fs-xs"></i></div><span class="text-muted-2 fs-sm">3 Beds</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-clone fs-xs"></i></div><span class="text-muted-2 fs-sm">1800 SQFT</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="listing-detail-footer d-flex align-items-center justify-content-between py-4">
+                                        <div class="listing-short-detail-flex">
+                                            <h6 class="listing-card-info-price m-0">$80,000</h6>
+                                        </div>
+                                        <div class="footer-flex"><a class="prt-view" href="https://resido-shreethemes.vercel.app/single-property-1/1" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/send.b304d2dd60a3df340e0cd20ff2c460ff.svg" alt=""></a></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
+                            <div class="property-listing card rounded-3 border-0">
+                                <div class="listing-img-wrapper p-3 ">
+                                    <div class="list-img-slide position-relative">
+                                        <div class="position-absolute top-0 left-0 ms-3 mt-3 z-1">
+                                            <div class="label text-light d-inline-flex align-items-center justify-content-center mx-1  bg-purple "><img src="https://resido-shreethemes.vercel.app/static/media/user-1.a8055daf7129433ff1905bfac4607da6.svg" alt="" class="me-1">SuperAgent</div>
+                                        </div>
+                                        <div class="click rounded-3 overflow-hidden mb-0">
+                                            <div class="tns-outer" id="tns2-ow">
+                                                <div class="tns-liveregion tns-visually-hidden" aria-live="polite" aria-atomic="true">slide <span class="current">2</span> of 3</div>
+                                                <div id="tns2-mw" class="tns-ovh">
+                                                    <div class="tns-inner" id="tns2-iw">
+                                                        <div class="  tns-slider tns-carousel tns-subpixel tns-calc tns-horizontal" id="tns2" style="transform: translate3d(-33.3333%, 0px, 0px);">
+                                                            <div class="tns-item" id="tns2-item0" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/2" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-2.868458e19dc4bdddf69c.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item tns-slide-active" id="tns2-item1"><a href="https://resido-shreethemes.vercel.app/single-property-1/2" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-6.d10ac77df638cc48cbc7.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item" id="tns2-item2" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/2" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-8.2bec661cac8f5545bd0a.jpg" class="img-fluid" alt=""></a></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tns-nav" aria-label="Carousel Pagination"><button type="button" data-nav="0" aria-controls="tns2" style="" aria-label="Carousel Page 1" class="" tabindex="-1"></button><button type="button" data-nav="1" aria-controls="tns2" style="" aria-label="Carousel Page 2 (Current Slide)" class="tns-nav-active"></button><button type="button" data-nav="2" tabindex="-1" aria-controls="tns2" style="" aria-label="Carousel Page 3"></button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="listing-caption-wrapper px-3">
+                                    <div class="listing-detail-wrapper">
+                                        <div class="listing-short-detail-wrap">
+                                            <div class="listing-short-detail">
+                                                <div class="d-flex align-items-center"><span class="label bg-light-danger text-danger prt-type me-2">For Sell</span><span class="label bg-light-purple text-purple property-cats">House</span></div>
+                                                <h4 class="listing-name fw-semibold fs-5 mb-2 mt-3"><a href="https://resido-shreethemes.vercel.app/single-property-1/2" data-discover="true">Purple Flatiron House</a></h4>
+                                                <div class="prt-location text-muted-2 d-flex"><img src="https://resido-shreethemes.vercel.app/static/media/map-1.b961e6739abd52a5eb607995fbddda27.svg" alt="">210 Zirak Road, Canada</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="price-features-wrapper">
+                                        <div class="list-fx-features d-flex align-items-center justify-content-between">
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-building-shield fs-xs"></i></div><span class="text-muted-2 fs-sm">3BHK</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-bed fs-xs"></i></div><span class="text-muted-2 fs-sm">3 Beds</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-clone fs-xs"></i></div><span class="text-muted-2 fs-sm">1800 SQFT</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="listing-detail-footer d-flex align-items-center justify-content-between py-4">
+                                        <div class="listing-short-detail-flex">
+                                            <h6 class="listing-card-info-price m-0">$67,000</h6>
+                                        </div>
+                                        <div class="footer-flex"><a class="prt-view" href="https://resido-shreethemes.vercel.app/single-property-1/2" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/send.b304d2dd60a3df340e0cd20ff2c460ff.svg" alt=""></a></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
+                            <div class="property-listing card rounded-3 border-0">
+                                <div class="listing-img-wrapper p-3 ">
+                                    <div class="list-img-slide position-relative">
+                                        <div class="position-absolute top-0 left-0 ms-3 mt-3 z-1">
+                                            <div class="label text-light d-inline-flex align-items-center justify-content-center mx-1 bg-success  "><img src="https://resido-shreethemes.vercel.app/static/media/verified.242169a62e8f6591475384d3d250d336.svg" alt="" class="me-1">Verified</div>
+                                            <div class="label text-light d-inline-flex align-items-center justify-content-center mx-1   bg-danger"><img src="https://resido-shreethemes.vercel.app/static/media/moon.ea7b8aefa6d14722b4ac9adfac6a30aa.svg" alt="" class="me-1">New</div>
+                                        </div>
+                                        <div class="click rounded-3 overflow-hidden mb-0">
+                                            <div class="tns-outer" id="tns3-ow">
+                                                <div class="tns-liveregion tns-visually-hidden" aria-live="polite" aria-atomic="true">slide <span class="current">2</span> of 3</div>
+                                                <div id="tns3-mw" class="tns-ovh">
+                                                    <div class="tns-inner" id="tns3-iw">
+                                                        <div class="  tns-slider tns-carousel tns-subpixel tns-calc tns-horizontal" id="tns3" style="transform: translate3d(-33.3333%, 0px, 0px);">
+                                                            <div class="tns-item" id="tns3-item0" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/3" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-3.c59de8733c4a5bd6e8e3.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item tns-slide-active" id="tns3-item1"><a href="https://resido-shreethemes.vercel.app/single-property-1/3" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-5.19fb08d86a872b5e47e2.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item" id="tns3-item2" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/3" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-7.780019f2636a1625ff40.jpg" class="img-fluid" alt=""></a></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tns-nav" aria-label="Carousel Pagination"><button type="button" data-nav="0" aria-controls="tns3" style="" aria-label="Carousel Page 1" class="" tabindex="-1"></button><button type="button" data-nav="1" aria-controls="tns3" style="" aria-label="Carousel Page 2 (Current Slide)" class="tns-nav-active"></button><button type="button" data-nav="2" tabindex="-1" aria-controls="tns3" style="" aria-label="Carousel Page 3"></button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="listing-caption-wrapper px-3">
+                                    <div class="listing-detail-wrapper">
+                                        <div class="listing-short-detail-wrap">
+                                            <div class="listing-short-detail">
+                                                <div class="d-flex align-items-center"><span class="label bg-light-success text-success prt-type me-2">For Rent</span><span class="label bg-light-purple text-purple property-cats">Building</span></div>
+                                                <h4 class="listing-name fw-semibold fs-5 mb-2 mt-3"><a href="https://resido-shreethemes.vercel.app/single-property-1/3" data-discover="true">The Green Canton Chrysler</a></h4>
+                                                <div class="prt-location text-muted-2 d-flex"><img src="https://resido-shreethemes.vercel.app/static/media/map-1.b961e6739abd52a5eb607995fbddda27.svg" alt="">210 Zirak Road, Canada</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="price-features-wrapper">
+                                        <div class="list-fx-features d-flex align-items-center justify-content-between">
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-building-shield fs-xs"></i></div><span class="text-muted-2 fs-sm">3BHK</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-bed fs-xs"></i></div><span class="text-muted-2 fs-sm">3 Beds</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-clone fs-xs"></i></div><span class="text-muted-2 fs-sm">1800 SQFT</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="listing-detail-footer d-flex align-items-center justify-content-between py-4">
+                                        <div class="listing-short-detail-flex">
+                                            <h6 class="listing-card-info-price m-0">$92,500</h6>
+                                        </div>
+                                        <div class="footer-flex"><a class="prt-view" href="https://resido-shreethemes.vercel.app/single-property-1/3" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/send.b304d2dd60a3df340e0cd20ff2c460ff.svg" alt=""></a></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
+                            <div class="property-listing card rounded-3 border-0">
+                                <div class="listing-img-wrapper p-3 ">
+                                    <div class="list-img-slide position-relative">
+                                        <div class="position-absolute top-0 left-0 ms-3 mt-3 z-1">
+                                            <div class="label text-light d-inline-flex align-items-center justify-content-center mx-1  bg-purple "><img src="https://resido-shreethemes.vercel.app/static/media/user-1.a8055daf7129433ff1905bfac4607da6.svg" alt="" class="me-1">SuperAgent</div>
+                                        </div>
+                                        <div class="click rounded-3 overflow-hidden mb-0">
+                                            <div class="tns-outer" id="tns4-ow">
+                                                <div class="tns-liveregion tns-visually-hidden" aria-live="polite" aria-atomic="true">slide <span class="current">2</span> of 3</div>
+                                                <div id="tns4-mw" class="tns-ovh">
+                                                    <div class="tns-inner" id="tns4-iw">
+                                                        <div class="  tns-slider tns-carousel tns-subpixel tns-calc tns-horizontal" id="tns4" style="transform: translate3d(-33.3333%, 0px, 0px);">
+                                                            <div class="tns-item" id="tns4-item0" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/4" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-4.13de83f704124f7e0aac.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item tns-slide-active" id="tns4-item1"><a href="https://resido-shreethemes.vercel.app/single-property-1/4" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-6.d10ac77df638cc48cbc7.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item" id="tns4-item2" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/4" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-9.1dbb88d422a95a0d5137.jpg" class="img-fluid" alt=""></a></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tns-nav" aria-label="Carousel Pagination"><button type="button" data-nav="0" aria-controls="tns4" style="" aria-label="Carousel Page 1" class="" tabindex="-1"></button><button type="button" data-nav="1" aria-controls="tns4" style="" aria-label="Carousel Page 2 (Current Slide)" class="tns-nav-active"></button><button type="button" data-nav="2" tabindex="-1" aria-controls="tns4" style="" aria-label="Carousel Page 3"></button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="listing-caption-wrapper px-3">
+                                    <div class="listing-detail-wrapper">
+                                        <div class="listing-short-detail-wrap">
+                                            <div class="listing-short-detail">
+                                                <div class="d-flex align-items-center"><span class="label bg-light-danger text-danger prt-type me-2">For Sell</span><span class="label bg-light-purple text-purple property-cats">Condos</span></div>
+                                                <h4 class="listing-name fw-semibold fs-5 mb-2 mt-3"><a href="https://resido-shreethemes.vercel.app/single-property-1/4" data-discover="true">The Red Freedom Tower</a></h4>
+                                                <div class="prt-location text-muted-2 d-flex"><img src="https://resido-shreethemes.vercel.app/static/media/map-1.b961e6739abd52a5eb607995fbddda27.svg" alt="">210 Zirak Road, Canada</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="price-features-wrapper">
+                                        <div class="list-fx-features d-flex align-items-center justify-content-between">
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-building-shield fs-xs"></i></div><span class="text-muted-2 fs-sm">3BHK</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-bed fs-xs"></i></div><span class="text-muted-2 fs-sm">3 Beds</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-clone fs-xs"></i></div><span class="text-muted-2 fs-sm">1800 SQFT</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="listing-detail-footer d-flex align-items-center justify-content-between py-4">
+                                        <div class="listing-short-detail-flex">
+                                            <h6 class="listing-card-info-price m-0">$89,000</h6>
+                                        </div>
+                                        <div class="footer-flex"><a class="prt-view" href="https://resido-shreethemes.vercel.app/single-property-1/4" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/send.b304d2dd60a3df340e0cd20ff2c460ff.svg" alt=""></a></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
+                            <div class="property-listing card rounded-3 border-0">
+                                <div class="listing-img-wrapper p-3 ">
+                                    <div class="list-img-slide position-relative">
+                                        <div class="position-absolute top-0 left-0 ms-3 mt-3 z-1">
+                                            <div class="label text-light d-inline-flex align-items-center justify-content-center mx-1 bg-success  "><img src="https://resido-shreethemes.vercel.app/static/media/verified.242169a62e8f6591475384d3d250d336.svg" alt="" class="me-1">Verified</div>
+                                            <div class="label text-light d-inline-flex align-items-center justify-content-center mx-1   bg-danger"><img src="https://resido-shreethemes.vercel.app/static/media/moon.ea7b8aefa6d14722b4ac9adfac6a30aa.svg" alt="" class="me-1">New</div>
+                                        </div>
+                                        <div class="click rounded-3 overflow-hidden mb-0">
+                                            <div class="tns-outer" id="tns5-ow">
+                                                <div class="tns-liveregion tns-visually-hidden" aria-live="polite" aria-atomic="true">slide <span class="current">2</span> of 3</div>
+                                                <div id="tns5-mw" class="tns-ovh">
+                                                    <div class="tns-inner" id="tns5-iw">
+                                                        <div class="  tns-slider tns-carousel tns-subpixel tns-calc tns-horizontal" id="tns5" style="transform: translate3d(-33.3333%, 0px, 0px);">
+                                                            <div class="tns-item" id="tns5-item0" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/5" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-5.19fb08d86a872b5e47e2.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item tns-slide-active" id="tns5-item1"><a href="https://resido-shreethemes.vercel.app/single-property-1/5" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-12.4ccdb28916e16e7da8e8.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item" id="tns5-item2" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/5" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-13.bd1257cfb6723950a1a1.jpg" class="img-fluid" alt=""></a></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tns-nav" aria-label="Carousel Pagination"><button type="button" data-nav="0" aria-controls="tns5" style="" aria-label="Carousel Page 1" class="" tabindex="-1"></button><button type="button" data-nav="1" aria-controls="tns5" style="" aria-label="Carousel Page 2 (Current Slide)" class="tns-nav-active"></button><button type="button" data-nav="2" tabindex="-1" aria-controls="tns5" style="" aria-label="Carousel Page 3"></button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="listing-caption-wrapper px-3">
+                                    <div class="listing-detail-wrapper">
+                                        <div class="listing-short-detail-wrap">
+                                            <div class="listing-short-detail">
+                                                <div class="d-flex align-items-center"><span class="label bg-light-success text-success prt-type me-2">For Rent</span><span class="label bg-light-purple text-purple property-cats">Villa</span></div>
+                                                <h4 class="listing-name fw-semibold fs-5 mb-2 mt-3"><a href="https://resido-shreethemes.vercel.app/single-property-1/5" data-discover="true">The Donald Dwelling</a></h4>
+                                                <div class="prt-location text-muted-2 d-flex"><img src="https://resido-shreethemes.vercel.app/static/media/map-1.b961e6739abd52a5eb607995fbddda27.svg" alt="">210 Zirak Road, Canada</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="price-features-wrapper">
+                                        <div class="list-fx-features d-flex align-items-center justify-content-between">
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-building-shield fs-xs"></i></div><span class="text-muted-2 fs-sm">3BHK</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-bed fs-xs"></i></div><span class="text-muted-2 fs-sm">3 Beds</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-clone fs-xs"></i></div><span class="text-muted-2 fs-sm">1800 SQFT</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="listing-detail-footer d-flex align-items-center justify-content-between py-4">
+                                        <div class="listing-short-detail-flex">
+                                            <h6 class="listing-card-info-price m-0">$88,000</h6>
+                                        </div>
+                                        <div class="footer-flex"><a class="prt-view" href="https://resido-shreethemes.vercel.app/single-property-1/5" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/send.b304d2dd60a3df340e0cd20ff2c460ff.svg" alt=""></a></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
+                            <div class="property-listing card rounded-3 border-0">
+                                <div class="listing-img-wrapper p-3 ">
+                                    <div class="list-img-slide position-relative">
+                                        <div class="position-absolute top-0 left-0 ms-3 mt-3 z-1">
+                                            <div class="label text-light d-inline-flex align-items-center justify-content-center mx-1  bg-purple "><img src="https://resido-shreethemes.vercel.app/static/media/user-1.a8055daf7129433ff1905bfac4607da6.svg" alt="" class="me-1">SuperAgent</div>
+                                        </div>
+                                        <div class="click rounded-3 overflow-hidden mb-0">
+                                            <div class="tns-outer" id="tns6-ow">
+                                                <div class="tns-liveregion tns-visually-hidden" aria-live="polite" aria-atomic="true">slide <span class="current">2</span> of 3</div>
+                                                <div id="tns6-mw" class="tns-ovh">
+                                                    <div class="tns-inner" id="tns6-iw">
+                                                        <div class="  tns-slider tns-carousel tns-subpixel tns-calc tns-horizontal" id="tns6" style="transform: translate3d(-33.3333%, 0px, 0px);">
+                                                            <div class="tns-item" id="tns6-item0" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/6" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-6.d10ac77df638cc48cbc7.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item tns-slide-active" id="tns6-item1"><a href="https://resido-shreethemes.vercel.app/single-property-1/6" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-7.780019f2636a1625ff40.jpg" class="img-fluid" alt=""></a></div>
+                                                            <div class="tns-item" id="tns6-item2" aria-hidden="true" tabindex="-1"><a href="https://resido-shreethemes.vercel.app/single-property-1/6" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/p-11.388d4ff37db99ad9f65b.jpg" class="img-fluid" alt=""></a></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tns-nav" aria-label="Carousel Pagination"><button type="button" data-nav="0" aria-controls="tns6" style="" aria-label="Carousel Page 1" class="" tabindex="-1"></button><button type="button" data-nav="1" aria-controls="tns6" style="" aria-label="Carousel Page 2 (Current Slide)" class="tns-nav-active"></button><button type="button" data-nav="2" tabindex="-1" aria-controls="tns6" style="" aria-label="Carousel Page 3"></button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="listing-caption-wrapper px-3">
+                                    <div class="listing-detail-wrapper">
+                                        <div class="listing-short-detail-wrap">
+                                            <div class="listing-short-detail">
+                                                <div class="d-flex align-items-center"><span class="label bg-light-danger text-danger prt-type me-2">For Sell</span><span class="label bg-light-purple text-purple property-cats">Building</span></div>
+                                                <h4 class="listing-name fw-semibold fs-5 mb-2 mt-3"><a href="https://resido-shreethemes.vercel.app/single-property-1/6" data-discover="true">Red Tiny Hearst Castle</a></h4>
+                                                <div class="prt-location text-muted-2 d-flex"><img src="https://resido-shreethemes.vercel.app/static/media/map-1.b961e6739abd52a5eb607995fbddda27.svg" alt="">210 Zirak Road, Canada</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="price-features-wrapper">
+                                        <div class="list-fx-features d-flex align-items-center justify-content-between">
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-building-shield fs-xs"></i></div><span class="text-muted-2 fs-sm">3BHK</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-bed fs-xs"></i></div><span class="text-muted-2 fs-sm">3 Beds</span>
+                                            </div>
+                                            <div class="listing-card d-flex align-items-center">
+                                                <div class="square--25 text-muted-2 fs-sm circle gray-simple me-1"><i class="fa-solid fa-clone fs-xs"></i></div><span class="text-muted-2 fs-sm">1800 SQFT</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="listing-detail-footer d-flex align-items-center justify-content-between py-4">
+                                        <div class="listing-short-detail-flex">
+                                            <h6 class="listing-card-info-price m-0">$10,50000</h6>
+                                        </div>
+                                        <div class="footer-flex"><a class="prt-view" href="https://resido-shreethemes.vercel.app/single-property-1/6" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/send.b304d2dd60a3df340e0cd20ff2c460ff.svg" alt=""></a></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col-lg-12 col-md-12 col-sm-12 text-center mt-5"><a class="btn btn-primary px-md-5 rounded " href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true">Browse More Properties</a></div>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-6 col-lg-7 col-md-10 text-center">
+                            <div class="sec-heading center">
+                                <h2>Find Best Locations</h2>
+                                <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center g-xl-4 g-md-3 g-4">
+                        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                            <div class="location-property-wrap rounded-4 p-2">
+                                <div class="location-property-thumb rounded-4"><a href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/c-1.f04326def3bf5b37dc05.png" class="img-fluid" alt=""></a></div>
+                                <div class="location-property-content">
+                                    <div class="lp-content-flex">
+                                        <h4 class="lp-content-title">San Francisco, California</h4><span class="text-muted-2">95 Properties</span>
+                                    </div>
+                                    <div class="lp-content-right"><a class="text-primary" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="5" fill="currentColor"></rect>
+                                                    <path d="M11.9343 12.5657L9.53696 14.963C9.22669 15.2733 9.18488 15.7619 9.43792 16.1204C9.7616 16.5789 10.4211 16.6334 10.8156 16.2342L14.3054 12.7029C14.6903 12.3134 14.6903 11.6866 14.3054 11.2971L10.8156 7.76582C10.4211 7.3666 9.7616 7.42107 9.43792 7.87962C9.18488 8.23809 9.22669 8.72669 9.53696 9.03696L11.9343 11.4343C12.2467 11.7467 12.2467 12.2533 11.9343 12.5657Z" fill="currentColor"></path>
+                                                </svg></span></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                            <div class="location-property-wrap rounded-4 p-2">
+                                <div class="location-property-thumb rounded-4"><a href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/c-2.98a1daac55db49885786.png" class="img-fluid" alt=""></a></div>
+                                <div class="location-property-content">
+                                    <div class="lp-content-flex">
+                                        <h4 class="lp-content-title">Dunao, California</h4><span class="text-muted-2">95 Properties</span>
+                                    </div>
+                                    <div class="lp-content-right"><a class="text-primary" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="5" fill="currentColor"></rect>
+                                                    <path d="M11.9343 12.5657L9.53696 14.963C9.22669 15.2733 9.18488 15.7619 9.43792 16.1204C9.7616 16.5789 10.4211 16.6334 10.8156 16.2342L14.3054 12.7029C14.6903 12.3134 14.6903 11.6866 14.3054 11.2971L10.8156 7.76582C10.4211 7.3666 9.7616 7.42107 9.43792 7.87962C9.18488 8.23809 9.22669 8.72669 9.53696 9.03696L11.9343 11.4343C12.2467 11.7467 12.2467 12.2533 11.9343 12.5657Z" fill="currentColor"></path>
+                                                </svg></span></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                            <div class="location-property-wrap rounded-4 p-2">
+                                <div class="location-property-thumb rounded-4"><a href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/c-3.46e8b943bd1cb06c83b8.png" class="img-fluid" alt=""></a></div>
+                                <div class="location-property-content">
+                                    <div class="lp-content-flex">
+                                        <h4 class="lp-content-title">Liverpool, London</h4><span class="text-muted-2">95 Properties</span>
+                                    </div>
+                                    <div class="lp-content-right"><a class="text-primary" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="5" fill="currentColor"></rect>
+                                                    <path d="M11.9343 12.5657L9.53696 14.963C9.22669 15.2733 9.18488 15.7619 9.43792 16.1204C9.7616 16.5789 10.4211 16.6334 10.8156 16.2342L14.3054 12.7029C14.6903 12.3134 14.6903 11.6866 14.3054 11.2971L10.8156 7.76582C10.4211 7.3666 9.7616 7.42107 9.43792 7.87962C9.18488 8.23809 9.22669 8.72669 9.53696 9.03696L11.9343 11.4343C12.2467 11.7467 12.2467 12.2533 11.9343 12.5657Z" fill="currentColor"></path>
+                                                </svg></span></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                            <div class="location-property-wrap rounded-4 p-2">
+                                <div class="location-property-thumb rounded-4"><a href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/c-4.c2f5b22a08927c7d2eca.png" class="img-fluid" alt=""></a></div>
+                                <div class="location-property-content">
+                                    <div class="lp-content-flex">
+                                        <h4 class="lp-content-title">San Francisco, New York</h4><span class="text-muted-2">95 Properties</span>
+                                    </div>
+                                    <div class="lp-content-right"><a class="text-primary" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="5" fill="currentColor"></rect>
+                                                    <path d="M11.9343 12.5657L9.53696 14.963C9.22669 15.2733 9.18488 15.7619 9.43792 16.1204C9.7616 16.5789 10.4211 16.6334 10.8156 16.2342L14.3054 12.7029C14.6903 12.3134 14.6903 11.6866 14.3054 11.2971L10.8156 7.76582C10.4211 7.3666 9.7616 7.42107 9.43792 7.87962C9.18488 8.23809 9.22669 8.72669 9.53696 9.03696L11.9343 11.4343C12.2467 11.7467 12.2467 12.2533 11.9343 12.5657Z" fill="currentColor"></path>
+                                                </svg></span></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                            <div class="location-property-wrap rounded-4 p-2">
+                                <div class="location-property-thumb rounded-4"><a href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/c-5.dd7858d81fa8beff01a8.png" class="img-fluid" alt=""></a></div>
+                                <div class="location-property-content">
+                                    <div class="lp-content-flex">
+                                        <h4 class="lp-content-title">New Orleans, Louisiana</h4><span class="text-muted-2">95 Properties</span>
+                                    </div>
+                                    <div class="lp-content-right"><a class="text-primary" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="5" fill="currentColor"></rect>
+                                                    <path d="M11.9343 12.5657L9.53696 14.963C9.22669 15.2733 9.18488 15.7619 9.43792 16.1204C9.7616 16.5789 10.4211 16.6334 10.8156 16.2342L14.3054 12.7029C14.6903 12.3134 14.6903 11.6866 14.3054 11.2971L10.8156 7.76582C10.4211 7.3666 9.7616 7.42107 9.43792 7.87962C9.18488 8.23809 9.22669 8.72669 9.53696 9.03696L11.9343 11.4343C12.2467 11.7467 12.2467 12.2533 11.9343 12.5657Z" fill="currentColor"></path>
+                                                </svg></span></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                            <div class="location-property-wrap rounded-4 p-2">
+                                <div class="location-property-thumb rounded-4"><a href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/c-6.62295d0d2a1a9defdabb.png" class="img-fluid" alt=""></a></div>
+                                <div class="location-property-content">
+                                    <div class="lp-content-flex">
+                                        <h4 class="lp-content-title">Los Angeles</h4><span class="text-muted-2">95 Properties</span>
+                                    </div>
+                                    <div class="lp-content-right"><a class="text-primary" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="5" fill="currentColor"></rect>
+                                                    <path d="M11.9343 12.5657L9.53696 14.963C9.22669 15.2733 9.18488 15.7619 9.43792 16.1204C9.7616 16.5789 10.4211 16.6334 10.8156 16.2342L14.3054 12.7029C14.6903 12.3134 14.6903 11.6866 14.3054 11.2971L10.8156 7.76582C10.4211 7.3666 9.7616 7.42107 9.43792 7.87962C9.18488 8.23809 9.22669 8.72669 9.53696 9.03696L11.9343 11.4343C12.2467 11.7467 12.2467 12.2533 11.9343 12.5657Z" fill="currentColor"></path>
+                                                </svg></span></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                            <div class="location-property-wrap rounded-4 p-2">
+                                <div class="location-property-thumb rounded-4"><a href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/c-7.52c49882c057156ee426.png" class="img-fluid" alt=""></a></div>
+                                <div class="location-property-content">
+                                    <div class="lp-content-flex">
+                                        <h4 class="lp-content-title">Dubai, UAE</h4><span class="text-muted-2">95 Properties</span>
+                                    </div>
+                                    <div class="lp-content-right"><a class="text-primary" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="5" fill="currentColor"></rect>
+                                                    <path d="M11.9343 12.5657L9.53696 14.963C9.22669 15.2733 9.18488 15.7619 9.43792 16.1204C9.7616 16.5789 10.4211 16.6334 10.8156 16.2342L14.3054 12.7029C14.6903 12.3134 14.6903 11.6866 14.3054 11.2971L10.8156 7.76582C10.4211 7.3666 9.7616 7.42107 9.43792 7.87962C9.18488 8.23809 9.22669 8.72669 9.53696 9.03696L11.9343 11.4343C12.2467 11.7467 12.2467 12.2533 11.9343 12.5657Z" fill="currentColor"></path>
+                                                </svg></span></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                            <div class="location-property-wrap rounded-4 p-2">
+                                <div class="location-property-thumb rounded-4"><a href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><img src="https://resido-shreethemes.vercel.app/static/media/c-8.96b48666c3619b88b994.png" class="img-fluid" alt=""></a></div>
+                                <div class="location-property-content">
+                                    <div class="lp-content-flex">
+                                        <h4 class="lp-content-title">Dhaka, UAE</h4><span class="text-muted-2">95 Properties</span>
+                                    </div>
+                                    <div class="lp-content-right"><a class="text-primary" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true"><span class="svg-icon svg-icon-2hx"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect opacity="0.3" x="2" y="2" width="20" height="20" rx="5" fill="currentColor"></rect>
+                                                    <path d="M11.9343 12.5657L9.53696 14.963C9.22669 15.2733 9.18488 15.7619 9.43792 16.1204C9.7616 16.5789 10.4211 16.6334 10.8156 16.2342L14.3054 12.7029C14.6903 12.3134 14.6903 11.6866 14.3054 11.2971L10.8156 7.76582C10.4211 7.3666 9.7616 7.42107 9.43792 7.87962C9.18488 8.23809 9.22669 8.72669 9.53696 9.03696L11.9343 11.4343C12.2467 11.7467 12.2467 12.2533 11.9343 12.5657Z" fill="currentColor"></path>
+                                                </svg></span></a></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 text-center mt-5"><a class="btn btn-primary px-md-5 rounded" href="https://resido-shreethemes.vercel.app/listings-list-with-sidebar" data-discover="true">Browse More Locations</a></div>
+                    </div>
+                </div>
+            </section>
+            <section class="gray">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-6 col-lg-7 col-md-10 text-center">
+                            <div class="sec-heading center">
+                                <h2>Good Reviews by Customers</h2>
+                                <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-lg-12 col-md-12">
+                            <div class="smart-textimonials smart-center" id="smart-textimonials">
+                                <div class="tns-outer" id="tns7-ow">
+                                    <div class="tns-liveregion tns-visually-hidden" aria-live="polite" aria-atomic="true">slide <span class="current">2 to 4</span> of 5</div>
+                                    <div id="tns7-mw" class="tns-ovh">
+                                        <div class="tns-inner" id="tns7-iw">
+                                            <div class="  tns-slider tns-carousel tns-subpixel tns-calc tns-horizontal" id="tns7" style="transform: translate3d(-20%, 0px, 0px);">
+                                                <div class="item tns-item" id="tns7-item0" aria-hidden="true" tabindex="-1">
+                                                    <div class="item-box">
+                                                        <div class="smart-tes-author">
+                                                            <div class="st-author-box">
+                                                                <div class="st-author-thumb">
+                                                                    <div class="quotes bg-primary"><i class="fa-solid fa-quote-left"></i></div><img src="https://resido-shreethemes.vercel.app/static/media/user-1.bed4b8e3d95a059607c4.jpg" class="img-fluid" alt="">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="smart-tes-content">
+                                                            <p>Cicero famously orated against his political opponent Lucius Sergius Catilina. Occasionally the first Oration against Catiline is taken specimens.</p>
+                                                        </div>
+                                                        <div class="st-author-info">
+                                                            <h4 class="st-author-title">Adam Williams</h4><span class="st-author-subtitle">CEO Of Microwoft</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="item tns-item tns-slide-active" id="tns7-item1">
+                                                    <div class="item-box">
+                                                        <div class="smart-tes-author">
+                                                            <div class="st-author-box">
+                                                                <div class="st-author-thumb">
+                                                                    <div class="quotes bg-success"><i class="fa-solid fa-quote-left"></i></div><img src="https://resido-shreethemes.vercel.app/static/media/user-2.cf3aefa4e505a1addb50.jpg" class="img-fluid" alt="">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="smart-tes-content">
+                                                            <p>Cicero famously orated against his political opponent Lucius Sergius Catilina. Occasionally the first Oration against Catiline is taken specimens.</p>
+                                                        </div>
+                                                        <div class="st-author-info">
+                                                            <h4 class="st-author-title">Retha Deowalim</h4><span class="st-author-subtitle">CEO Of Apple</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="item tns-item tns-slide-active" id="tns7-item2">
+                                                    <div class="item-box">
+                                                        <div class="smart-tes-author">
+                                                            <div class="st-author-box">
+                                                                <div class="st-author-thumb">
+                                                                    <div class="quotes bg-purple"><i class="fa-solid fa-quote-left"></i></div><img src="https://resido-shreethemes.vercel.app/static/media/user-3.8c4b8910cf1b29448886.jpg" class="img-fluid" alt="">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="smart-tes-content">
+                                                            <p>Cicero famously orated against his political opponent Lucius Sergius Catilina. Occasionally the first Oration against Catiline is taken specimens.</p>
+                                                        </div>
+                                                        <div class="st-author-info">
+                                                            <h4 class="st-author-title">Sam J. Wasim</h4><span class="st-author-subtitle">Pio Founder</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="item tns-item tns-slide-active" id="tns7-item3">
+                                                    <div class="item-box">
+                                                        <div class="smart-tes-author">
+                                                            <div class="st-author-box">
+                                                                <div class="st-author-thumb">
+                                                                    <div class="quotes bg-seegreen"><i class="fa-solid fa-quote-left"></i></div><img src="https://resido-shreethemes.vercel.app/static/media/user-4.e1999c7e18260d82af63.jpg" class="img-fluid" alt="">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="smart-tes-content">
+                                                            <p>Cicero famously orated against his political opponent Lucius Sergius Catilina. Occasionally the first Oration against Catiline is taken specimens.</p>
+                                                        </div>
+                                                        <div class="st-author-info">
+                                                            <h4 class="st-author-title">Usan Gulwarm</h4><span class="st-author-subtitle">CEO Of Facewarm</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="item tns-item" id="tns7-item4" aria-hidden="true" tabindex="-1">
+                                                    <div class="item-box">
+                                                        <div class="smart-tes-author">
+                                                            <div class="st-author-box">
+                                                                <div class="st-author-thumb">
+                                                                    <div class="quotes bg-danger"><i class="fa-solid fa-quote-left"></i></div><img src="https://resido-shreethemes.vercel.app/static/media/user-5.c6a83db291754b65f686.jpg" class="img-fluid" alt="">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="smart-tes-content">
+                                                            <p>Cicero famously orated against his political opponent Lucius Sergius Catilina. Occasionally the first Oration against Catiline is taken specimens.</p>
+                                                        </div>
+                                                        <div class="st-author-info">
+                                                            <h4 class="st-author-title">Shilpa Shethy</h4><span class="st-author-subtitle">CEO Of Zapple</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-6 col-lg-7 col-md-10 text-center">
+                            <div class="sec-heading center">
+                                <h2>See our packages</h2>
+                                <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row align-items-center justify-content-center g-lg-4 g-md-3 g-4">
+                        <div class="col-xl-4 col-lg-4 col-md-4">
+                            <div class="pricing-wrap py-3 px-3">
+                                <div class="pricing-header bg-dark">
+                                    <h4 class="pr-value text-light"><sup class="text-light opacity-75">$</sup>49</h4>
+                                    <h4 class="pr-title text-info">Basic Package</h4>
+                                </div>
+                                <div class="pricing-body px-2">
+                                    <ul class="p-0">
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>5+ Listings</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>Contact With Agent</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>3 Month Validity</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>7x24 Fully Support</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>50GB Space</li>
+                                    </ul>
+                                </div>
+                                <div class="pricing-bottom mt-5 mb-1 px-2"><a class="btn btn-light-primary rounded full-width" href="https://resido-shreethemes.vercel.app/" data-discover="true">Choose Plan</a></div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-4">
+                            <div class="pricing-wrap py-3 px-3">
+                                <div class="pricing-header bg-primary">
+                                    <h4 class="pr-value text-light"><sup class="text-light opacity-75">$</sup>99</h4>
+                                    <h4 class="pr-title text-light">PLATINUM PACKAGE</h4>
+                                </div>
+                                <div class="pricing-body px-2">
+                                    <ul class="p-0">
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>5+ Listings</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>Contact With Agent</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>3 Month Validity</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>7x24 Fully Support</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>50GB Space</li>
+                                    </ul>
+                                </div>
+                                <div class="pricing-bottom mt-5 mb-1 px-2"><a class="btn btn-dark rounded full-width" href="https://resido-shreethemes.vercel.app/" data-discover="true">Choose Plan</a></div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-4">
+                            <div class="pricing-wrap py-3 px-3">
+                                <div class="pricing-header bg-dark">
+                                    <h4 class="pr-value text-light"><sup class="text-light opacity-75">$</sup>199</h4>
+                                    <h4 class="pr-title text-info">STANDARD PACKAGE</h4>
+                                </div>
+                                <div class="pricing-body px-2">
+                                    <ul class="p-0">
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>5+ Listings</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>Contact With Agent</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>3 Month Validity</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>7x24 Fully Support</li>
+                                        <li><span class="text-success me-2"><i class="fa-solid fa-circle-check"></i></span>50GB Space</li>
+                                    </ul>
+                                </div>
+                                <div class="pricing-bottom mt-5 mb-1 px-2"><a class="btn btn-light-primary rounded full-width" href="https://resido-shreethemes.vercel.app/" data-discover="true">Choose Plan</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="call-to-act-wrap theme-bg">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="call-to-act">
+                                <div class="call-to-act-head">
+                                    <h3>Want to Become a Real Estate Agent?</h3><span>We'll help you to grow your career and growth.</span>
+                                </div><a class="btn btn-call-to-act" href="https://resido-shreethemes.vercel.app/" data-discover="true">SignUp Today</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="dark-footer skin-dark-footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-4">
+                            <div class="footer-widget"><a class="nav-footer-logo" href="https://resido-shreethemes.vercel.app/" data-discover="true"><span class="svg-icon text-light svg-icon-2hx"><svg width="65" height="65" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M15.8797 15.375C15.9797 15.075 15.9797 14.775 15.9797 14.475C15.9797 13.775 15.7797 13.075 15.4797 12.475C14.7797 11.275 13.4797 10.475 11.9797 10.475C11.7797 10.475 11.5797 10.475 11.3797 10.575C7.37971 11.075 4.67971 14.575 2.57971 18.075L10.8797 3.675C11.3797 2.775 12.5797 2.775 13.0797 3.675C13.1797 3.875 13.2797 3.975 13.3797 4.175C15.2797 7.575 16.9797 11.675 15.8797 15.375Z" fill="currentColor"></path>
+                                            <path opacity="0.3" d="M20.6797 20.6749C16.7797 20.6749 12.3797 20.275 9.57972 17.575C10.2797 18.075 11.0797 18.375 11.9797 18.375C13.4797 18.375 14.7797 17.5749 15.4797 16.2749C15.6797 15.9749 15.7797 15.675 15.7797 15.375V15.2749C16.8797 11.5749 15.2797 7.47495 13.2797 4.07495L21.6797 18.6749C22.2797 19.5749 21.6797 20.6749 20.6797 20.6749ZM8.67972 18.6749C8.17972 17.8749 7.97972 16.975 7.77972 15.975C7.37972 13.575 8.67972 10.775 11.3797 10.375C7.37972 10.875 4.67972 14.375 2.57972 17.875C2.47972 18.075 2.27972 18.375 2.17972 18.575C1.67972 19.475 2.27972 20.475 3.27972 20.475H10.3797C9.67972 20.175 9.07972 19.3749 8.67972 18.6749Z" fill="currentColor"></path>
+                                        </svg></span>
+                                    <h5 class="fs-2 fw-bold text-light ms-1 my-0">Resido</h5>
+                                </a>
+                                <div class="footer-add">
+                                    <p>Collins Street West, Victoria 8007, Australia.</p>
+                                    <p>+1 246-345-0695</p>
+                                    <p>info@example.com</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4">
+                            <div class="footer-widget">
+                                <h4 class="widget-title">Navigations</h4>
+                                <ul class="footer-menu">
+                                    <li><a href="https://resido-shreethemes.vercel.app/about-us" data-discover="true">About Us</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/faq" data-discover="true">FAQs Page</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/checkout" data-discover="true">Checkout</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/contact" data-discover="true">Contact</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/blog" data-discover="true">Blog</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4">
+                            <div class="footer-widget">
+                                <h4 class="widget-title">The Highlights</h4>
+                                <ul class="footer-menu">
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Apartment</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">My Houses</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Restaurant</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Nightlife</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Villas</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-6">
+                            <div class="footer-widget">
+                                <h4 class="widget-title">My Account</h4>
+                                <ul class="footer-menu">
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">My Profile</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">My account</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">My Property</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Favorites</a></li>
+                                    <li><a href="https://resido-shreethemes.vercel.app/" data-discover="true">Cart</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="footer-widget">
+                                <h4 class="widget-title">Download Apps</h4><a class="other-store-link" href="https://resido-shreethemes.vercel.app/" data-discover="true">
+                                    <div class="other-store-app">
+                                        <div class="os-app-icon"><img src="https://resido-shreethemes.vercel.app/static/media/google-play.2a815587f8d96f1c96be80d406e74024.svg" alt=""></div>
+                                        <div class="os-app-caps"> Google Play<span>Get It Now</span></div>
+                                    </div>
+                                </a><a class="other-store-link" href="https://resido-shreethemes.vercel.app/" data-discover="true">
+                                    <div class="other-store-app">
+                                        <div class="os-app-icon"><img src="https://resido-shreethemes.vercel.app/static/media/apple-store.6bc57fe632aa4ec4995bba4d9c05f5c0.svg" alt=""></div>
+                                        <div class="os-app-caps">App Store<span>Now it Available</span></div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6 col-md-6">
+                                <p class="mb-0">© 2026 Resido. Develop with <i class="fa-solid fa-heart ms-1 text-danger"></i> By <a href="https://shreethemes.in/" target="_blank">Shreethemes</a></p>
+                            </div>
+                            <div class="col-lg-6 col-md-6 text-right">
+                                <ul class="footer-bottom-social">
+                                    <li><a href="https://www.facebook.com/shreethemes" target="_blank"><i class="fa-brands fa-facebook"></i></a></li>
+                                    <li><a href="https://x.com/shreethemes" target="_blank"><i class="fa-brands fa-twitter"></i></a></li>
+                                    <li><a href="https://www.instagram.com/shreethemes/" target="_blank"><i class="fa-brands fa-instagram"></i></a></li>
+                                    <li><a href="https://www.linkedin.com/company/shreethemes" target="_blank"><i class="fa-brands fa-linkedin"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer><a id="back2Top" class="top-scroll " title="Back to top" href="https://resido-shreethemes.vercel.app/" data-discover="true" style=""><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="ti-arrow-up" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                </svg></a>
+        </div>
+    </div>
+</body>
+
+</html>

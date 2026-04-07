@@ -1,0 +1,245 @@
+pg_dump: executing SELECT pg_catalog.set_config('search_path', '', false);
+pg_dump: last built-in OID is 16383
+pg_dump: reading extensions
+pg_dump: identifying extension members
+pg_dump: reading schemas
+pg_dump: reading user-defined tables
+pg_dump: reading user-defined functions
+pg_dump: reading user-defined types
+pg_dump: reading procedural languages
+pg_dump: reading user-defined aggregate functions
+pg_dump: reading user-defined operators
+pg_dump: reading user-defined access methods
+pg_dump: reading user-defined operator classes
+pg_dump: reading user-defined operator families
+pg_dump: reading user-defined text search parsers
+pg_dump: reading user-defined text search templates
+pg_dump: reading user-defined text search dictionaries
+pg_dump: reading user-defined text search configurations
+pg_dump: reading user-defined foreign-data wrappers
+pg_dump: reading user-defined foreign servers
+pg_dump: reading default privileges
+pg_dump: reading user-defined collations
+pg_dump: reading user-defined conversions
+pg_dump: reading type casts
+pg_dump: reading transforms
+pg_dump: reading table inheritance information
+pg_dump: reading event triggers
+pg_dump: finding extension tables
+pg_dump: finding inheritance relationships
+pg_dump: reading column info for interesting tables
+pg_dump: finding table default expressions
+pg_dump: flagging inherited columns in subtables
+pg_dump: reading partitioning data
+pg_dump: reading indexes
+pg_dump: flagging indexes in partitioned tables
+pg_dump: reading extended statistics
+pg_dump: reading constraints
+pg_dump: reading triggers
+pg_dump: reading rewrite rules
+pg_dump: reading policies
+pg_dump: reading row-level security policies
+pg_dump: reading publications
+pg_dump: reading publication membership of tables
+pg_dump: reading publication membership of schemas
+pg_dump: reading subscriptions
+pg_dump: reading subscription membership of tables
+pg_dump: reading large objects
+pg_dump: reading dependency data
+pg_dump: saving encoding = UTF8
+pg_dump: saving "standard_conforming_strings = on"
+pg_dump: saving "search_path = "
+pg_dump: dropping FK CONSTRAINT Property Property_projectId_fkey
+pg_dump: dropping FK CONSTRAINT Property Property_customerId_fkey
+pg_dump: dropping FK CONSTRAINT PropertyImage PropertyImage_propertyId_fkey
+pg_dump: dropping FK CONSTRAINT Project Project_customerId_fkey
+pg_dump: dropping FK CONSTRAINT ProjectUnit ProjectUnit_propertyId_fkey
+pg_dump: dropping FK CONSTRAINT ProjectUnit ProjectUnit_projectId_fkey
+pg_dump: dropping FK CONSTRAINT ProjectImage ProjectImage_projectId_fkey
+pg_dump: dropping FK CONSTRAINT ProjectDocument ProjectDocument_projectId_fkey
+pg_dump: dropping FK CONSTRAINT Inquiry Inquiry_propertyId_fkey
+pg_dump: dropping FK CONSTRAINT Inquiry Inquiry_projectId_fkey
+pg_dump: dropping FK CONSTRAINT InquiryNote InquiryNote_inquiryId_fkey
+pg_dump: dropping FK CONSTRAINT EmailLog EmailLog_inquiryId_fkey
+pg_dump: dropping FK CONSTRAINT Appointment Appointment_inquiryId_fkey
+pg_dump: dropping FK CONSTRAINT ApiClient ApiClient_customerId_fkey
+pg_dump: dropping FK CONSTRAINT AdminUser AdminUser_customerId_fkey
+pg_dump: dropping INDEX Property_slug_key
+pg_dump: dropping INDEX Property_published_status_idx
+pg_dump: dropping INDEX Property_projectId_idx
+pg_dump: dropping INDEX Property_featured_idx
+pg_dump: dropping INDEX Property_customerId_idx
+pg_dump: dropping INDEX Property_city_idx
+pg_dump: dropping INDEX Property_apiEnabled_published_status_idx
+pg_dump: dropping INDEX PropertyImage_propertyId_sortOrder_idx
+pg_dump: dropping INDEX Project_slug_key
+pg_dump: dropping INDEX Project_published_status_idx
+pg_dump: dropping INDEX Project_customerId_idx
+pg_dump: dropping INDEX Project_city_idx
+pg_dump: dropping INDEX Project_apiEnabled_published_status_idx
+pg_dump: dropping INDEX ProjectUnit_propertyId_idx
+pg_dump: dropping INDEX ProjectUnit_projectId_building_entrance_floor_idx
+pg_dump: dropping INDEX ProjectImage_projectId_sortOrder_idx
+pg_dump: dropping INDEX ProjectDocument_projectId_sortOrder_idx
+pg_dump: dropping INDEX Inquiry_status_idx
+pg_dump: dropping INDEX Inquiry_propertyId_createdAt_idx
+pg_dump: dropping INDEX Inquiry_projectId_idx
+pg_dump: dropping INDEX InquiryNote_inquiryId_createdAt_idx
+pg_dump: dropping INDEX HeroImage_active_sortOrder_idx
+pg_dump: dropping INDEX EmailLog_inquiryId_sentAt_idx
+pg_dump: dropping INDEX Customer_companyName_idx
+pg_dump: dropping INDEX Appointment_inquiryId_dateTime_idx
+pg_dump: dropping INDEX ApiClient_tokenHash_key
+pg_dump: dropping INDEX ApiClient_customerId_idx
+pg_dump: dropping INDEX AdminUser_email_key
+pg_dump: dropping INDEX AdminUser_customerId_idx
+pg_dump: dropping CONSTRAINT _prisma_migrations _prisma_migrations_pkey
+pg_dump: dropping CONSTRAINT SiteSetting SiteSetting_pkey
+pg_dump: dropping CONSTRAINT Property Property_pkey
+pg_dump: dropping CONSTRAINT PropertyImage PropertyImage_pkey
+pg_dump: dropping CONSTRAINT Project Project_pkey
+pg_dump: dropping CONSTRAINT ProjectUnit ProjectUnit_pkey
+pg_dump: dropping CONSTRAINT ProjectImage ProjectImage_pkey
+pg_dump: dropping CONSTRAINT ProjectDocument ProjectDocument_pkey
+pg_dump: dropping CONSTRAINT Inquiry Inquiry_pkey
+pg_dump: dropping CONSTRAINT InquiryNote InquiryNote_pkey
+pg_dump: dropping CONSTRAINT ImageBank ImageBank_pkey
+pg_dump: dropping CONSTRAINT HeroImage HeroImage_pkey
+pg_dump: dropping CONSTRAINT EmailLog EmailLog_pkey
+pg_dump: dropping CONSTRAINT Customer Customer_pkey
+pg_dump: dropping CONSTRAINT Appointment Appointment_pkey
+pg_dump: dropping CONSTRAINT ApiClient ApiClient_pkey
+pg_dump: dropping CONSTRAINT AdminUser AdminUser_pkey
+pg_dump: dropping TABLE _prisma_migrations
+pg_dump: dropping TABLE SiteSetting
+pg_dump: dropping TABLE PropertyImage
+pg_dump: dropping TABLE Property
+pg_dump: dropping TABLE ProjectUnit
+pg_dump: dropping TABLE ProjectImage
+pg_dump: dropping TABLE ProjectDocument
+pg_dump: dropping TABLE Project
+pg_dump: dropping TABLE InquiryNote
+pg_dump: dropping TABLE Inquiry
+pg_dump: dropping TABLE ImageBank
+pg_dump: dropping TABLE HeroImage
+pg_dump: dropping TABLE EmailLog
+pg_dump: dropping TABLE Customer
+pg_dump: dropping TABLE Appointment
+pg_dump: dropping TABLE ApiClient
+pg_dump: dropping TABLE AdminUser
+pg_dump: dropping TYPE PropertyStatus
+pg_dump: dropping TYPE ProjectStatus
+pg_dump: creating TYPE "public.ProjectStatus"
+pg_dump: creating TYPE "public.PropertyStatus"
+pg_dump: creating TABLE "public.AdminUser"
+pg_dump: creating TABLE "public.ApiClient"
+pg_dump: creating TABLE "public.Appointment"
+pg_dump: creating TABLE "public.Customer"
+pg_dump: creating TABLE "public.EmailLog"
+pg_dump: creating TABLE "public.HeroImage"
+pg_dump: creating TABLE "public.ImageBank"
+pg_dump: creating TABLE "public.Inquiry"
+pg_dump: creating TABLE "public.InquiryNote"
+pg_dump: creating TABLE "public.Project"
+pg_dump: creating TABLE "public.ProjectDocument"
+pg_dump: creating TABLE "public.ProjectImage"
+pg_dump: creating TABLE "public.ProjectUnit"
+pg_dump: creating TABLE "public.Property"
+pg_dump: creating TABLE "public.PropertyImage"
+pg_dump: creating TABLE "public.SiteSetting"
+pg_dump: creating TABLE "public._prisma_migrations"
+pg_dump: processing data for table "public.AdminUser"
+pg_dump: dumping contents of table "public.AdminUser"
+pg_dump: processing data for table "public.ApiClient"
+pg_dump: dumping contents of table "public.ApiClient"
+pg_dump: processing data for table "public.Appointment"
+pg_dump: dumping contents of table "public.Appointment"
+pg_dump: processing data for table "public.Customer"
+pg_dump: dumping contents of table "public.Customer"
+pg_dump: processing data for table "public.EmailLog"
+pg_dump: dumping contents of table "public.EmailLog"
+pg_dump: processing data for table "public.HeroImage"
+pg_dump: dumping contents of table "public.HeroImage"
+pg_dump: processing data for table "public.ImageBank"
+pg_dump: dumping contents of table "public.ImageBank"
+pg_dump: processing data for table "public.Inquiry"
+pg_dump: dumping contents of table "public.Inquiry"
+pg_dump: processing data for table "public.InquiryNote"
+pg_dump: dumping contents of table "public.InquiryNote"
+pg_dump: processing data for table "public.Project"
+pg_dump: dumping contents of table "public.Project"
+pg_dump: processing data for table "public.ProjectDocument"
+pg_dump: dumping contents of table "public.ProjectDocument"
+pg_dump: processing data for table "public.ProjectImage"
+pg_dump: dumping contents of table "public.ProjectImage"
+pg_dump: processing data for table "public.ProjectUnit"
+pg_dump: dumping contents of table "public.ProjectUnit"
+pg_dump: processing data for table "public.Property"
+pg_dump: dumping contents of table "public.Property"
+pg_dump: processing data for table "public.PropertyImage"
+pg_dump: dumping contents of table "public.PropertyImage"
+pg_dump: processing data for table "public.SiteSetting"
+pg_dump: dumping contents of table "public.SiteSetting"
+pg_dump: processing data for table "public._prisma_migrations"
+pg_dump: dumping contents of table "public._prisma_migrations"
+pg_dump: creating CONSTRAINT "public.AdminUser AdminUser_pkey"
+pg_dump: creating CONSTRAINT "public.ApiClient ApiClient_pkey"
+pg_dump: creating CONSTRAINT "public.Appointment Appointment_pkey"
+pg_dump: creating CONSTRAINT "public.Customer Customer_pkey"
+pg_dump: creating CONSTRAINT "public.EmailLog EmailLog_pkey"
+pg_dump: creating CONSTRAINT "public.HeroImage HeroImage_pkey"
+pg_dump: creating CONSTRAINT "public.ImageBank ImageBank_pkey"
+pg_dump: creating CONSTRAINT "public.InquiryNote InquiryNote_pkey"
+pg_dump: creating CONSTRAINT "public.Inquiry Inquiry_pkey"
+pg_dump: creating CONSTRAINT "public.ProjectDocument ProjectDocument_pkey"
+pg_dump: creating CONSTRAINT "public.ProjectImage ProjectImage_pkey"
+pg_dump: creating CONSTRAINT "public.ProjectUnit ProjectUnit_pkey"
+pg_dump: creating CONSTRAINT "public.Project Project_pkey"
+pg_dump: creating CONSTRAINT "public.PropertyImage PropertyImage_pkey"
+pg_dump: creating CONSTRAINT "public.Property Property_pkey"
+pg_dump: creating CONSTRAINT "public.SiteSetting SiteSetting_pkey"
+pg_dump: creating CONSTRAINT "public._prisma_migrations _prisma_migrations_pkey"
+pg_dump: creating INDEX "public.AdminUser_customerId_idx"
+pg_dump: creating INDEX "public.AdminUser_email_key"
+pg_dump: creating INDEX "public.ApiClient_customerId_idx"
+pg_dump: creating INDEX "public.ApiClient_tokenHash_key"
+pg_dump: creating INDEX "public.Appointment_inquiryId_dateTime_idx"
+pg_dump: creating INDEX "public.Customer_companyName_idx"
+pg_dump: creating INDEX "public.EmailLog_inquiryId_sentAt_idx"
+pg_dump: creating INDEX "public.HeroImage_active_sortOrder_idx"
+pg_dump: creating INDEX "public.InquiryNote_inquiryId_createdAt_idx"
+pg_dump: creating INDEX "public.Inquiry_projectId_idx"
+pg_dump: creating INDEX "public.Inquiry_propertyId_createdAt_idx"
+pg_dump: creating INDEX "public.Inquiry_status_idx"
+pg_dump: creating INDEX "public.ProjectDocument_projectId_sortOrder_idx"
+pg_dump: creating INDEX "public.ProjectImage_projectId_sortOrder_idx"
+pg_dump: creating INDEX "public.ProjectUnit_projectId_building_entrance_floor_idx"
+pg_dump: creating INDEX "public.ProjectUnit_propertyId_idx"
+pg_dump: creating INDEX "public.Project_apiEnabled_published_status_idx"
+pg_dump: creating INDEX "public.Project_city_idx"
+pg_dump: creating INDEX "public.Project_customerId_idx"
+pg_dump: creating INDEX "public.Project_published_status_idx"
+pg_dump: creating INDEX "public.Project_slug_key"
+pg_dump: creating INDEX "public.PropertyImage_propertyId_sortOrder_idx"
+pg_dump: creating INDEX "public.Property_apiEnabled_published_status_idx"
+pg_dump: creating INDEX "public.Property_city_idx"
+pg_dump: creating INDEX "public.Property_customerId_idx"
+pg_dump: creating INDEX "public.Property_featured_idx"
+pg_dump: creating INDEX "public.Property_projectId_idx"
+pg_dump: creating INDEX "public.Property_published_status_idx"
+pg_dump: creating INDEX "public.Property_slug_key"
+pg_dump: creating FK CONSTRAINT "public.AdminUser AdminUser_customerId_fkey"
+pg_dump: creating FK CONSTRAINT "public.ApiClient ApiClient_customerId_fkey"
+pg_dump: creating FK CONSTRAINT "public.Appointment Appointment_inquiryId_fkey"
+pg_dump: creating FK CONSTRAINT "public.EmailLog EmailLog_inquiryId_fkey"
+pg_dump: creating FK CONSTRAINT "public.InquiryNote InquiryNote_inquiryId_fkey"
+pg_dump: creating FK CONSTRAINT "public.Inquiry Inquiry_projectId_fkey"
+pg_dump: creating FK CONSTRAINT "public.Inquiry Inquiry_propertyId_fkey"
+pg_dump: creating FK CONSTRAINT "public.ProjectDocument ProjectDocument_projectId_fkey"
+pg_dump: creating FK CONSTRAINT "public.ProjectImage ProjectImage_projectId_fkey"
+pg_dump: creating FK CONSTRAINT "public.ProjectUnit ProjectUnit_projectId_fkey"
+pg_dump: creating FK CONSTRAINT "public.ProjectUnit ProjectUnit_propertyId_fkey"
+pg_dump: creating FK CONSTRAINT "public.Project Project_customerId_fkey"
+pg_dump: creating FK CONSTRAINT "public.PropertyImage PropertyImage_propertyId_fkey"
+pg_dump: creating FK CONSTRAINT "public.Property Property_customerId_fkey"
+pg_dump: creating FK CONSTRAINT "public.Property Property_projectId_fkey"
