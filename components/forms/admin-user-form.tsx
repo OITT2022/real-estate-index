@@ -204,7 +204,7 @@ export function AdminUserForm({ mode, user, customers }: Props) {
           <p className="muted" style={{ margin: 0 }}>Assign a customer to make this user a Customer Manager with scoped access.</p>
           <label>
             <span>Assigned Customer</span>
-            <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+            <select {...register("customerId")}>
               <option value="">None — regular admin user</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>{c.companyName}</option>

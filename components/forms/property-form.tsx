@@ -282,7 +282,7 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
       {projects && projects.length > 0 && (
         <label>
           <span>Project</span>
-          <select {...register("projectId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+          <select {...register("projectId")}>
             <option value="">None — standalone property</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>{p.title}</option>
@@ -304,8 +304,7 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
               // Link new unit
               if (e.target.value) await updateProjectUnit(e.target.value, { propertyId: property.id });
             }}
-            style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}
-          >
+                     >
             <option value="">Not assigned to a unit</option>
             {projectUnits
               .filter((u) => !u.propertyId || u.propertyId === property?.id)
@@ -340,7 +339,7 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
         ) : (
           <label>
             <span>Customer</span>
-            <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+            <select {...register("customerId")}>
               <option value="">None</option>
               {customers?.map((c) => (
                 <option key={c.id} value={c.id}>{c.companyName}</option>

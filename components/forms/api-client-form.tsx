@@ -202,7 +202,7 @@ export function ApiClientForm({ mode, client, customers, scopeCounts }: Props) {
         <div className="admin-form-grid">
           <label>
             <span>Scope</span>
-            <select {...register("scopeType")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+            <select {...register("scopeType")}>
               <option value="all">All Customers</option>
               <option value="customer">Specific Customer</option>
             </select>
@@ -210,7 +210,7 @@ export function ApiClientForm({ mode, client, customers, scopeCounts }: Props) {
           {scopeType === "customer" && customers && customers.length > 0 && (
             <label>
               <span>Customer</span>
-              <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+              <select {...register("customerId")}>
                 <option value="">Select customer...</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>{c.companyName}</option>

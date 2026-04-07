@@ -179,7 +179,7 @@ export function ProjectForm({ mode, project, customers, userScope, onCreated }: 
       ) : customers && customers.length > 0 ? (
         <label>
           <span>Customer</span>
-          <select {...register("customerId")} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line)", background: "white" }}>
+          <select {...register("customerId")}>
             <option value="">None</option>
             {customers.map((c) => (
               <option key={c.id} value={c.id}>{c.companyName}</option>
