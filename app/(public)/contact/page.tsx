@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { ContactForm } from "@/components/forms/contact-form";
@@ -61,7 +62,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h4>Email Us</h4>
-                  <p>info@realestate-index.com</p>
+                  <p>info@aradre.com</p>
                 </div>
               </div>
 
@@ -73,6 +74,16 @@ export default function ContactPage() {
                   <h4>Call Us</h4>
                   <p>+357 99 123 456</p>
                 </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
+                <Image
+                  src="/contact-illustration.png"
+                  alt="Contact us"
+                  width={220}
+                  height={220}
+                  style={{ maxWidth: "100%", height: "auto" }}
+                />
               </div>
             </div>
           </div>

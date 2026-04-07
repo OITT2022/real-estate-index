@@ -893,3 +893,29 @@ export async function clearProjectStructure(projectId: string): Promise<ActionRe
   revalidatePath(`/admin/projects/${projectId}`);
   return { success: true };
 }
+
+// ── Contact Form ──────────────────────────────────────────────
+
+const contactSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  email: z.string().email("Invalid email"),
+  subject: z.string().min(1, "Subject is required").max(500),
+  message: z.string().min(1, "Message is required").max(5000),
+});
+
+export async function submitContactForm(data: unknown): Promise<ActionResult> {
+  const parsed = contactSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.errors[0]?.message ?? "Invalid input" };
+
+  const { name, email, subject, message } = parsed.data;
+
+  const { sendEmail } = await import("@/lib/email");
+  const result = await sendEmail(
+    "avi@aradre.com",
+    `[Contact Form] ${subject}`,
+    `New contact form submission:\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`,
+  );
+
+  if (!result.success) return { success: false, error: result.error ?? "Failed to send email" };
+  return { success: true };
+}
