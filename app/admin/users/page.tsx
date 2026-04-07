@@ -1,12 +1,23 @@
-import { getAllAdminUsers } from "@/lib/site-data";
+import { db } from "@/lib/db";
 import { AdminUserTable } from "@/components/admin/admin-user-table";
 import { checkPageAccess } from "@/lib/check-access";
+import { getSessionUser, isCustomerManager } from "@/lib/scope";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
   await checkPageAccess("users");
-  const users = await getAllAdminUsers();
+  const sessionUser = await getSessionUser();
+
+  // Customer managers only see users in their org
+  const where = sessionUser && isCustomerManager(sessionUser)
+    ? { customerId: sessionUser.customerId! }
+    : undefined;
+
+  const users = await db.adminUser.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+  });
 
   const rows = users.map((u) => ({
     id: u.id,

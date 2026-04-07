@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { checkPageAccess } from "@/lib/check-access";
-import { getSessionUser, propertyCustomerScope } from "@/lib/scope";
+import { getSessionUser, propertyCustomerScope, isCustomerManager } from "@/lib/scope";
 import { CalendarView } from "@/components/admin/calendar-view";
 
 export const dynamic = "force-dynamic";
@@ -33,10 +33,16 @@ export default async function CalendarSchedulePage() {
     orderBy: { dateTime: "asc" },
   });
 
-  const customers = await db.customer.findMany({
-    select: { id: true, companyName: true },
-    orderBy: { companyName: "asc" },
-  });
+  // Customer managers only see their own customer in the dropdown
+  const customers = sessionUser && isCustomerManager(sessionUser)
+    ? await db.customer.findMany({
+        where: { id: sessionUser.customerId! },
+        select: { id: true, companyName: true },
+      })
+    : await db.customer.findMany({
+        select: { id: true, companyName: true },
+        orderBy: { companyName: "asc" },
+      });
 
   const events = appointments.map((apt) => {
     const inq = apt.inquiry;
