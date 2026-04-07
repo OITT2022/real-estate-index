@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { ProjectActions } from "@/components/admin/project-actions";
 import { PublishToggle } from "@/components/admin/publish-toggle";
 import { ApiToggle } from "@/components/admin/api-toggle";
-import { Search, SlidersHorizontal, Plus, ChevronUp, ChevronDown, X, FolderKanban } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, ChevronUp, ChevronDown, X, FolderKanban, LayoutGrid, List, MapPin, Building2 } from "lucide-react";
 
 type Row = {
   id: string;
@@ -31,6 +31,7 @@ type Props = {
 type SortKey = "title" | "city" | "developer" | "customer" | "units" | "status";
 
 export function AdminProjectTable({ rows, addUrl, filterCustomerName, showAllUrl }: Props) {
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [cityFilter, setCityFilter] = useState("");
@@ -114,64 +115,94 @@ export function AdminProjectTable({ rows, addUrl, filterCustomerName, showAllUrl
             {hasFilters && <button type="button" onClick={clearFilters} className="at-filter-clear"><X size={14} /> Clear</button>}
           </div>
           <div className="at-toolbar-right">
+            <div className="at-view-toggle">
+              <button type="button" className={`at-view-btn ${viewMode === "list" ? "at-view-btn-active" : ""}`} onClick={() => setViewMode("list")} title="List view"><List size={16} /></button>
+              <button type="button" className={`at-view-btn ${viewMode === "grid" ? "at-view-btn-active" : ""}`} onClick={() => setViewMode("grid")} title="Grid view"><LayoutGrid size={16} /></button>
+            </div>
             <Link href={addUrl} className="at-btn-primary"><Plus size={16} /> Add Project</Link>
           </div>
         </div>
       </div>
 
-      <div className="at-table-card">
-        <div className="at-table-head" style={{ gridTemplateColumns: gridCols }}>
-          <div></div>
-          <div className="at-th" onClick={() => toggleSort("title")}>Project <SortIcon col="title" /></div>
-          <div className="at-th" onClick={() => toggleSort("city")}>City <SortIcon col="city" /></div>
-          <div className="at-th" onClick={() => toggleSort("developer")}>Developer <SortIcon col="developer" /></div>
-          <div className="at-th" onClick={() => toggleSort("customer")}>Customer <SortIcon col="customer" /></div>
-          <div className="at-th" onClick={() => toggleSort("units")}>Units <SortIcon col="units" /></div>
-          <div className="at-th" onClick={() => toggleSort("status")}>Status <SortIcon col="status" /></div>
-          <div className="at-th">API</div>
-          <div className="at-th">Actions</div>
-        </div>
-
-        {sorted.length === 0 && (
+      {/* Empty */}
+      {sorted.length === 0 && (
+        <div className="at-table-card">
           <div className="at-empty">
             <FolderKanban size={40} strokeWidth={1} />
             <p className="at-empty-title">{hasFilters ? "No projects match your filters" : "No projects yet"}</p>
             <p className="at-empty-sub">{hasFilters ? "Try adjusting your search or filters." : "Create your first project to get started."}</p>
             {hasFilters && <button type="button" onClick={clearFilters} className="at-btn-secondary" style={{ marginTop: 8 }}>Clear Filters</button>}
           </div>
-        )}
+        </div>
+      )}
 
-        {sorted.map((r) => (
-          <div key={r.id} className="at-table-row" style={{ gridTemplateColumns: gridCols }}>
-            <div>
-              {r.imageUrl
-                ? <img src={r.imageUrl} alt="" className="at-thumb" />
-                : <div className="at-thumb at-thumb-empty"><FolderKanban size={18} strokeWidth={1.5} /></div>}
-            </div>
-            <div className="at-cell-title">
-              <span className="at-title">{r.title}</span>
-            </div>
-            <div className="at-cell">{r.city}</div>
-            <div className="at-cell">{r.developerName}</div>
-            <div className="at-cell">{r.customerName ? <span>{r.customerName}</span> : <span className="at-muted">—</span>}</div>
-            <div className="at-cell"><strong>{r.units}</strong></div>
-            <div className="at-cell"><PublishToggle type="project" id={r.id} published={r.published} /></div>
-            <div className="at-cell"><ApiToggle type="project" id={r.id} enabled={r.apiEnabled} /></div>
-            <div className="at-cell at-actions">
-              <Link href={`/admin/projects/${r.id}`} className="icon-btn" title="Edit">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </Link>
-              <ProjectActions projectId={r.id} published={r.published} />
-            </div>
+      {/* List View */}
+      {sorted.length > 0 && viewMode === "list" && (
+        <div className="at-table-card">
+          <div className="at-table-head" style={{ gridTemplateColumns: gridCols }}>
+            <div></div>
+            <div className="at-th" onClick={() => toggleSort("title")}>Project <SortIcon col="title" /></div>
+            <div className="at-th" onClick={() => toggleSort("city")}>City <SortIcon col="city" /></div>
+            <div className="at-th" onClick={() => toggleSort("developer")}>Developer <SortIcon col="developer" /></div>
+            <div className="at-th" onClick={() => toggleSort("customer")}>Customer <SortIcon col="customer" /></div>
+            <div className="at-th" onClick={() => toggleSort("units")}>Units <SortIcon col="units" /></div>
+            <div className="at-th" onClick={() => toggleSort("status")}>Status <SortIcon col="status" /></div>
+            <div className="at-th">API</div>
+            <div className="at-th">Actions</div>
           </div>
-        ))}
+          {sorted.map((r) => (
+            <div key={r.id} className="at-table-row" style={{ gridTemplateColumns: gridCols }}>
+              <div>{r.imageUrl ? <img src={r.imageUrl} alt="" className="at-thumb" /> : <div className="at-thumb at-thumb-empty"><FolderKanban size={18} strokeWidth={1.5} /></div>}</div>
+              <div className="at-cell-title"><span className="at-title">{r.title}</span></div>
+              <div className="at-cell">{r.city}</div>
+              <div className="at-cell">{r.developerName}</div>
+              <div className="at-cell">{r.customerName ? <span>{r.customerName}</span> : <span className="at-muted">—</span>}</div>
+              <div className="at-cell"><strong>{r.units}</strong></div>
+              <div className="at-cell"><PublishToggle type="project" id={r.id} published={r.published} /></div>
+              <div className="at-cell"><ApiToggle type="project" id={r.id} enabled={r.apiEnabled} /></div>
+              <div className="at-cell at-actions">
+                <Link href={`/admin/projects/${r.id}`} className="icon-btn" title="Edit">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </Link>
+                <ProjectActions projectId={r.id} published={r.published} />
+              </div>
+            </div>
+          ))}
+          <div className="at-table-footer"><span>Showing <strong>{sorted.length}</strong> of <strong>{rows.length}</strong> projects</span></div>
+        </div>
+      )}
 
-        {sorted.length > 0 && (
-          <div className="at-table-footer">
-            <span>Showing <strong>{sorted.length}</strong> of <strong>{rows.length}</strong> projects</span>
+      {/* Grid View */}
+      {sorted.length > 0 && viewMode === "grid" && (
+        <>
+          <div className="at-card-grid">
+            {sorted.map((r) => (
+              <div key={r.id} className="at-property-card">
+                <div className="at-pcard-img-wrap">
+                  {r.imageUrl ? <img src={r.imageUrl} alt={r.title} className="at-pcard-img" /> : <div className="at-pcard-img at-pcard-img-empty"><FolderKanban size={32} strokeWidth={1} /></div>}
+                  <div className="at-pcard-badges"><PublishToggle type="project" id={r.id} published={r.published} /></div>
+                </div>
+                <div className="at-pcard-body">
+                  <h3 className="at-pcard-title">{r.title}</h3>
+                  <p className="at-pcard-location"><MapPin size={13} /> {r.city}</p>
+                  <div className="at-pcard-specs">
+                    <span className="at-pcard-spec"><Building2 size={14} /> {r.developerName}</span>
+                    <span className="at-pcard-spec">{r.units} propert{r.units !== 1 ? "ies" : "y"}</span>
+                  </div>
+                  {r.customerName && <div style={{ marginTop: 8 }}><span className="at-tag">{r.customerName}</span></div>}
+                </div>
+                <div className="at-pcard-footer">
+                  <Link href={`/admin/projects/${r.id}`} className="icon-btn" title="Edit">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </Link>
+                  <ProjectActions projectId={r.id} published={r.published} />
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+          <div className="at-table-card" style={{ marginTop: 16 }}><div className="at-table-footer"><span>Showing <strong>{sorted.length}</strong> of <strong>{rows.length}</strong> projects</span></div></div>
+        </>
+      )}
     </div>
   );
 }
