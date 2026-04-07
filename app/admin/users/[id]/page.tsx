@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 import { AdminUserForm } from "@/components/forms/admin-user-form";
 import { getAdminUserById, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
+import { getSessionUser } from "@/lib/scope";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   await checkPageAccess("users");
   const { id } = await params;
+  const sessionUser = await getSessionUser();
   const [user, customers] = await Promise.all([
     getAdminUserById(id),
     getAllCustomersForSelect(),
@@ -23,7 +25,13 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
           <p className="at-page-subtitle">{user.name || user.email}</p>
         </div>
       </div>
-      <AdminUserForm mode="edit" user={user} customers={customers} />
+      <AdminUserForm
+        mode="edit"
+        user={user}
+        customers={customers}
+        currentUserCustomerId={sessionUser?.customerId ?? undefined}
+        currentUserAllowedPages={sessionUser?.isSuperAdmin ? undefined : sessionUser?.allowedPages}
+      />
     </section>
   );
 }

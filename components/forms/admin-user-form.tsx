@@ -26,12 +26,23 @@ type Props = {
   mode: "create" | "edit";
   user?: UserData | null;
   customers?: CustomerOption[];
+  /** If set, the current logged-in user is a customer manager — lock to this customer */
+  currentUserCustomerId?: string;
+  /** If set, only these pages can be assigned (current user's own permissions) */
+  currentUserAllowedPages?: string[];
 };
 
-export function AdminUserForm({ mode, user, customers }: Props) {
+export function AdminUserForm({ mode, user, customers, currentUserCustomerId, currentUserAllowedPages }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  const isManagerScope = !!currentUserCustomerId;
+  // Pages available for assignment — customer managers can only grant their own pages
+  const availablePages = currentUserAllowedPages
+    ? ADMIN_PAGES.filter((p) => currentUserAllowedPages.includes(p.key))
+    : ADMIN_PAGES;
+  const availablePageKeys = availablePages.map((p) => p.key);
 
   const {
     register,
@@ -50,13 +61,13 @@ export function AdminUserForm({ mode, user, customers }: Props) {
           password: "",
           isSuperAdmin: user.isSuperAdmin,
           allowedPages: (user.allowedPages as string[]) ?? [],
-          customerId: user.customerId ?? "",
+          customerId: user.customerId ?? (currentUserCustomerId || ""),
           active: user.active,
         }
       : {
           isSuperAdmin: false,
-          allowedPages: ALL_PAGE_KEYS.slice(),
-          customerId: "",
+          allowedPages: availablePageKeys.slice(),
+          customerId: currentUserCustomerId || "",
           active: true,
           password: "",
           phone: "",
@@ -69,7 +80,8 @@ export function AdminUserForm({ mode, user, customers }: Props) {
   const profileImage = watch("profileImage");
 
   function toggleAllPages() {
-    setValue("allowedPages", allowedPages.length === ALL_PAGE_KEYS.length ? [] : ALL_PAGE_KEYS.slice());
+    const allSelected = availablePageKeys.every((k) => allowedPages.includes(k));
+    setValue("allowedPages", allSelected ? [] : availablePageKeys.slice());
   }
 
   function togglePage(key: string) {
@@ -194,11 +206,13 @@ export function AdminUserForm({ mode, user, customers }: Props) {
         </div>
         <div className="checkbox-row">
           <label><input type="checkbox" {...register("active")} /> Active</label>
-          <label><input type="checkbox" {...register("isSuperAdmin")} /> Super Admin (full access)</label>
+          {!isManagerScope && (
+            <label><input type="checkbox" {...register("isSuperAdmin")} /> Super Admin (full access)</label>
+          )}
         </div>
       </div>
 
-      {!isSuperAdmin && customers && customers.length > 0 && (
+      {!isSuperAdmin && !isManagerScope && customers && customers.length > 0 && (
         <div className="card" style={{ display: "grid", gap: 12 }}>
           <p className="eyebrow">Customer Assignment</p>
           <p className="muted" style={{ margin: 0 }}>Assign a customer to make this user a Customer Manager with scoped access.</p>
@@ -214,19 +228,31 @@ export function AdminUserForm({ mode, user, customers }: Props) {
         </div>
       )}
 
+      {isManagerScope && (
+        <div className="card" style={{ display: "grid", gap: 12 }}>
+          <p className="eyebrow">Customer Assignment</p>
+          <p className="muted" style={{ margin: 0 }}>
+            This user will be assigned to your customer: <strong>{customers?.find((c) => c.id === currentUserCustomerId)?.companyName ?? "—"}</strong>
+          </p>
+          <input type="hidden" {...register("customerId")} />
+        </div>
+      )}
+
       {!isSuperAdmin && (
         <div className="card" style={{ display: "grid", gap: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <p className="eyebrow" style={{ margin: 0 }}>Page Permissions ({allowedPages.length}/{ALL_PAGE_KEYS.length})</p>
-              <p className="muted" style={{ margin: "4px 0 0" }}>Select which admin pages this user can access</p>
+              <p className="eyebrow" style={{ margin: 0 }}>Page Permissions ({allowedPages.filter((k) => availablePageKeys.includes(k)).length}/{availablePageKeys.length})</p>
+              <p className="muted" style={{ margin: "4px 0 0" }}>
+                {isManagerScope ? "Grant pages from your own permissions" : "Select which admin pages this user can access"}
+              </p>
             </div>
             <button type="button" className="button-secondary" onClick={toggleAllPages} style={{ padding: "6px 12px", fontSize: "0.85rem" }}>
-              {allowedPages.length === ALL_PAGE_KEYS.length ? "Deselect All" : "Select All"}
+              {availablePageKeys.every((k) => allowedPages.includes(k)) ? "Deselect All" : "Select All"}
             </button>
           </div>
           <div className="field-checkbox-grid">
-            {ADMIN_PAGES.map((page) => (
+            {availablePages.map((page) => (
               <label key={page.key} className="field-checkbox">
                 <input type="checkbox" checked={allowedPages.includes(page.key)} onChange={() => togglePage(page.key)} />
                 <span>{page.label}</span>
