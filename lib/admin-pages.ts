@@ -14,7 +14,7 @@ export interface AdminPage {
 
 export const ADMIN_PAGES: AdminPage[] = [
   { key: "dashboard", label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard, group: "general" },
-  { key: "homepage", label: "Home Page", path: "/admin/homepage", icon: Home, group: "general" },
+  { key: "homepage", label: "Pages", path: "/admin/pages", icon: Home, group: "general" },
   { key: "properties", label: "Properties", path: "/admin/properties", icon: Building2, group: "listings" },
   { key: "projects", label: "Projects", path: "/admin/projects", icon: FolderKanban, group: "listings" },
   { key: "inquiries", label: "Inquiries", path: "/admin/inquiries", icon: MessageSquare, group: "crm" },

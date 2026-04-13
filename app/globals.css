@@ -2744,3 +2744,27 @@ body:has(.admin-layout) { background: #f8f9fb; }
     font-size: 5rem;
   }
 }
+
+/* ── Pages Tabs ──────────────────────────────────────────────── */
+.pages-tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e2e8f0;
+}
+.pages-tab {
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.pages-tab:hover { color: #0f766e; }
+.pages-tab-active {
+  color: #0f766e;
+  border-bottom-color: #0f766e;
+}

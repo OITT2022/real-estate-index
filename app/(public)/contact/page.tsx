@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { ContactForm } from "@/components/forms/contact-form";
+import { getContactContent } from "@/lib/settings";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Contact Us — Real Estate Index",
   description: "Get in touch with our team. We are here to help you find your perfect property.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const c = await getContactContent();
+
   return (
     <main>
       <div className="page-hero">
@@ -17,10 +21,10 @@ export default function ContactPage() {
           <div className="page-hero-breadcrumb">
             <Link href="/">Home</Link>
             <span>/</span>
-            <span>Contact</span>
+            <span>{c.contact_title}</span>
           </div>
-          <h1>Contact Us</h1>
-          <p>We&apos;d love to hear from you. Get in touch with our team.</p>
+          <h1>{c.contact_title}</h1>
+          <p>{c.contact_subtitle}</p>
         </div>
       </div>
 
@@ -29,9 +33,9 @@ export default function ContactPage() {
           <div className="contact-grid">
             {/* ── Contact Form ──────────────────────────────── */}
             <div className="contact-form-card">
-              <h2 className="contact-form-title">Send Us a Message</h2>
+              <h2 className="contact-form-title">{c.contact_form_heading}</h2>
               <p className="muted" style={{ margin: "0 0 24px" }}>
-                Fill in the form below and we&apos;ll get back to you as soon as possible.
+                {c.contact_form_intro}
               </p>
               <ContactForm />
             </div>
@@ -39,11 +43,8 @@ export default function ContactPage() {
             {/* ── Info Cards ───────────────────────────────── */}
             <div className="contact-info-col">
               <div className="contact-info-intro">
-                <h2>Get In Touch</h2>
-                <p className="muted">
-                  Whether you have a question about listings, pricing, or anything else,
-                  our team is ready to answer all your questions.
-                </p>
+                <h2>{c.contact_info_heading}</h2>
+                <p className="muted">{c.contact_info_intro}</p>
               </div>
 
               <div className="contact-info-card">
@@ -52,7 +53,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h4>Our Office</h4>
-                  <p>Cyprus</p>
+                  <p>{c.contact_office}</p>
                 </div>
               </div>
 
@@ -62,7 +63,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h4>Email Us</h4>
-                  <p>info@aradre.com</p>
+                  <p>{c.contact_email}</p>
                 </div>
               </div>
 
@@ -72,19 +73,21 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h4>Call Us</h4>
-                  <p>+357 99 123 456</p>
+                  <p>{c.contact_phone}</p>
                 </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-                <Image
-                  src="/contact-illustration.png"
-                  alt="Contact us"
-                  width={220}
-                  height={220}
-                  style={{ maxWidth: "100%", height: "auto" }}
-                />
-              </div>
+              {c.contact_image && (
+                <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
+                  <img
+                    src={c.contact_image}
+                    alt="Contact us"
+                    width={220}
+                    height={220}
+                    style={{ maxWidth: "100%", height: "auto" }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

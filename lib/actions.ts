@@ -495,6 +495,21 @@ export async function saveMapSettings(data: {
   return { success: true };
 }
 
+// ── Page Content ──────────────────────────────────────────────
+
+export async function savePageContent(data: Record<string, string>): Promise<ActionResult> {
+  for (const [key, value] of Object.entries(data)) {
+    await db.siteSetting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    });
+  }
+  revalidatePath("/about");
+  revalidatePath("/contact");
+  return { success: true };
+}
+
 // ── Image Bank ────────────────────────────────────────────────
 
 export async function linkBankImageToProperty(bankImageId: string, propertyId: string): Promise<ActionResult> {
@@ -667,7 +682,7 @@ export async function toggleHeroImageActive(id: string): Promise<ActionResult> {
   const img = await db.heroImage.findUnique({ where: { id } });
   if (!img) return { success: false, error: "Image not found" };
   await db.heroImage.update({ where: { id }, data: { active: !img.active } });
-  revalidatePath("/admin/homepage");
+  revalidatePath("/admin/pages");
   revalidatePath("/");
   return { success: true };
 }
@@ -677,7 +692,7 @@ export async function removeHeroImage(id: string): Promise<ActionResult> {
   if (!img) return { success: false, error: "Image not found" };
   await deleteImage(img.url);
   await db.heroImage.delete({ where: { id } });
-  revalidatePath("/admin/homepage");
+  revalidatePath("/admin/pages");
   revalidatePath("/");
   return { success: true };
 }
