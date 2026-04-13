@@ -507,6 +507,8 @@ export async function savePageContent(data: Record<string, string>): Promise<Act
   }
   revalidatePath("/about");
   revalidatePath("/contact");
+  revalidatePath("/");
+  revalidatePath("/admin/pages");
   return { success: true };
 }
 

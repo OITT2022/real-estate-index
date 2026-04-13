@@ -4,7 +4,7 @@ import { MapPin, Mail, Phone } from "lucide-react";
 import { ContactForm } from "@/components/forms/contact-form";
 import { getContactContent } from "@/lib/settings";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Contact Us — Real Estate Index",
