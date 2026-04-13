@@ -17,11 +17,14 @@ type Props = {
   lng: number;
   onLatChange: (val: number) => void;
   onLngChange: (val: number) => void;
+  city?: string;
+  address?: string;
 };
 
-export function LocationPicker({ lat, lng, onLatChange, onLngChange }: Props) {
+export function LocationPicker({ lat, lng, onLatChange, onLngChange, city, address }: Props) {
   const [localLat, setLocalLat] = useState(lat);
   const [localLng, setLocalLng] = useState(lng);
+  const [geocoding, setGeocoding] = useState(false);
 
   function handleMapClick(newLat: number, newLng: number) {
     const roundedLat = Math.round(newLat * 10000) / 10000;
@@ -42,6 +45,30 @@ export function LocationPicker({ lat, lng, onLatChange, onLngChange }: Props) {
     onLngChange(val);
   }
 
+  async function handleGeocode() {
+    if (!city && !address) return;
+    setGeocoding(true);
+    try {
+      const q = [address, city].filter(Boolean).join(", ");
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`
+      );
+      const data = await res.json();
+      if (data.length > 0) {
+        const newLat = Math.round(parseFloat(data[0].lat) * 10000) / 10000;
+        const newLng = Math.round(parseFloat(data[0].lon) * 10000) / 10000;
+        setLocalLat(newLat);
+        setLocalLng(newLng);
+        onLatChange(newLat);
+        onLngChange(newLng);
+      }
+    } catch (err) {
+      console.error("Geocoding failed:", err);
+    } finally {
+      setGeocoding(false);
+    }
+  }
+
   return (
     <div className="card" style={{ display: "grid", gap: 12 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -51,6 +78,30 @@ export function LocationPicker({ lat, lng, onLatChange, onLngChange }: Props) {
         </div>
         <div className="map-coordinates">{localLat.toFixed(4)}, {localLng.toFixed(4)}</div>
       </div>
+      {(city || address) && (
+        <div
+          onClick={handleGeocode}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 12px",
+            background: "#f0f9ff",
+            borderRadius: 8,
+            cursor: geocoding ? "wait" : "pointer",
+            fontSize: "0.85rem",
+            color: "#0369a1",
+            border: "1px solid #bae6fd",
+          }}
+          title="Click to look up coordinates for this address"
+        >
+          <span style={{ fontSize: "1rem" }}>&#x1F4CD;</span>
+          <span style={{ textDecoration: "underline" }}>
+            {[address, city].filter(Boolean).join(", ")}
+          </span>
+          {geocoding && <span style={{ marginLeft: "auto", fontSize: "0.8rem", opacity: 0.7 }}>Looking up...</span>}
+        </div>
+      )}
       <div style={{ height: 300, borderRadius: 14, overflow: "hidden" }}>
         <MapPicker lat={localLat} lng={localLng} onChange={handleMapClick} />
       </div>

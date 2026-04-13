@@ -131,6 +131,8 @@ export function ProjectForm({ mode, project, customers, userScope, onCreated }: 
         lng={watch("longitude") || 33.6232}
         onLatChange={(v) => setValue("latitude", v)}
         onLngChange={(v) => setValue("longitude", v)}
+        city={watch("city")}
+        address={watch("address")}
       />
       <input {...register("latitude")} type="hidden" />
       <input {...register("longitude")} type="hidden" />

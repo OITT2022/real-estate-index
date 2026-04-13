@@ -216,6 +216,8 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
         lng={watch("longitude") || 33.6232}
         onLatChange={(v) => setValue("latitude", v)}
         onLngChange={(v) => setValue("longitude", v)}
+        city={watch("city")}
+        address={watch("address")}
       />
 
       <input {...register("latitude")} type="hidden" />
