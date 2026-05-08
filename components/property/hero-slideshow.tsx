@@ -25,7 +25,19 @@ export function HeroSlideshow({ images, interval = 5000, children }: Props) {
     return () => clearInterval(timer);
   }, [images.length, interval]);
 
-  if (images.length === 0) return null;
+  if (images.length === 0) {
+    // No hero images configured — render the search card on a plain
+    // gradient background so the page stays usable on a fresh DB.
+    return (
+      <div
+        className="hero-fullwidth"
+        style={{ background: "linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)" }}
+      >
+        <div className="hero-fullwidth-overlay" />
+        <div className="hero-fullwidth-content container">{children}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="hero-fullwidth">

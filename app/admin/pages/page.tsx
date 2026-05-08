@@ -1,8 +1,9 @@
 import { HeroImageManager } from "@/components/admin/hero-image-manager";
 import { AboutPageEditor } from "@/components/admin/about-page-editor";
 import { ContactPageEditor } from "@/components/admin/contact-page-editor";
+import { HomepageContentEditor } from "@/components/admin/homepage-content-editor";
 import { getAllHeroImages } from "@/lib/site-data";
-import { getAboutContent, getContactContent } from "@/lib/settings";
+import { getAboutContent, getContactContent, getHomepageContent } from "@/lib/settings";
 import { checkPageAccess } from "@/lib/check-access";
 import { PagesTabs } from "@/components/admin/pages-tabs";
 
@@ -10,10 +11,11 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPagesPage() {
   await checkPageAccess("homepage");
-  const [images, aboutContent, contactContent] = await Promise.all([
+  const [images, aboutContent, contactContent, homepageContent] = await Promise.all([
     getAllHeroImages(),
     getAboutContent(),
     getContactContent(),
+    getHomepageContent(),
   ]);
 
   return (
@@ -25,7 +27,12 @@ export default async function AdminPagesPage() {
         </div>
       </div>
       <PagesTabs
-        homepageContent={<HeroImageManager images={images} />}
+        homepageContent={
+          <div style={{ display: "grid", gap: 20 }}>
+            <HeroImageManager images={images} />
+            <HomepageContentEditor content={homepageContent} />
+          </div>
+        }
         aboutContent={<AboutPageEditor content={aboutContent} />}
         contactContent={<ContactPageEditor content={contactContent} />}
       />

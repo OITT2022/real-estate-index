@@ -10,6 +10,7 @@ import {
   getDistinctCities,
   getDistinctPropertyTypes,
 } from "@/lib/site-data";
+import { getHomepageContent } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -28,25 +29,20 @@ export default async function HomePage({ searchParams }: Props) {
 
   const hasFilters = city || propertyType || bedrooms || minPrice || maxPrice;
 
-  const [properties, featured, projects, heroImages, cities, propertyTypes] = await Promise.all([
+  const [properties, featured, projects, heroImages, cities, propertyTypes, homepage] = await Promise.all([
     searchProperties({ city, propertyType, bedrooms, minPrice, maxPrice }),
     hasFilters ? Promise.resolve([]) : getFeaturedProperties(),
     hasFilters ? Promise.resolve([]) : getPublishedProjects(),
     getActiveHeroImages(),
     getDistinctCities(),
     getDistinctPropertyTypes(),
+    getHomepageContent(),
   ]);
-
-  const fallbackImages = [
-    { id: "fallback-1", url: "https://images.unsplash.com/photo-1580137189272-c9379f8864fd?w=1400&q=80", altText: "Beautiful coastline" },
-  ];
-
-  const slideshowImages = heroImages.length > 0 ? heroImages : fallbackImages;
 
   return (
     <main>
       {/* ── Full-Width Hero ──────────────────────────────────── */}
-      <HeroSlideshow images={slideshowImages}>
+      <HeroSlideshow images={heroImages}>
         <div className="hero-search-card">
           <h1>Find Your Dream Property</h1>
           <p className="muted">
@@ -77,25 +73,25 @@ export default async function HomePage({ searchParams }: Props) {
         <section className="section">
           <div className="container">
             <div className="section-header">
-              <p className="eyebrow">How it works</p>
-              <h2>Find Your Home in 3 Steps</h2>
-              <p>We make the property search simple, transparent, and enjoyable from start to finish.</p>
+              <p className="eyebrow">{homepage.homepage_how_eyebrow}</p>
+              <h2>{homepage.homepage_how_heading}</h2>
+              <p>{homepage.homepage_how_intro}</p>
             </div>
             <div className="how-it-works-grid">
               <div className="how-it-works-card">
                 <div className="how-it-works-icon">&#127968;</div>
-                <h3>Browse Properties</h3>
-                <p>Explore our curated listings with detailed photos, specs, and location data for every property.</p>
+                <h3>{homepage.homepage_card1_title}</h3>
+                <p>{homepage.homepage_card1_text}</p>
               </div>
               <div className="how-it-works-card">
                 <div className="how-it-works-icon">&#128269;</div>
-                <h3>Compare &amp; Choose</h3>
-                <p>Use our filters to narrow down your perfect match by location, size, price, and features.</p>
+                <h3>{homepage.homepage_card2_title}</h3>
+                <p>{homepage.homepage_card2_text}</p>
               </div>
               <div className="how-it-works-card">
                 <div className="how-it-works-icon">&#128274;</div>
-                <h3>Contact the Seller</h3>
-                <p>Send inquiries directly to property sellers through our secure contact forms.</p>
+                <h3>{homepage.homepage_card3_title}</h3>
+                <p>{homepage.homepage_card3_text}</p>
               </div>
             </div>
           </div>

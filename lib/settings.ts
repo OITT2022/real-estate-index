@@ -67,8 +67,16 @@ const CONTACT_KEYS = [
   "contact_image",
 ] as const;
 
+const HOMEPAGE_KEYS = [
+  "homepage_how_eyebrow", "homepage_how_heading", "homepage_how_intro",
+  "homepage_card1_title", "homepage_card1_text",
+  "homepage_card2_title", "homepage_card2_text",
+  "homepage_card3_title", "homepage_card3_text",
+] as const;
+
 export type AboutContent = Record<(typeof ABOUT_KEYS)[number], string>;
 export type ContactContent = Record<(typeof CONTACT_KEYS)[number], string>;
+export type HomepageContent = Record<(typeof HOMEPAGE_KEYS)[number], string>;
 
 const ABOUT_DEFAULTS: AboutContent = {
   about_title: "About Us",
@@ -102,13 +110,43 @@ const CONTACT_DEFAULTS: ContactContent = {
   contact_image: "/contact-illustration.png",
 };
 
+const HOMEPAGE_DEFAULTS: HomepageContent = {
+  homepage_how_eyebrow: "How it works",
+  homepage_how_heading: "Find Your Home in 3 Steps",
+  homepage_how_intro: "We make the property search simple, transparent, and enjoyable from start to finish.",
+  homepage_card1_title: "Browse Properties",
+  homepage_card1_text: "Explore our curated listings with detailed photos, specs, and location data for every property.",
+  homepage_card2_title: "Compare & Choose",
+  homepage_card2_text: "Use our filters to narrow down your perfect match by location, size, price, and features.",
+  homepage_card3_title: "Contact the Seller",
+  homepage_card3_text: "Send inquiries directly to property sellers through our secure contact forms.",
+};
+
+export const ALL_PAGE_DEFAULTS: Record<string, string> = {
+  ...ABOUT_DEFAULTS,
+  ...CONTACT_DEFAULTS,
+  ...HOMEPAGE_DEFAULTS,
+};
+
 export async function getAboutContent(): Promise<AboutContent> {
-  const settings = await db.siteSetting.findMany({ where: { key: { in: [...ABOUT_KEYS] } } });
+  const [settings, propertyCount, distinctCities] = await Promise.all([
+    db.siteSetting.findMany({ where: { key: { in: [...ABOUT_KEYS] } } }),
+    db.property.count({ where: { published: true, status: "ACTIVE" } }),
+    db.property.findMany({
+      where: { published: true, status: "ACTIVE" },
+      select: { city: true },
+      distinct: ["city"],
+    }),
+  ]);
   const map = new Map(settings.map((s) => [s.key, s.value]));
   const result = { ...ABOUT_DEFAULTS };
   for (const key of ABOUT_KEYS) {
     if (map.has(key)) (result as Record<string, string>)[key] = map.get(key)!;
   }
+  // Live-compute the first two stats from the database. The third
+  // ("Happy Clients") has no DB source and stays admin-editable.
+  result.about_stat1_value = String(propertyCount);
+  result.about_stat2_value = String(distinctCities.length);
   return result;
 }
 
@@ -117,6 +155,16 @@ export async function getContactContent(): Promise<ContactContent> {
   const map = new Map(settings.map((s) => [s.key, s.value]));
   const result = { ...CONTACT_DEFAULTS };
   for (const key of CONTACT_KEYS) {
+    if (map.has(key)) (result as Record<string, string>)[key] = map.get(key)!;
+  }
+  return result;
+}
+
+export async function getHomepageContent(): Promise<HomepageContent> {
+  const settings = await db.siteSetting.findMany({ where: { key: { in: [...HOMEPAGE_KEYS] } } });
+  const map = new Map(settings.map((s) => [s.key, s.value]));
+  const result = { ...HOMEPAGE_DEFAULTS };
+  for (const key of HOMEPAGE_KEYS) {
     if (map.has(key)) (result as Record<string, string>)[key] = map.get(key)!;
   }
   return result;

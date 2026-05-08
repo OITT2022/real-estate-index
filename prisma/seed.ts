@@ -1,5 +1,6 @@
 import { PrismaClient, PropertyStatus, ProjectStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { ALL_PAGE_DEFAULTS } from "@/lib/settings";
 
 const prisma = new PrismaClient();
 
@@ -517,6 +518,22 @@ async function main() {
       await prisma.inquiry.createMany({ data: inquiries });
       console.log("  Inquiries created");
     }
+  }
+
+  // ── Page Content Defaults (About / Contact / Homepage) ──────
+  // Idempotent: only inserts a key if missing, never overwrites an
+  // admin's saved value. Keys/values come from ALL_PAGE_DEFAULTS in
+  // lib/settings.ts so the seed and the runtime fallbacks stay in sync.
+  let pageSettingsCreated = 0;
+  for (const [key, value] of Object.entries(ALL_PAGE_DEFAULTS)) {
+    const existing = await prisma.siteSetting.findUnique({ where: { key } });
+    if (!existing) {
+      await prisma.siteSetting.create({ data: { key, value } });
+      pageSettingsCreated++;
+    }
+  }
+  if (pageSettingsCreated > 0) {
+    console.log(`  Page content defaults created (${pageSettingsCreated} keys)`);
   }
 
   // ── Customers ───────────────────────────────────────────────

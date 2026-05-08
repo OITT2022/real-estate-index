@@ -22,7 +22,11 @@ export function AboutPageEditor({ content }: Props) {
 
   async function handleSave() {
     setSaving(true);
-    await savePageContent(data);
+    // about_stat1_value and about_stat2_value are computed live in
+    // getAboutContent — don't persist stale snapshots of them.
+    const { about_stat1_value: _s1, about_stat2_value: _s2, ...persisted } = data;
+    void _s1; void _s2;
+    await savePageContent(persisted);
     setSaving(false);
     setSaved(true);
     router.refresh();
@@ -104,10 +108,20 @@ export function AboutPageEditor({ content }: Props) {
       {/* Stats */}
       <div className="card" style={{ display: "grid", gap: 12 }}>
         <p className="eyebrow">Statistics</p>
+        <p className="muted" style={{ fontSize: "0.85rem", margin: 0 }}>
+          Stat 1 (count of published properties) and Stat 2 (number of distinct cities) are computed live from the database.
+          Their labels are editable; Stat 3 is fully editable.
+        </p>
         <div className="admin-form-grid">
-          <label><span>Stat 1 Value</span><input value={data.about_stat1_value} onChange={(e) => set("about_stat1_value", e.target.value)} /></label>
+          <label>
+            <span>Stat 1 Value</span>
+            <input value={data.about_stat1_value} disabled readOnly title="Computed from the database" />
+          </label>
           <label><span>Stat 1 Label</span><input value={data.about_stat1_label} onChange={(e) => set("about_stat1_label", e.target.value)} /></label>
-          <label><span>Stat 2 Value</span><input value={data.about_stat2_value} onChange={(e) => set("about_stat2_value", e.target.value)} /></label>
+          <label>
+            <span>Stat 2 Value</span>
+            <input value={data.about_stat2_value} disabled readOnly title="Computed from the database" />
+          </label>
           <label><span>Stat 2 Label</span><input value={data.about_stat2_label} onChange={(e) => set("about_stat2_label", e.target.value)} /></label>
           <label><span>Stat 3 Value</span><input value={data.about_stat3_value} onChange={(e) => set("about_stat3_value", e.target.value)} /></label>
           <label><span>Stat 3 Label</span><input value={data.about_stat3_label} onChange={(e) => set("about_stat3_label", e.target.value)} /></label>
