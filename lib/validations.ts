@@ -132,10 +132,26 @@ export type AdminUserFormValues = z.infer<typeof adminUserFormSchema>;
 
 // Self-service profile schema. Email is intentionally excluded — it's the
 // immutable sign-in identity used by NextAuth's authorize().
-export const profileFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  phone: z.string().optional().or(z.literal("")),
-  profileImage: z.string().optional().or(z.literal("")),
-});
+export const profileFormSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    phone: z.string().optional().or(z.literal("")),
+    phonePrefix: z
+      .string()
+      .regex(/^\d{1,4}$/, "Invalid country code")
+      .optional()
+      .or(z.literal("")),
+    country: z
+      .string()
+      .regex(/^[A-Z]{2}$/, "Invalid country")
+      .optional()
+      .or(z.literal("")),
+    timezone: z.string().optional().or(z.literal("")),
+    profileImage: z.string().optional().or(z.literal("")),
+  })
+  .refine((d) => !d.phone || !!d.phonePrefix, {
+    message: "Pick a country code for the phone number",
+    path: ["phonePrefix"],
+  });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;

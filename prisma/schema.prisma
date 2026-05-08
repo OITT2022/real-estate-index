@@ -26,6 +26,9 @@ model AdminUser {
   name                String?
   email               String    @unique
   phone               String?
+  phonePrefix         String?
+  country             String?
+  timezone            String?
   profileImage        String?
   passwordHash        String
   isSuperAdmin        Boolean   @default(false)

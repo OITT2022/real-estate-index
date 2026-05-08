@@ -3,19 +3,29 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validations";
 import { updateOwnProfile } from "@/lib/actions";
+import type { CountryOption } from "@/lib/countries";
 
 type ProfileUser = {
   id: string;
   name: string | null;
   email: string;
   phone: string | null;
+  phonePrefix: string | null;
+  country: string | null;
+  timezone: string | null;
   profileImage: string | null;
 };
 
-export function ProfileForm({ user }: { user: ProfileUser }) {
+type Props = {
+  user: ProfileUser;
+  countries: CountryOption[];
+  timezones: string[];
+};
+
+export function ProfileForm({ user, countries, timezones }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -32,11 +42,34 @@ export function ProfileForm({ user }: { user: ProfileUser }) {
     defaultValues: {
       name: user.name ?? "",
       phone: user.phone ?? "",
+      phonePrefix: user.phonePrefix ?? "",
+      country: user.country ?? "",
+      timezone: user.timezone ?? "",
       profileImage: user.profileImage ?? "",
     },
   });
 
   const profileImage = watch("profileImage");
+  const country = watch("country");
+  const phonePrefix = watch("phonePrefix");
+
+  // Deduplicated list of dial codes for the prefix dropdown.
+  const dialCodes = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of countries) set.add(c.dialCode);
+    return [...set].sort((a, b) => Number(a) - Number(b));
+  }, [countries]);
+
+  function handleCountryChange(next: string) {
+    setValue("country", next);
+    if (!next) return;
+    const opt = countries.find((c) => c.code === next);
+    if (!opt) return;
+    // If the prefix is empty or matches some country's dial code already
+    // (i.e. user hasn't manually typed something exotic), update it.
+    const knownPrefix = !phonePrefix || dialCodes.includes(phonePrefix);
+    if (knownPrefix) setValue("phonePrefix", opt.dialCode);
+  }
 
   async function handleImageUpload(file: File) {
     setUploading(true);
@@ -178,7 +211,49 @@ export function ProfileForm({ user }: { user: ProfileUser }) {
 
         <div>
           <label className="admin-label">Phone</label>
-          <input type="tel" {...register("phone")} className="admin-input" />
+          <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 8 }}>
+            <select
+              className="admin-input"
+              value={phonePrefix ?? ""}
+              onChange={(e) => setValue("phonePrefix", e.target.value)}
+            >
+              <option value="">Code…</option>
+              {dialCodes.map((d) => (
+                <option key={d} value={d}>+{d}</option>
+              ))}
+            </select>
+            <input type="tel" {...register("phone")} className="admin-input" placeholder="National number" />
+          </div>
+          {errors.phonePrefix && <p className="form-error">{errors.phonePrefix.message}</p>}
+        </div>
+      </div>
+
+      <div className="card" style={{ display: "grid", gap: 16 }}>
+        <p className="eyebrow">Location</p>
+
+        <div>
+          <label className="admin-label">Country</label>
+          <select
+            className="admin-input"
+            value={country ?? ""}
+            onChange={(e) => handleCountryChange(e.target.value)}
+          >
+            <option value="">Select country…</option>
+            {countries.map((c) => (
+              <option key={c.code} value={c.code}>{c.name} (+{c.dialCode})</option>
+            ))}
+          </select>
+          {errors.country && <p className="form-error">{errors.country.message}</p>}
+        </div>
+
+        <div>
+          <label className="admin-label">Time zone</label>
+          <select className="admin-input" {...register("timezone")}>
+            <option value="">Select time zone…</option>
+            {timezones.map((tz) => (
+              <option key={tz} value={tz}>{tz}</option>
+            ))}
+          </select>
         </div>
       </div>
 
