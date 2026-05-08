@@ -13,6 +13,8 @@ import path from "path";
 export interface StorageProvider {
   upload(file: File): Promise<string>;
   delete(url: string): Promise<void>;
+  /** Return the public URL of every object the provider currently holds. */
+  list(): Promise<string[]>;
 }
 
 // ── Local filesystem provider ──
@@ -38,6 +40,17 @@ class LocalStorageProvider implements StorageProvider {
       await fs.unlink(filepath).catch(() => {});
     }
   }
+
+  async list(): Promise<string[]> {
+    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    try {
+      const entries = await fs.readdir(uploadsDir, { withFileTypes: true });
+      return entries.filter((e) => e.isFile()).map((e) => `/uploads/${e.name}`);
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+      throw err;
+    }
+  }
 }
 
 // ── S3 provider ──
@@ -46,6 +59,7 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 
 class S3StorageProvider implements StorageProvider {
@@ -98,6 +112,27 @@ class S3StorageProvider implements StorageProvider {
         Key: key,
       })
     );
+  }
+
+  async list(): Promise<string[]> {
+    const out: string[] = [];
+    let continuationToken: string | undefined = undefined;
+    do {
+      const res: import("@aws-sdk/client-s3").ListObjectsV2CommandOutput = await this.getClient().send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: "uploads/",
+          ContinuationToken: continuationToken,
+        }),
+      );
+      for (const obj of res.Contents ?? []) {
+        if (obj.Key) {
+          out.push(`https://${this.bucket}.s3.${this.region}.amazonaws.com/${obj.Key}`);
+        }
+      }
+      continuationToken = res.IsTruncated ? res.NextContinuationToken : undefined;
+    } while (continuationToken);
+    return out;
   }
 }
 

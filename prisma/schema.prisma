@@ -230,7 +230,6 @@ model Inquiry {
 
   @@index([propertyId, createdAt])
   @@index([projectId])
-  @@index([status])
   @@index([status, createdAt(sort: Desc)])
 }
 

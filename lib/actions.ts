@@ -7,7 +7,7 @@ import { z } from "zod";
 import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema, adminUserFormSchema, customerFormSchema } from "@/lib/validations";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { getSessionUser, canAccessCustomer, isCustomerManager } from "@/lib/scope";
+import { getSessionUser, canAccessCustomer, isCustomerManager, propertyCustomerScope } from "@/lib/scope";
 import { slugify } from "@/lib/slug";
 import { resolveCustomerId } from "@/lib/customer-scope";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -518,8 +518,28 @@ export async function saveMapSettings(data: {
 
 // ── Page Content ──────────────────────────────────────────────
 
+// SiteSetting keys that hold user-uploaded image URLs. When the value is
+// replaced, the previous blob (if it lived in our storage) should be
+// deleted to avoid orphaning it.
+const PAGE_IMAGE_KEYS = new Set(["about_image", "contact_image"]);
+
 export async function savePageContent(data: Record<string, string>): Promise<ActionResult> {
   for (const [key, value] of Object.entries(data)) {
+    if (PAGE_IMAGE_KEYS.has(key)) {
+      const existing = await db.siteSetting.findUnique({ where: { key }, select: { value: true } });
+      const oldUrl = existing?.value;
+      if (
+        oldUrl &&
+        oldUrl !== value &&
+        (oldUrl.startsWith("/uploads/") || oldUrl.includes(".s3."))
+      ) {
+        try {
+          await deleteImage(oldUrl);
+        } catch (err) {
+          console.error(`[savePageContent] failed to delete replaced blob ${oldUrl}`, err);
+        }
+      }
+    }
     await db.siteSetting.upsert({
       where: { key },
       update: { value },
@@ -695,6 +715,16 @@ export async function deleteAdminUser(id: string): Promise<ActionResult> {
   const user = await db.adminUser.findUnique({ where: { id } });
   if (!user) return { success: false, error: "User not found" };
   if (user.isSuperAdmin) return { success: false, error: "Cannot delete a super admin" };
+
+  // Clean up the profile image blob if it lives in our storage. External URLs
+  // (e.g. gravatar) and the default placeholder are skipped.
+  if (user.profileImage && (user.profileImage.startsWith("/uploads/") || user.profileImage.includes(".s3."))) {
+    try {
+      await deleteImage(user.profileImage);
+    } catch (err) {
+      console.error(`[deleteAdminUser] failed to delete blob ${user.profileImage}`, err);
+    }
+  }
 
   await db.adminUser.delete({ where: { id } });
   revalidatePath("/admin/users");
@@ -1087,5 +1117,71 @@ export async function changeOwnPassword(currentPassword: string, newPassword: st
     data: { passwordHash, mustChangePassword: false },
   });
 
+  return { success: true };
+}
+
+// ── Topbar data: scoped recent inquiries ──────────────────────────
+
+export type RecentInquiry = {
+  id: string;
+  fullName: string;
+  propertyTitle: string;
+  createdAt: Date;
+};
+
+export async function getRecentInquiriesForCurrentUser(
+  limit = 5,
+): Promise<{ inquiries: RecentInquiry[]; newCount: number }> {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) return { inquiries: [], newCount: 0 };
+
+  const propScope = propertyCustomerScope(sessionUser);
+  const where = {
+    status: "new",
+    ...(propScope ? { property: propScope } : {}),
+  } as const;
+
+  const [rows, newCount] = await Promise.all([
+    db.inquiry.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      include: { property: { select: { title: true } } },
+    }),
+    db.inquiry.count({ where }),
+  ]);
+
+  return {
+    inquiries: rows.map((r) => ({
+      id: r.id,
+      fullName: r.fullName,
+      propertyTitle: r.property.title,
+      createdAt: r.createdAt,
+    })),
+    newCount,
+  };
+}
+
+// ── Self-service profile update (email is intentionally excluded) ──
+
+export async function updateOwnProfile(data: unknown): Promise<ActionResult> {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) return { success: false, error: "Not signed in." };
+
+  const { profileFormSchema } = await import("@/lib/validations");
+  const parsed = profileFormSchema.safeParse(data);
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+
+  await db.adminUser.update({
+    where: { id: sessionUser.id },
+    data: {
+      name: parsed.data.name,
+      phone: parsed.data.phone || null,
+      profileImage: parsed.data.profileImage || null,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/profile");
   return { success: true };
 }

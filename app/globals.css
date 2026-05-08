@@ -1711,6 +1711,39 @@ body:has(.admin-layout) { background: #f8f9fb; }
 .admin-topbar-user-name { font-weight: 600; color: var(--text); }
 .admin-topbar-user-role { color: var(--muted); }
 
+/* Topbar dropdowns (avatar menu + notifications popover) */
+.admin-topbar-anchor { position: relative; display: inline-flex; }
+.admin-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.08));
+  padding: 6px;
+  z-index: 30;
+}
+.admin-dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+}
+.admin-dropdown-item:hover { background: var(--surface-alt); color: var(--accent); }
+.admin-dropdown-divider { height: 1px; background: var(--line); margin: 4px 6px; }
+.admin-notif-popover { width: 360px; max-height: 480px; overflow-y: auto; }
+.admin-notif-row { padding: 10px 12px; }
+.admin-notif-empty { padding: 16px; text-align: center; color: var(--muted); font-size: 0.85rem; }
+
 /* Sidebar V2 */
 .admin-sidebar-v2 {
   border-right: 1px solid var(--line);

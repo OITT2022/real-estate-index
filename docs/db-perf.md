@@ -52,7 +52,11 @@ correct behavior.
 - `PropertyImage(propertyId, sortOrder)` and `ProjectImage(projectId, sortOrder)` — covers gallery rendering + cascade
 - `ProjectDocument(projectId, sortOrder)` — covers document list rendering + cascade
 - `ProjectUnit(projectId, building, entrance, floor)` and `(propertyId)`
-- `Inquiry(propertyId, createdAt)`, `(projectId)`, `(status)`, and the new `(status, createdAt DESC)`
+- `Inquiry(propertyId, createdAt)`, `(projectId)`, `(status, createdAt DESC)`
+  - The single-column `(status)` index that originally lived alongside the
+    composite was dropped in `20260510000000_drop_redundant_inquiry_status_idx`.
+    Its leading column is `status`, so the composite covers any query the
+    single-column one could serve. Keeping both wasted disk and write IO.
 - `InquiryNote(inquiryId, createdAt)`, `Appointment(inquiryId, dateTime)`, `EmailLog(inquiryId, sentAt)`
 - `HeroImage(active, sortOrder)`, `Customer(companyName)`, `AdminUser(customerId)`, `ApiClient(customerId)`
 

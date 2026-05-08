@@ -123,3 +123,13 @@ export const adminUserFormSchema = z.object({
 });
 
 export type AdminUserFormValues = z.infer<typeof adminUserFormSchema>;
+
+// Self-service profile schema. Email is intentionally excluded — it's the
+// immutable sign-in identity used by NextAuth's authorize().
+export const profileFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  phone: z.string().optional().or(z.literal("")),
+  profileImage: z.string().optional().or(z.literal("")),
+});
+
+export type ProfileFormValues = z.infer<typeof profileFormSchema>;
