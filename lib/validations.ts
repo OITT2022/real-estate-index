@@ -113,20 +113,36 @@ export const customerFormSchema = z.object({
 
 export type CustomerFormValues = z.infer<typeof customerFormSchema>;
 
-export const adminUserFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Valid email required"),
-  phone: z.string().optional().or(z.literal("")),
-  profileImage: z.string().optional().or(z.literal("")),
-  // Empty string = "leave password unchanged" on update; create rejects empty
-  // explicitly in lib/actions.ts. When non-empty, enforce min length + at
-  // least one letter and one digit.
-  password: z.union([z.literal(""), passwordPolicy]),
-  isSuperAdmin: z.boolean(),
-  allowedPages: z.array(z.string()),
-  customerId: z.string().optional().or(z.literal("")),
-  active: z.boolean(),
-});
+export const adminUserFormSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Valid email required"),
+    phone: z.string().optional().or(z.literal("")),
+    phoneCountry: z
+      .string()
+      .regex(/^[A-Z]{2}$/, "Invalid country")
+      .optional()
+      .or(z.literal("")),
+    country: z
+      .string()
+      .regex(/^[A-Z]{2}$/, "Invalid country")
+      .optional()
+      .or(z.literal("")),
+    timezone: z.string().optional().or(z.literal("")),
+    profileImage: z.string().optional().or(z.literal("")),
+    // Empty string = "leave password unchanged" on update; create rejects empty
+    // explicitly in lib/actions.ts. When non-empty, enforce min length + at
+    // least one letter and one digit.
+    password: z.union([z.literal(""), passwordPolicy]),
+    isSuperAdmin: z.boolean(),
+    allowedPages: z.array(z.string()),
+    customerId: z.string().optional().or(z.literal("")),
+    active: z.boolean(),
+  })
+  .refine((d) => !d.phone || !!d.phoneCountry, {
+    message: "Pick a country for the phone number",
+    path: ["phoneCountry"],
+  });
 
 export type AdminUserFormValues = z.infer<typeof adminUserFormSchema>;
 

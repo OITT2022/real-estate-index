@@ -3,16 +3,23 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import * as flagsByCode from "country-flag-icons/string/3x2";
 import { adminUserFormSchema, type AdminUserFormValues } from "@/lib/validations";
 import { createAdminUser, updateAdminUser } from "@/lib/actions";
 import { ADMIN_PAGES, ALL_PAGE_KEYS } from "@/lib/admin-pages";
+import { SearchableSelect, type SearchableOption } from "@/components/ui/searchable-select";
+import type { CountryOption } from "@/lib/countries";
+import type { TimezoneOption } from "@/lib/timezones";
 
 type UserData = {
   id: string;
   name: string | null;
   email: string;
   phone: string | null;
+  phoneCountry: string | null;
+  country: string | null;
+  timezone: string | null;
   profileImage: string | null;
   isSuperAdmin: boolean;
   allowedPages: unknown;
@@ -26,13 +33,30 @@ type Props = {
   mode: "create" | "edit";
   user?: UserData | null;
   customers?: CustomerOption[];
+  countries: CountryOption[];
+  timezones: TimezoneOption[];
   /** If set, the current logged-in user is a customer manager — lock to this customer */
   currentUserCustomerId?: string;
   /** If set, only these pages can be assigned (current user's own permissions) */
   currentUserAllowedPages?: string[];
 };
 
-export function AdminUserForm({ mode, user, customers, currentUserCustomerId, currentUserAllowedPages }: Props) {
+const FLAGS = flagsByCode as Record<string, string>;
+
+function Flag({ code, size = 18 }: { code: string; size?: number }) {
+  const svg = FLAGS[code];
+  if (!svg) return null;
+  return (
+    <span
+      className="ss-flag"
+      style={{ width: size * 1.5, height: size, lineHeight: 0 }}
+      aria-hidden
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+}
+
+export function AdminUserForm({ mode, user, customers, countries, timezones, currentUserCustomerId, currentUserAllowedPages }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -57,6 +81,9 @@ export function AdminUserForm({ mode, user, customers, currentUserCustomerId, cu
           name: user.name ?? "",
           email: user.email,
           phone: user.phone ?? "",
+          phoneCountry: user.phoneCountry ?? "",
+          country: user.country ?? "",
+          timezone: user.timezone ?? "",
           profileImage: user.profileImage ?? "",
           password: "",
           isSuperAdmin: user.isSuperAdmin,
@@ -71,6 +98,9 @@ export function AdminUserForm({ mode, user, customers, currentUserCustomerId, cu
           active: true,
           password: "",
           phone: "",
+          phoneCountry: "",
+          country: "",
+          timezone: "",
           profileImage: "",
         },
   });
@@ -78,6 +108,63 @@ export function AdminUserForm({ mode, user, customers, currentUserCustomerId, cu
   const isSuperAdmin = watch("isSuperAdmin");
   const allowedPages = watch("allowedPages");
   const profileImage = watch("profileImage");
+  const country = watch("country");
+  const phoneCountry = watch("phoneCountry");
+
+  const countryOptions: SearchableOption[] = useMemo(
+    () => countries.map((c) => ({ value: c.code, label: c.name, searchText: c.searchText })),
+    [countries],
+  );
+  const tzOptions: SearchableOption[] = useMemo(
+    () => timezones.map((t) => ({ value: t.value, label: t.label, searchText: `${t.label} ${t.value}`.toLowerCase() })),
+    [timezones],
+  );
+  const countriesByCode = useMemo(() => {
+    const m = new Map<string, CountryOption>();
+    for (const c of countries) m.set(c.code, c);
+    return m;
+  }, [countries]);
+
+  const phoneCountryInfo = phoneCountry ? countriesByCode.get(phoneCountry) ?? null : null;
+
+  function handleCountryChange(next: string) {
+    setValue("country", next, { shouldValidate: true });
+    if (!phoneCountry) setValue("phoneCountry", next);
+  }
+
+  function renderCountryOption(opt: SearchableOption) {
+    const info = countriesByCode.get(opt.value);
+    return (
+      <span className="ss-row">
+        <Flag code={opt.value} />
+        <span className="ss-row-label">{opt.label}</span>
+        {info && <span className="ss-row-aux">+{info.dialCode}</span>}
+      </span>
+    );
+  }
+
+  function renderCountryTrigger(opt: SearchableOption | null) {
+    if (!opt) return <span className="ss-placeholder">Select country…</span>;
+    const info = countriesByCode.get(opt.value);
+    return (
+      <span className="ss-row">
+        <Flag code={opt.value} />
+        <span className="ss-row-label">{opt.label}</span>
+        {info && <span className="ss-row-aux">+{info.dialCode}</span>}
+      </span>
+    );
+  }
+
+  function renderPhonePrefixTrigger(opt: SearchableOption | null) {
+    if (!opt) return <span className="ss-placeholder">Code</span>;
+    const info = countriesByCode.get(opt.value);
+    return (
+      <span className="ss-row">
+        <Flag code={opt.value} />
+        {info && <span className="ss-row-aux ss-row-aux-strong">+{info.dialCode}</span>}
+      </span>
+    );
+  }
 
   function toggleAllPages() {
     const allSelected = availablePageKeys.every((k) => allowedPages.includes(k));
@@ -197,7 +284,25 @@ export function AdminUserForm({ mode, user, customers, currentUserCustomerId, cu
         <div className="admin-form-grid">
           <label>
             <span>Phone</span>
-            <input {...register("phone")} type="tel" placeholder="+1 (555) 123-4567" />
+            <div className="phone-input-group">
+              <SearchableSelect
+                compact
+                options={countryOptions}
+                value={phoneCountry ?? ""}
+                onChange={(next) => setValue("phoneCountry", next, { shouldValidate: true })}
+                renderOption={renderCountryOption}
+                renderTrigger={renderPhonePrefixTrigger}
+                placeholder="Code"
+                className="phone-input-prefix"
+              />
+              <input
+                type="tel"
+                {...register("phone")}
+                className="phone-input-number"
+                placeholder={phoneCountryInfo ? "Phone number" : "Pick a country first"}
+              />
+            </div>
+            {errors.phoneCountry && <span className="field-error">{errors.phoneCountry.message}</span>}
           </label>
           <label>
             <span>{mode === "create" ? "Password" : "New Password (leave empty to keep current)"}</span>
@@ -209,6 +314,33 @@ export function AdminUserForm({ mode, user, customers, currentUserCustomerId, cu
           {!isManagerScope && (
             <label><input type="checkbox" {...register("isSuperAdmin")} /> Super Admin (full access)</label>
           )}
+        </div>
+      </div>
+
+      <div className="card" style={{ display: "grid", gap: 16 }}>
+        <p className="eyebrow">Location</p>
+        <div className="admin-form-grid">
+          <label>
+            <span>Country</span>
+            <SearchableSelect
+              options={countryOptions}
+              value={country ?? ""}
+              onChange={handleCountryChange}
+              renderOption={renderCountryOption}
+              renderTrigger={renderCountryTrigger}
+              placeholder="Select country…"
+            />
+            {errors.country && <span className="field-error">{errors.country.message}</span>}
+          </label>
+          <label>
+            <span>Time zone</span>
+            <SearchableSelect
+              options={tzOptions}
+              value={watch("timezone") ?? ""}
+              onChange={(next) => setValue("timezone", next, { shouldValidate: true })}
+              placeholder="Select time zone…"
+            />
+          </label>
         </div>
       </div>
 

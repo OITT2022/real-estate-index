@@ -3,6 +3,8 @@ import { AdminUserForm } from "@/components/forms/admin-user-form";
 import { getAdminUserById, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 import { getSessionUser } from "@/lib/scope";
+import { listCountries } from "@/lib/countries";
+import { listTimezones } from "@/lib/timezones";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,9 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
 
   if (!user) return notFound();
 
+  const countries = listCountries();
+  const timezones = listTimezones();
+
   return (
     <section className="admin-content">
       <div className="at-page-header">
@@ -29,6 +34,8 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
         mode="edit"
         user={user}
         customers={customers}
+        countries={countries}
+        timezones={timezones}
         currentUserCustomerId={sessionUser?.customerId ?? undefined}
         currentUserAllowedPages={sessionUser?.isSuperAdmin ? undefined : sessionUser?.allowedPages}
       />
