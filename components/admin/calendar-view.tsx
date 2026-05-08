@@ -21,7 +21,7 @@ export type CalendarEvent = {
   contactName: string;
   contactEmail: string;
   contactPhone: string | null;
-  propertyTitle: string;
+  propertyTitle: string | null;
   projectTitle: string | null;
   message: string;
   inquiryStatus: string;
@@ -156,7 +156,7 @@ export function CalendarView({ events, customers }: Props) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: "1.15rem" }}>{selectedEvent.contactName}</h2>
-                <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.88rem" }}>{selectedEvent.propertyTitle}</p>
+                <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.88rem" }}>{selectedEvent.propertyTitle ?? selectedEvent.projectTitle ?? ""}</p>
               </div>
               <button
                 type="button"

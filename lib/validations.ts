@@ -72,13 +72,19 @@ export const projectFormSchema = z.object({
 
 export type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
-export const inquirySchema = z.object({
-  fullName: z.string().min(2, "Name is required"),
-  email: z.string().email("Valid email required"),
-  phone: z.string().optional(),
-  message: z.string().min(5, "Message must be at least 5 characters"),
-  propertyId: z.string().min(1),
-});
+export const inquirySchema = z
+  .object({
+    fullName: z.string().min(2, "Name is required"),
+    email: z.string().email("Valid email required"),
+    phone: z.string().optional(),
+    message: z.string().min(5, "Message must be at least 5 characters"),
+    propertyId: z.string().min(1).optional(),
+    projectId: z.string().min(1).optional(),
+  })
+  .refine((d) => Boolean(d.propertyId) || Boolean(d.projectId), {
+    message: "Inquiry must reference a property or a project",
+    path: ["propertyId"],
+  });
 
 export type InquiryFormValues = z.infer<typeof inquirySchema>;
 

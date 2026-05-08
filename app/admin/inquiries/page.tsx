@@ -1,17 +1,17 @@
 import { db } from "@/lib/db";
 import { AdminInquiryTable } from "@/components/admin/admin-inquiry-table";
 import { checkPageAccess } from "@/lib/check-access";
-import { getSessionUser, propertyCustomerScope } from "@/lib/scope";
+import { getSessionUser, inquiryCustomerScope } from "@/lib/scope";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminInquiriesPage() {
   await checkPageAccess("inquiries");
   const sessionUser = await getSessionUser();
-  const propScope = sessionUser ? propertyCustomerScope(sessionUser) : undefined;
+  const where = sessionUser ? inquiryCustomerScope(sessionUser) : undefined;
 
   const inquiries = await db.inquiry.findMany({
-    where: propScope ? { property: propScope } : undefined,
+    where,
     include: {
       property: {
         select: {
@@ -21,7 +21,12 @@ export default async function AdminInquiriesPage() {
           project: { select: { customerId: true, customer: { select: { companyName: true } } } },
         },
       },
-      project: { select: { title: true } },
+      project: {
+        select: {
+          title: true,
+          customer: { select: { companyName: true } },
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -31,11 +36,12 @@ export default async function AdminInquiriesPage() {
     fullName: inq.fullName,
     email: inq.email,
     phone: inq.phone ?? null,
-    propertyTitle: inq.property.title,
+    propertyTitle: inq.property?.title ?? null,
     projectTitle: inq.project?.title ?? null,
     customerName:
-      inq.property.project?.customer?.companyName
-      ?? inq.property.customer?.companyName
+      inq.property?.project?.customer?.companyName
+      ?? inq.property?.customer?.companyName
+      ?? inq.project?.customer?.companyName
       ?? null,
     status: inq.status,
     date: inq.createdAt.toLocaleDateString(),

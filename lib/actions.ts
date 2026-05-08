@@ -7,7 +7,7 @@ import { z } from "zod";
 import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSchema, adminUserFormSchema, customerFormSchema } from "@/lib/validations";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { getSessionUser, canAccessCustomer, isCustomerManager, propertyCustomerScope } from "@/lib/scope";
+import { getSessionUser, canAccessCustomer, isCustomerManager, propertyCustomerScope, inquiryCustomerScope } from "@/lib/scope";
 import { slugify } from "@/lib/slug";
 import { resolveCustomerId } from "@/lib/customer-scope";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -405,37 +405,74 @@ export async function createInquiry(data: unknown): Promise<ActionResult> {
   const parsed = inquirySchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
-  const property = await db.property.findUnique({ where: { id: parsed.data.propertyId }, include: { project: true } });
-  if (!property) return { success: false, error: "Property not found" };
+  // Resolve which subject the inquiry is about: a property (which may belong
+  // to a project) or a project on its own.
+  let propertyId: string | null = null;
+  let projectId: string | null = null;
+  let notifyEmail = "";
+  let subject = "";
+  let body = "";
 
-  const inquiry = await db.inquiry.create({
-    data: {
-      ...parsed.data,
-      projectId: property.projectId,
-    },
-  });
+  if (parsed.data.propertyId) {
+    const property = await db.property.findUnique({
+      where: { id: parsed.data.propertyId },
+      include: { project: true },
+    });
+    if (!property) return { success: false, error: "Property not found" };
 
-  // Notify the seller (and admin fallback). Email failures must not block the
-  // inquiry from being saved — log to EmailLog so the admin can see the trail.
-  const recipient = property.sellerEmail || process.env.RESEND_TO_EMAIL || "";
-  if (recipient) {
-    const subject = `New inquiry: ${property.title}`;
-    const body =
+    propertyId = property.id;
+    projectId = property.projectId;
+    notifyEmail = property.sellerEmail || process.env.RESEND_TO_EMAIL || "";
+    subject = `New inquiry: ${property.title}`;
+    body =
       `New inquiry on ${property.title} (/properties/${property.slug}):\n\n` +
       `Name: ${parsed.data.fullName}\n` +
       `Email: ${parsed.data.email}\n` +
       `Phone: ${parsed.data.phone ?? "—"}\n\n` +
       `Message:\n${parsed.data.message}`;
+  } else if (parsed.data.projectId) {
+    const project = await db.project.findUnique({
+      where: { id: parsed.data.projectId },
+      include: { customer: { select: { contactEmail: true } } },
+    });
+    if (!project) return { success: false, error: "Project not found" };
 
+    projectId = project.id;
+    notifyEmail = project.customer?.contactEmail || process.env.RESEND_TO_EMAIL || "";
+    subject = `New inquiry: ${project.title}`;
+    body =
+      `New inquiry on project ${project.title} (/projects/${project.slug}):\n\n` +
+      `Name: ${parsed.data.fullName}\n` +
+      `Email: ${parsed.data.email}\n` +
+      `Phone: ${parsed.data.phone ?? "—"}\n\n` +
+      `Message:\n${parsed.data.message}`;
+  } else {
+    return { success: false, error: "Inquiry must reference a property or a project" };
+  }
+
+  const inquiry = await db.inquiry.create({
+    data: {
+      fullName: parsed.data.fullName,
+      email: parsed.data.email,
+      phone: parsed.data.phone || null,
+      message: parsed.data.message,
+      propertyId,
+      projectId,
+    },
+  });
+
+  // Notify the seller (and admin fallback). Email failures must not block the
+  // inquiry from being saved — log to EmailLog so the admin can see the trail.
+  if (notifyEmail) {
     try {
       const { sendEmail } = await import("@/lib/email");
-      const result = await sendEmail(recipient, subject, body);
+      const result = await sendEmail(notifyEmail, subject, body);
       await db.emailLog.create({
         data: {
           inquiryId: inquiry.id,
           subject,
           body: result.success ? body : `[FAILED: ${result.error ?? "unknown"}]\n\n${body}`,
-          sentTo: recipient,
+          sentTo: notifyEmail,
         },
       });
     } catch (err) {
@@ -1135,7 +1172,8 @@ export async function changeOwnPassword(currentPassword: string, newPassword: st
 export type RecentInquiry = {
   id: string;
   fullName: string;
-  propertyTitle: string;
+  /** Property title, project title, or "Inquiry" if neither is present. */
+  subjectTitle: string;
   createdAt: Date;
 };
 
@@ -1145,18 +1183,21 @@ export async function getRecentInquiriesForCurrentUser(
   const sessionUser = await getSessionUser();
   if (!sessionUser) return { inquiries: [], newCount: 0 };
 
-  const propScope = propertyCustomerScope(sessionUser);
+  const scope = inquiryCustomerScope(sessionUser);
   const where = {
     status: "new",
-    ...(propScope ? { property: propScope } : {}),
-  } as const;
+    ...(scope ?? {}),
+  };
 
   const [rows, newCount] = await Promise.all([
     db.inquiry.findMany({
       where,
       orderBy: { createdAt: "desc" },
       take: limit,
-      include: { property: { select: { title: true } } },
+      include: {
+        property: { select: { title: true } },
+        project: { select: { title: true } },
+      },
     }),
     db.inquiry.count({ where }),
   ]);
@@ -1165,7 +1206,7 @@ export async function getRecentInquiriesForCurrentUser(
     inquiries: rows.map((r) => ({
       id: r.id,
       fullName: r.fullName,
-      propertyTitle: r.property.title,
+      subjectTitle: r.property?.title ?? r.project?.title ?? "Inquiry",
       createdAt: r.createdAt,
     })),
     newCount,

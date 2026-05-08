@@ -23,7 +23,7 @@ type Inquiry = {
   message: string;
   status: string;
   createdAt: string;
-  property: { title: string; slug: string };
+  property: { title: string; slug: string } | null;
   project: { title: string; slug: string } | null;
   notes: Note[];
   appointments: Apt[];
@@ -128,10 +128,12 @@ export function InquiryCrm({ inquiry }: Props) {
 
       {/* Context */}
       <div className="card" style={{ display: "flex", gap: 20 }}>
-        <div>
-          <p className="eyebrow">Property</p>
-          <Link href={`/properties/${inquiry.property.slug}`} style={{ color: "var(--accent)" }}>{inquiry.property.title}</Link>
-        </div>
+        {inquiry.property && (
+          <div>
+            <p className="eyebrow">Property</p>
+            <Link href={`/properties/${inquiry.property.slug}`} style={{ color: "var(--accent)" }}>{inquiry.property.title}</Link>
+          </div>
+        )}
         {inquiry.project && (
           <div>
             <p className="eyebrow">Project</p>

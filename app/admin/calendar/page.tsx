@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { checkPageAccess } from "@/lib/check-access";
-import { getSessionUser, propertyCustomerScope, isCustomerManager } from "@/lib/scope";
+import { getSessionUser, inquiryCustomerScope, isCustomerManager } from "@/lib/scope";
 import { CalendarView } from "@/components/admin/calendar-view";
 
 export const dynamic = "force-dynamic";
@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic";
 export default async function CalendarSchedulePage() {
   await checkPageAccess("calendar");
   const sessionUser = await getSessionUser();
-  const propScope = sessionUser ? propertyCustomerScope(sessionUser) : undefined;
+  const inqWhere = sessionUser ? inquiryCustomerScope(sessionUser) : undefined;
 
   const appointments = await db.appointment.findMany({
     where: {
-      inquiry: propScope ? { property: propScope } : undefined,
+      inquiry: inqWhere,
     },
     include: {
       inquiry: {
@@ -26,7 +26,13 @@ export default async function CalendarSchedulePage() {
               project: { select: { customerId: true, customer: { select: { id: true, companyName: true } } } },
             },
           },
-          project: { select: { id: true, title: true } },
+          project: {
+            select: {
+              id: true,
+              title: true,
+              customer: { select: { id: true, companyName: true } },
+            },
+          },
         },
       },
     },
@@ -47,20 +53,23 @@ export default async function CalendarSchedulePage() {
   const events = appointments.map((apt) => {
     const inq = apt.inquiry;
     const customerName =
-      inq.property.project?.customer?.companyName
-      ?? inq.property.customer?.companyName
+      inq.property?.project?.customer?.companyName
+      ?? inq.property?.customer?.companyName
+      ?? inq.project?.customer?.companyName
       ?? null;
     const customerId =
-      inq.property.project?.customer?.id
-      ?? inq.property.customer?.id
+      inq.property?.project?.customer?.id
+      ?? inq.property?.customer?.id
+      ?? inq.project?.customer?.id
       ?? null;
 
     const start = apt.dateTime;
     const end = new Date(start.getTime() + 60 * 60 * 1000); // 60 min default
+    const subjectTitle = inq.property?.title ?? inq.project?.title ?? "Inquiry";
 
     return {
       id: apt.id,
-      title: `${inq.fullName} — ${inq.property.title}`,
+      title: `${inq.fullName} — ${subjectTitle}`,
       start: start.toISOString(),
       end: end.toISOString(),
       status: apt.status,
@@ -71,7 +80,7 @@ export default async function CalendarSchedulePage() {
       contactName: inq.fullName,
       contactEmail: inq.email,
       contactPhone: inq.phone ?? null,
-      propertyTitle: inq.property.title,
+      propertyTitle: inq.property?.title ?? null,
       projectTitle: inq.project?.title ?? null,
       message: inq.message,
       inquiryStatus: inq.status,

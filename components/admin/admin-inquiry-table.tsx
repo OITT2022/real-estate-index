@@ -10,7 +10,7 @@ type Row = {
   fullName: string;
   email: string;
   phone: string | null;
-  propertyTitle: string;
+  propertyTitle: string | null;
   projectTitle: string | null;
   customerName: string | null;
   status: string;
@@ -41,7 +41,9 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
     return rows.filter((r) => {
       if (search) {
         const q = search.toLowerCase();
-        if (!r.fullName.toLowerCase().includes(q) && !r.email.toLowerCase().includes(q) && !r.propertyTitle.toLowerCase().includes(q)) return false;
+        const propMatch = r.propertyTitle?.toLowerCase().includes(q) ?? false;
+        const projMatch = r.projectTitle?.toLowerCase().includes(q) ?? false;
+        if (!r.fullName.toLowerCase().includes(q) && !r.email.toLowerCase().includes(q) && !propMatch && !projMatch) return false;
       }
       if (statusFilter && r.status !== statusFilter) return false;
       if (customerFilter && r.customerName !== customerFilter) return false;
@@ -54,7 +56,7 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
     switch (key) {
       case "name": return a.fullName.localeCompare(b.fullName);
       case "email": return a.email.localeCompare(b.email);
-      case "property": return a.propertyTitle.localeCompare(b.propertyTitle);
+      case "property": return (a.propertyTitle ?? "").localeCompare(b.propertyTitle ?? "");
       case "status": return a.status.localeCompare(b.status);
       case "date": return a.date.localeCompare(b.date);
       default: return 0;
@@ -135,7 +137,7 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
                 {r.phone && <span className="at-subtitle">{r.phone}</span>}
               </div>
               <div className="at-cell" style={{ fontSize: "0.85rem" }}>{r.email}</div>
-              <div className="at-cell">{r.propertyTitle}</div>
+              <div className="at-cell">{r.propertyTitle ?? <span className="at-muted">—</span>}</div>
               <div className="at-cell">{r.projectTitle ? <span className="at-tag">{r.projectTitle}</span> : <span className="at-muted">—</span>}</div>
               <div className="at-cell">{r.customerName ?? <span className="at-muted">—</span>}</div>
               <div className="at-cell">

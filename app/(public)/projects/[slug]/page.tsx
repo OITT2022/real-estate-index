@@ -169,7 +169,7 @@ export default async function ProjectDetailPage({ params }: Props) {
             {firstProperty ? (
               <InquiryForm propertyId={firstProperty.id} propertyTitle={project.title} />
             ) : (
-              <ProjectInquiryForm projectTitle={project.title} />
+              <ProjectInquiryForm projectId={project.id} projectTitle={project.title} />
             )}
             <div className="sp-seller-card">
               <h3 className="sp-seller-card-title">Developer</h3>

@@ -55,6 +55,23 @@ export function propertyCustomerScope(user: SessionUser) {
 }
 
 /**
+ * Returns a Prisma `where` filter for inquiries scoped to a customer.
+ * Inquiries can reference a property (with its own or its project's customer)
+ * OR be project-only (propertyId is null).
+ */
+export function inquiryCustomerScope(user: SessionUser) {
+  if (user.isSuperAdmin) return undefined;
+  if (!user.customerId) return { id: "__none__" };
+  return {
+    OR: [
+      { property: { customerId: user.customerId } },
+      { property: { project: { customerId: user.customerId } } },
+      { propertyId: null, project: { customerId: user.customerId } },
+    ],
+  };
+}
+
+/**
  * Check if a user can access a specific customer's data.
  */
 export function canAccessCustomer(user: SessionUser, customerId: string | null): boolean {

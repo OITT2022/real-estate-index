@@ -141,7 +141,7 @@ export function AdminTopbar() {
                         <strong style={{ fontSize: "0.85rem" }}>{inq.fullName}</strong>
                         <span className="muted" style={{ fontSize: "0.7rem" }}>{timeAgo(inq.createdAt)}</span>
                       </div>
-                      <span className="muted" style={{ fontSize: "0.78rem" }}>{inq.propertyTitle}</span>
+                      <span className="muted" style={{ fontSize: "0.78rem" }}>{inq.subjectTitle}</span>
                     </div>
                   </Link>
                 ))

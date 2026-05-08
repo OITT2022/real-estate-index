@@ -1,16 +1,36 @@
 "use client";
 
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { inquirySchema, type InquiryFormValues } from "@/lib/validations";
+import { createInquiry } from "@/lib/actions";
 
 type Props = {
+  projectId: string;
   projectTitle: string;
 };
 
-export function ProjectInquiryForm({ projectTitle }: Props) {
+export function ProjectInquiryForm({ projectId, projectTitle }: Props) {
   const [submitted, setSubmitted] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<InquiryFormValues>({
+    resolver: zodResolver(inquirySchema),
+    defaultValues: { projectId },
+  });
+
+  async function onSubmit(values: InquiryFormValues) {
+    setServerError(null);
+    const result = await createInquiry(values);
+    if (!result.success) {
+      setServerError(result.error);
+      return;
+    }
     setSubmitted(true);
   }
 
@@ -27,7 +47,8 @@ export function ProjectInquiryForm({ projectTitle }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="inquiry-card">
+    <form onSubmit={handleSubmit(onSubmit)} className="inquiry-card">
+      <input type="hidden" {...register("projectId")} />
       <div className="inquiry-header">
         <div className="inquiry-icon">&#9993;</div>
         <div>
@@ -36,25 +57,35 @@ export function ProjectInquiryForm({ projectTitle }: Props) {
         </div>
       </div>
 
+      {serverError && <p className="form-error">{serverError}</p>}
+
       <div className="inquiry-fields">
         <div className="inquiry-row">
           <label className="inquiry-label">
-            <input placeholder="Full name *" required className="inquiry-input" />
+            <input {...register("fullName")} placeholder="Full name *" className="inquiry-input" />
+            {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
           </label>
           <label className="inquiry-label">
-            <input type="email" placeholder="Email address *" required className="inquiry-input" />
+            <input {...register("email")} type="email" placeholder="Email address *" className="inquiry-input" />
+            {errors.email && <span className="field-error">{errors.email.message}</span>}
           </label>
         </div>
         <label className="inquiry-label">
-          <input placeholder="Phone number (optional)" className="inquiry-input" />
+          <input {...register("phone")} placeholder="Phone number (optional)" className="inquiry-input" />
         </label>
         <label className="inquiry-label">
-          <textarea placeholder={`Hi, I'm interested in ${projectTitle} and would like to know more...`} rows={4} required className="inquiry-input" />
+          <textarea
+            {...register("message")}
+            placeholder={`Hi, I'm interested in ${projectTitle} and would like to know more...`}
+            rows={4}
+            className="inquiry-input"
+          />
+          {errors.message && <span className="field-error">{errors.message.message}</span>}
         </label>
       </div>
 
-      <button type="submit" className="inquiry-submit">
-        Send Message
+      <button type="submit" className="inquiry-submit" disabled={isSubmitting}>
+        {isSubmitting ? "Sending..." : "Send Message"}
       </button>
     </form>
   );
