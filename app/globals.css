@@ -867,16 +867,8 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
 /* ═══════════════════════════════════════════════════════════════
    MAP PAGE (full-bleed map + side panel)
    ═══════════════════════════════════════════════════════════════ */
-.map-page-hero { padding-bottom: 16px; }
-.map-page-filter {
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
-  padding: 16px 0 24px;
-}
-.map-page-filter .filter-bar { margin-top: 0; }
-
-.map-page-explorer {
-  height: calc(100vh - 280px);
+.map-page-fullscreen {
+  height: calc(100vh - 70px); /* viewport minus sticky site header */
   min-height: 520px;
 }
 
@@ -1065,7 +1057,7 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
     display: none;
   }
   .map-explorer-side { border-right: none; }
-  .map-page-explorer { height: calc(100vh - 240px); }
+  .map-page-fullscreen { height: calc(100vh - 60px); }
 }
 
 .video-placeholder {
@@ -1948,6 +1940,24 @@ body:has(.admin-layout) { background: #f8f9fb; }
 .admin-notif-popover { width: 360px; max-height: 480px; overflow-y: auto; }
 .admin-notif-row { padding: 10px 12px; }
 .admin-notif-empty { padding: 16px; text-align: center; color: var(--muted); font-size: 0.85rem; }
+
+/* Per-unit sold toggle in the project structure editor */
+.unit-sold-pill {
+  background: #dc2626; color: #fff;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; border: 0; cursor: pointer;
+  white-space: nowrap;
+}
+.unit-sold-pill:hover { background: #b91c1c; }
+.unit-mark-sold-btn {
+  background: white; color: var(--muted);
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 0.72rem; font-weight: 600;
+  border: 1px solid var(--line); cursor: pointer;
+  white-space: nowrap;
+}
+.unit-mark-sold-btn:hover { color: #dc2626; border-color: #dc2626; }
 
 /* Sidebar V2 */
 .admin-sidebar-v2 {
