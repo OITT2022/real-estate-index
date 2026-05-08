@@ -6,9 +6,11 @@ import { useCallback } from "react";
 type Props = {
   cities: string[];
   propertyTypes: string[];
+  /** Path to navigate to on submit/clear. Defaults to "/". */
+  target?: string;
 };
 
-export function FilterBar({ cities, propertyTypes }: Props) {
+export function FilterBar({ cities, propertyTypes, target = "/" }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -29,12 +31,12 @@ export function FilterBar({ cities, propertyTypes }: Props) {
         if (value) params.set(key, value as string);
       }
       const qs = params.toString();
-      router.push(qs ? `/?${qs}` : "/");
+      router.push(qs ? `${target}?${qs}` : target);
     },
-    [router]
+    [router, target]
   );
 
-  const clear = useCallback(() => router.push("/"), [router]);
+  const clear = useCallback(() => router.push(target), [router, target]);
 
   const hasFilters = Object.values(current).some(Boolean);
 

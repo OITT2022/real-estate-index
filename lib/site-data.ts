@@ -95,6 +95,162 @@ export async function searchProperties(filters: SearchFilters) {
   });
 }
 
+// ── Map page ───────────────────────────────────────────────────
+
+export type MapPropertyPoint = {
+  id: string;
+  slug: string;
+  title: string;
+  address: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  price: number;
+  currency: string;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  areaSqm: number | null;
+  floor: number | null;
+  propertyType: string | null;
+  image: { url: string; altText: string | null } | null;
+};
+
+export type MapProjectPoint = {
+  id: string;
+  slug: string;
+  title: string;
+  address: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  developerName: string;
+  totalUnits: number | null;
+  completionDate: string | null;
+  propertyCount: number;
+  image: { url: string; altText: string | null } | null;
+};
+
+export type MapPageData = {
+  projects: MapProjectPoint[];
+  properties: MapPropertyPoint[];
+};
+
+export async function getMapPageData(filters: SearchFilters): Promise<MapPageData> {
+  // Standalone properties: published + ACTIVE + no parent project + filters
+  const propWhere: Record<string, unknown> = {
+    published: true,
+    status: "ACTIVE",
+    projectId: null,
+  };
+  if (filters.city) {
+    propWhere.city = { contains: filters.city, mode: "insensitive" };
+  }
+  if (filters.propertyType) {
+    propWhere.propertyType = { equals: filters.propertyType, mode: "insensitive" };
+  }
+  if (filters.bedrooms) {
+    propWhere.bedrooms = { gte: filters.bedrooms };
+  }
+  if (filters.minPrice || filters.maxPrice) {
+    propWhere.price = {
+      ...(filters.minPrice ? { gte: filters.minPrice } : {}),
+      ...(filters.maxPrice ? { lte: filters.maxPrice } : {}),
+    };
+  }
+
+  // Projects: published + ACTIVE; only city filter applies (price/bedrooms
+  // are property-level concerns).
+  const projWhere: Record<string, unknown> = { published: true, status: "ACTIVE" };
+  if (filters.city) {
+    projWhere.city = { contains: filters.city, mode: "insensitive" };
+  }
+
+  const [propertyRows, projectRows] = await Promise.all([
+    db.property.findMany({
+      where: propWhere,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        address: true,
+        city: true,
+        latitude: true,
+        longitude: true,
+        price: true,
+        currency: true,
+        bedrooms: true,
+        bathrooms: true,
+        areaSqm: true,
+        floor: true,
+        propertyType: true,
+        images: {
+          orderBy: { sortOrder: "asc" },
+          take: 1,
+          select: { url: true, altText: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.project.findMany({
+      where: projWhere,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        address: true,
+        city: true,
+        latitude: true,
+        longitude: true,
+        developerName: true,
+        totalUnits: true,
+        completionDate: true,
+        images: {
+          orderBy: { sortOrder: "asc" },
+          take: 1,
+          select: { url: true, altText: true },
+        },
+        _count: { select: { properties: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  const properties: MapPropertyPoint[] = propertyRows.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    address: p.address,
+    city: p.city,
+    latitude: p.latitude,
+    longitude: p.longitude,
+    price: Number(p.price),
+    currency: p.currency,
+    bedrooms: p.bedrooms,
+    bathrooms: p.bathrooms,
+    areaSqm: p.areaSqm,
+    floor: p.floor,
+    propertyType: p.propertyType,
+    image: p.images[0] ?? null,
+  }));
+
+  const projects: MapProjectPoint[] = projectRows.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    address: p.address,
+    city: p.city,
+    latitude: p.latitude,
+    longitude: p.longitude,
+    developerName: p.developerName,
+    totalUnits: p.totalUnits,
+    completionDate: p.completionDate,
+    propertyCount: p._count.properties,
+    image: p.images[0] ?? null,
+  }));
+
+  return { projects, properties };
+}
+
 export async function getDistinctCities() {
   const results = await db.property.findMany({
     where: { published: true, status: "ACTIVE" },
