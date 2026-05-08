@@ -1,13 +1,27 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Suspense, useState } from "react";
 
 export default function AdminLoginPage() {
+  // useSearchParams forces static bailout; wrap in Suspense to satisfy Next 15.
+  return (
+    <Suspense fallback={null}>
+      <LoginInner />
+    </Suspense>
+  );
+}
+
+function LoginInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const flash = searchParams.get("reset") === "ok"
+    ? "Password updated. Sign in with your new password."
+    : null;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -50,6 +64,7 @@ export default function AdminLoginPage() {
             <h1 className="login-title">Sign In</h1>
             <p className="login-subtitle">Enter your email address and password to access admin panel.</p>
 
+            {flash && <p className="form-success" style={{ color: "#166534", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: 8, marginBottom: 12 }}>{flash}</p>}
             {error && <p className="form-error">{error}</p>}
 
             <form className="login-form" onSubmit={handleSubmit}>
@@ -65,6 +80,12 @@ export default function AdminLoginPage() {
               <button className="login-submit" type="submit" disabled={loading}>
                 {loading ? "Signing in..." : "Sign In"}
               </button>
+
+              <p style={{ marginTop: 12, textAlign: "center", fontSize: "0.9rem" }}>
+                <Link href="/admin/forgot-password" style={{ color: "var(--accent, #6366f1)", textDecoration: "underline" }}>
+                  Forgot password?
+                </Link>
+              </p>
             </form>
           </div>
         </div>

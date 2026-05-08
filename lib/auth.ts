@@ -30,6 +30,7 @@ export const authOptions: NextAuthOptions = {
           allowedPages: user.allowedPages as string[],
           customerId: user.customerId,
           profileImage: user.profileImage,
+          mustChangePassword: user.mustChangePassword,
         };
       },
     }),
@@ -44,6 +45,7 @@ export const authOptions: NextAuthOptions = {
         token.allowedPages = (user as { allowedPages?: string[] }).allowedPages;
         token.customerId = (user as { customerId?: string | null }).customerId ?? null;
         token.profileImage = (user as { profileImage?: string | null }).profileImage ?? null;
+        token.mustChangePassword = (user as { mustChangePassword?: boolean }).mustChangePassword ?? false;
       }
       return token;
     },
@@ -55,12 +57,14 @@ export const authOptions: NextAuthOptions = {
           allowedPages?: string[];
           customerId?: string | null;
           profileImage?: string | null;
+          mustChangePassword?: boolean;
         };
         u.id = token.id as string;
         u.isSuperAdmin = token.isSuperAdmin as boolean;
         u.allowedPages = token.allowedPages as string[];
         u.customerId = (token.customerId as string) ?? null;
         u.profileImage = (token.profileImage as string) ?? null;
+        u.mustChangePassword = (token.mustChangePassword as boolean) ?? false;
       }
       return session;
     },

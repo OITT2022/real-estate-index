@@ -656,6 +656,8 @@ export async function createAdminUser(data: unknown): Promise<ActionResult> {
       allowedPages: parsed.data.allowedPages,
       customerId: parsed.data.customerId || null,
       active: parsed.data.active,
+      // Force the user to change their temp password on first login.
+      mustChangePassword: true,
     },
   });
 
@@ -962,5 +964,128 @@ export async function submitContactForm(data: unknown): Promise<ActionResult> {
   );
 
   if (!result.success) return { success: false, error: result.error ?? "Failed to send email" };
+  return { success: true };
+}
+
+// ── Password recovery & self-service change ───────────────────────
+
+/**
+ * Forgot-password: always returns { success: true } regardless of whether
+ * the email matches an account, to prevent enumeration. The reset URL is
+ * sent via email, or logged to console if RESEND_API_KEY is unset (dev).
+ */
+export async function requestPasswordReset(email: string): Promise<ActionResult> {
+  const ip = await getClientIp();
+  const rl = checkRateLimit(`forgot:${ip}`, 3, 15 * 60_000);
+  if (!rl.allowed) {
+    const minutes = Math.ceil(rl.retryAfterMs / 60_000);
+    return { success: false, error: `Too many requests. Please try again in ${minutes} minute${minutes !== 1 ? "s" : ""}.` };
+  }
+
+  const normalized = (email ?? "").trim().toLowerCase();
+  if (!normalized) return { success: true }; // generic success — no enumeration
+
+  const user = await db.adminUser.findUnique({ where: { email: normalized } });
+  if (!user || !user.active) return { success: true };
+
+  const plaintext = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(plaintext).digest("hex");
+  const expiresAt = new Date(Date.now() + 60 * 60_000); // 1 hour
+
+  await db.passwordResetToken.create({
+    data: { adminUserId: user.id, tokenHash, expiresAt },
+  });
+
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const url = `${baseUrl}/admin/reset-password?token=${plaintext}`;
+  const subject = "Reset your aradre.com admin password";
+  const body =
+    `A password reset was requested for this account.\n\n` +
+    `Open this link to choose a new password (valid for 1 hour):\n${url}\n\n` +
+    `If you didn't request this, you can ignore this email — your password is unchanged.`;
+
+  const { sendEmail } = await import("@/lib/email");
+  const result = await sendEmail(user.email, subject, body);
+  if (!result.success) {
+    // Dev fallback: surface the URL so the only super admin can recover.
+    console.warn(`[requestPasswordReset] email failed (${result.error}); reset URL: ${url}`);
+  }
+
+  return { success: true };
+}
+
+/**
+ * Validates that a reset token is real, unused, and unexpired.
+ * Used by the reset-password page on mount to gate the form.
+ */
+export async function validateResetToken(token: string): Promise<{ valid: boolean }> {
+  if (!token) return { valid: false };
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  const row = await db.passwordResetToken.findUnique({ where: { tokenHash } });
+  if (!row || row.consumedAt || row.expiresAt <= new Date()) return { valid: false };
+  return { valid: true };
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<ActionResult> {
+  const { passwordPolicy } = await import("@/lib/validations");
+  const pwParsed = passwordPolicy.safeParse(newPassword);
+  if (!pwParsed.success) return { success: false, error: pwParsed.error.issues[0].message };
+
+  if (!token) return { success: false, error: "Reset link is invalid or has expired." };
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+  const row = await db.passwordResetToken.findUnique({ where: { tokenHash } });
+  if (!row || row.consumedAt || row.expiresAt <= new Date()) {
+    return { success: false, error: "Reset link is invalid or has expired." };
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+
+  await db.$transaction([
+    db.adminUser.update({
+      where: { id: row.adminUserId },
+      data: { passwordHash, mustChangePassword: false },
+    }),
+    db.passwordResetToken.update({
+      where: { id: row.id },
+      data: { consumedAt: new Date() },
+    }),
+    // Invalidate any other live tokens for this user — single account hijack window.
+    db.passwordResetToken.updateMany({
+      where: { adminUserId: row.adminUserId, consumedAt: null, id: { not: row.id } },
+      data: { consumedAt: new Date() },
+    }),
+  ]);
+
+  return { success: true };
+}
+
+/**
+ * Self-service password change. Used both for the forced first-time flow
+ * (mustChangePassword=true) and voluntary change via profile menu.
+ */
+export async function changeOwnPassword(currentPassword: string, newPassword: string): Promise<ActionResult> {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) return { success: false, error: "Not signed in." };
+
+  const user = await db.adminUser.findUnique({ where: { id: sessionUser.id } });
+  if (!user) return { success: false, error: "Account not found." };
+
+  const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!ok) return { success: false, error: "Current password is incorrect." };
+
+  const { passwordPolicy } = await import("@/lib/validations");
+  const pwParsed = passwordPolicy.safeParse(newPassword);
+  if (!pwParsed.success) return { success: false, error: pwParsed.error.issues[0].message };
+
+  if (currentPassword === newPassword) {
+    return { success: false, error: "New password must differ from current." };
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await db.adminUser.update({
+    where: { id: user.id },
+    data: { passwordHash, mustChangePassword: false },
+  });
+
   return { success: true };
 }

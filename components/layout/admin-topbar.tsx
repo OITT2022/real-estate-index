@@ -2,7 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Search, Bell, LogOut } from "lucide-react";
+import Link from "next/link";
+import { Search, Bell, LogOut, KeyRound } from "lucide-react";
 import { ADMIN_PAGES } from "@/lib/admin-pages";
 
 export function AdminTopbar({ inquiryCount }: { inquiryCount?: number }) {
@@ -57,6 +58,16 @@ export function AdminTopbar({ inquiryCount }: { inquiryCount?: number }) {
             <div className="admin-topbar-user-role">Admin</div>
           </div>
         </div>
+
+        <Link
+          href="/admin/change-password"
+          className="admin-topbar-icon"
+          title="Change password"
+          style={{ width: "auto", padding: "0 10px", gap: 6, display: "flex", alignItems: "center", fontSize: "0.75rem", fontWeight: 600, textDecoration: "none" }}
+        >
+          <KeyRound size={15} />
+          Password
+        </Link>
 
         <button
           type="button"

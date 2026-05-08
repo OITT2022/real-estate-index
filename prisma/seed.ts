@@ -16,6 +16,7 @@ async function main() {
       name: "Admin",
       passwordHash,
       isSuperAdmin: true,
+      mustChangePassword: false,
     },
   });
 

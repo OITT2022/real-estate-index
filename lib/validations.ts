@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+// Single source of truth for password rules. Used by adminUserFormSchema
+// (admin create/edit) and by the forgot/reset/change flows.
+export const passwordPolicy = z
+  .string()
+  .min(10, "Password must be at least 10 characters")
+  .regex(/[A-Za-z]/, "Password must contain at least one letter")
+  .regex(/\d/, "Password must contain at least one digit");
+
 export const propertyFormSchema = z.object({
   title: z.string().min(2, "Title is required"),
   slug: z.string().min(2, "Slug is required"),
@@ -107,14 +115,7 @@ export const adminUserFormSchema = z.object({
   // Empty string = "leave password unchanged" on update; create rejects empty
   // explicitly in lib/actions.ts. When non-empty, enforce min length + at
   // least one letter and one digit.
-  password: z.union([
-    z.literal(""),
-    z
-      .string()
-      .min(10, "Password must be at least 10 characters")
-      .regex(/[A-Za-z]/, "Password must contain at least one letter")
-      .regex(/\d/, "Password must contain at least one digit"),
-  ]),
+  password: z.union([z.literal(""), passwordPolicy]),
   isSuperAdmin: z.boolean(),
   allowedPages: z.array(z.string()),
   customerId: z.string().optional().or(z.literal("")),
