@@ -104,7 +104,17 @@ export const adminUserFormSchema = z.object({
   email: z.string().email("Valid email required"),
   phone: z.string().optional().or(z.literal("")),
   profileImage: z.string().optional().or(z.literal("")),
-  password: z.string().optional().or(z.literal("")),
+  // Empty string = "leave password unchanged" on update; create rejects empty
+  // explicitly in lib/actions.ts. When non-empty, enforce min length + at
+  // least one letter and one digit.
+  password: z.union([
+    z.literal(""),
+    z
+      .string()
+      .min(10, "Password must be at least 10 characters")
+      .regex(/[A-Za-z]/, "Password must contain at least one letter")
+      .regex(/\d/, "Password must contain at least one digit"),
+  ]),
   isSuperAdmin: z.boolean(),
   allowedPages: z.array(z.string()),
   customerId: z.string().optional().or(z.literal("")),

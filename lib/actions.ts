@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import { getSessionUser, canAccessCustomer, isCustomerManager } from "@/lib/scope";
 import { slugify } from "@/lib/slug";
 import { resolveCustomerId } from "@/lib/customer-scope";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export type ActionResult =
   | { success: true; id?: string }
@@ -394,18 +395,54 @@ export async function createAdminInquiry(data: unknown): Promise<ActionResult> {
 }
 
 export async function createInquiry(data: unknown): Promise<ActionResult> {
+  const ip = await getClientIp();
+  const rl = checkRateLimit(`inquiry:${ip}`, 5, 15 * 60_000);
+  if (!rl.allowed) {
+    const minutes = Math.ceil(rl.retryAfterMs / 60_000);
+    return { success: false, error: `Too many requests. Please try again in ${minutes} minute${minutes !== 1 ? "s" : ""}.` };
+  }
+
   const parsed = inquirySchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
   const property = await db.property.findUnique({ where: { id: parsed.data.propertyId }, include: { project: true } });
   if (!property) return { success: false, error: "Property not found" };
 
-  await db.inquiry.create({
+  const inquiry = await db.inquiry.create({
     data: {
       ...parsed.data,
       projectId: property.projectId,
     },
   });
+
+  // Notify the seller (and admin fallback). Email failures must not block the
+  // inquiry from being saved — log to EmailLog so the admin can see the trail.
+  const recipient = property.sellerEmail || process.env.RESEND_TO_EMAIL || "";
+  if (recipient) {
+    const subject = `New inquiry: ${property.title}`;
+    const body =
+      `New inquiry on ${property.title} (/properties/${property.slug}):\n\n` +
+      `Name: ${parsed.data.fullName}\n` +
+      `Email: ${parsed.data.email}\n` +
+      `Phone: ${parsed.data.phone ?? "—"}\n\n` +
+      `Message:\n${parsed.data.message}`;
+
+    try {
+      const { sendEmail } = await import("@/lib/email");
+      const result = await sendEmail(recipient, subject, body);
+      await db.emailLog.create({
+        data: {
+          inquiryId: inquiry.id,
+          subject,
+          body: result.success ? body : `[FAILED: ${result.error ?? "unknown"}]\n\n${body}`,
+          sentTo: recipient,
+        },
+      });
+    } catch (err) {
+      console.error("[createInquiry] notification email failed", err);
+    }
+  }
+
   return { success: true };
 }
 
@@ -905,6 +942,13 @@ const contactSchema = z.object({
 });
 
 export async function submitContactForm(data: unknown): Promise<ActionResult> {
+  const ip = await getClientIp();
+  const rl = checkRateLimit(`contact:${ip}`, 5, 15 * 60_000);
+  if (!rl.allowed) {
+    const minutes = Math.ceil(rl.retryAfterMs / 60_000);
+    return { success: false, error: `Too many requests. Please try again in ${minutes} minute${minutes !== 1 ? "s" : ""}.` };
+  }
+
   const parsed = contactSchema.safeParse(data);
   if (!parsed.success) return { success: false, error: parsed.error.errors[0]?.message ?? "Invalid input" };
 
@@ -912,7 +956,7 @@ export async function submitContactForm(data: unknown): Promise<ActionResult> {
 
   const { sendEmail } = await import("@/lib/email");
   const result = await sendEmail(
-    "avi@aradre.com",
+    process.env.RESEND_TO_EMAIL ?? "avi@aradre.com",
     `[Contact Form] ${subject}`,
     `New contact form submission:\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`,
   );
