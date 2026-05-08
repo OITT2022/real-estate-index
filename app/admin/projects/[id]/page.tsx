@@ -91,6 +91,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
                 id: u.id, building: u.building, entrance: u.entrance,
                 floor: u.floor, unitNumber: u.unitNumber,
                 propertyId: u.propertyId, propertyTitle: u.property?.title ?? null,
+                sold: u.sold,
               }))}
               availableProperties={linkedProperties.map((p) => ({ id: p.id, title: p.title }))}
             />

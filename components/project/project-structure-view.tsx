@@ -101,7 +101,11 @@ export function ProjectStructureView({ units }: Props) {
                     const floorUnits = floors.get(floorNum)!;
                     return floorUnits.map((unit, idx) => {
                       const p = unit.property;
-                      const isSold = p?.sold === true;
+                      // A unit slot is sold if either the unit-level flag is set, or
+                      // the underlying property is fully sold. unit.sold takes
+                      // precedence when the same property is reused across units.
+                      const unitSold = (unit as { sold?: boolean }).sold === true;
+                      const isSold = unitSold || p?.sold === true;
                       const isActive = p && p.published && p.status === "ACTIVE" && !isSold;
                       const isVisible = isActive || isSold;
                       const showFloorLabel = idx === 0;

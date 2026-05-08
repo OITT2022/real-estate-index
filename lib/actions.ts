@@ -932,6 +932,16 @@ export async function deleteProjectUnit(unitId: string): Promise<ActionResult> {
   return { success: true };
 }
 
+export async function setProjectUnitSold(unitId: string, sold: boolean): Promise<ActionResult> {
+  const unit = await db.projectUnit.findUnique({ where: { id: unitId }, select: { projectId: true } });
+  if (!unit) return { success: false, error: "Unit not found" };
+  await db.projectUnit.update({ where: { id: unitId }, data: { sold } });
+  revalidatePath(`/admin/projects/${unit.projectId}`);
+  // Public project pages cache unit data — invalidate the listing page.
+  revalidatePath("/projects");
+  return { success: true };
+}
+
 export async function addProjectFloor(
   projectId: string, building: string, entrance: string, floor: number, unitCount: number
 ): Promise<ActionResult> {

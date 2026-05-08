@@ -177,6 +177,7 @@ model ProjectUnit {
   floor       Int       @default(0)
   unitNumber  String
   propertyId  String?
+  sold        Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)

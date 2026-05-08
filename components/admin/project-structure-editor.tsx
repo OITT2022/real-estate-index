@@ -15,6 +15,7 @@ import {
   deleteProjectFloor,
   clearProjectStructure,
   createProperty,
+  setProjectUnitSold,
 } from "@/lib/actions";
 
 type UnitData = {
@@ -25,6 +26,7 @@ type UnitData = {
   unitNumber: string;
   propertyId: string | null;
   propertyTitle: string | null;
+  sold: boolean;
 };
 
 type PropertyOption = {
@@ -132,6 +134,13 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
   async function handleUnlinkProperty(unitId: string) {
     setError(null);
     await updateProjectUnit(unitId, { propertyId: null });
+    router.refresh();
+  }
+
+  async function handleToggleSold(unitId: string, current: boolean) {
+    setError(null);
+    const result = await setProjectUnitSold(unitId, !current);
+    if (!result.success) setError(result.error);
     router.refresh();
   }
 
@@ -317,6 +326,17 @@ export function ProjectStructureEditor({ projectId, projectTitle, units, availab
                               + New
                             </button>
                           </div>
+                        )}
+
+                        {unit.propertyId && (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSold(unit.id, unit.sold)}
+                            className={unit.sold ? "unit-sold-pill" : "unit-mark-sold-btn"}
+                            title={unit.sold ? "Unmark sold" : "Mark this unit as sold"}
+                          >
+                            {unit.sold ? "Sold" : "Mark sold"}
+                          </button>
                         )}
 
                         <button type="button" className="icon-btn icon-btn-danger" style={{ padding: 4 }} onClick={() => handleDeleteUnit(unit.id)} title="Delete unit">
