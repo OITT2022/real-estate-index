@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { PropertyForm } from "@/components/forms/property-form";
-import { ImageManager } from "@/components/admin/image-manager";
+import { ImageManagerGeneric } from "@/components/admin/image-manager-generic";
 import { ImageBankPicker } from "@/components/admin/image-bank-picker";
 import { getPropertyById, getAllProjectsForSelect, getAllCustomersForSelect, getAllBankImages, getProjectUnitsForSelect } from "@/lib/site-data";
 import { db } from "@/lib/db";
@@ -47,7 +47,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         </div>
       </div>
       <div style={{ display: "grid", gap: 20 }}>
-        <ImageManager propertyId={property.id} images={property.images} />
+        <ImageManagerGeneric entityType="property" entityId={property.id} images={property.images} />
         <ImageBankPicker bankImages={bankImagesSimple} targetType="property" targetId={property.id} />
         <PropertyForm
           mode="edit"

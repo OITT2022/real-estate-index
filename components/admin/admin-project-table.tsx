@@ -5,7 +5,8 @@ import { useState, useMemo } from "react";
 import { ProjectActions } from "@/components/admin/project-actions";
 import { PublishToggle } from "@/components/admin/publish-toggle";
 import { ApiToggle } from "@/components/admin/api-toggle";
-import { Search, SlidersHorizontal, Plus, ChevronUp, ChevronDown, X, FolderKanban, LayoutGrid, List, MapPin, Building2 } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, X, FolderKanban, LayoutGrid, List, MapPin, Building2 } from "lucide-react";
+import { useTableSort, SortIcon } from "@/lib/use-table-sort";
 
 type Row = {
   id: string;
@@ -35,8 +36,6 @@ export function AdminProjectTable({ rows, addUrl, filterCustomerName, showAllUrl
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [cityFilter, setCityFilter] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const cities = useMemo(() => [...new Set(rows.map((r) => r.city))].sort(), [rows]);
   const hasFilters = search || statusFilter || cityFilter;
@@ -54,31 +53,19 @@ export function AdminProjectTable({ rows, addUrl, filterCustomerName, showAllUrl
     });
   }, [rows, search, statusFilter, cityFilter]);
 
-  const sorted = useMemo(() => {
-    if (!sortKey) return filtered;
-    return [...filtered].sort((a, b) => {
-      let cmp = 0;
-      switch (sortKey) {
-        case "title": cmp = a.title.localeCompare(b.title); break;
-        case "city": cmp = a.city.localeCompare(b.city); break;
-        case "developer": cmp = a.developerName.localeCompare(b.developerName); break;
-        case "customer": cmp = (a.customerName ?? "").localeCompare(b.customerName ?? ""); break;
-        case "units": cmp = a.units - b.units; break;
-        case "status": cmp = (a.published ? 1 : 0) - (b.published ? 1 : 0); break;
-      }
-      return sortDir === "asc" ? cmp : -cmp;
-    });
-  }, [filtered, sortKey, sortDir]);
+  const { sorted, sortKey, sortDir, toggleSort } = useTableSort<Row, SortKey>(filtered, (a, b, key) => {
+    switch (key) {
+      case "title": return a.title.localeCompare(b.title);
+      case "city": return a.city.localeCompare(b.city);
+      case "developer": return a.developerName.localeCompare(b.developerName);
+      case "customer": return (a.customerName ?? "").localeCompare(b.customerName ?? "");
+      case "units": return a.units - b.units;
+      case "status": return (a.published ? 1 : 0) - (b.published ? 1 : 0);
+      default: return 0;
+    }
+  });
 
-  function toggleSort(key: SortKey) {
-    if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
-    else { setSortKey(key); setSortDir("asc"); }
-  }
   function clearFilters() { setSearch(""); setStatusFilter(""); setCityFilter(""); }
-  function SortIcon({ col }: { col: SortKey }) {
-    if (sortKey !== col) return null;
-    return sortDir === "asc" ? <ChevronUp size={14} style={{ marginLeft: 2, opacity: 0.7 }} /> : <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.7 }} />;
-  }
 
   const gridCols = "56px 2fr 1fr 1.2fr 1fr 80px 90px 60px 90px";
 
@@ -141,12 +128,12 @@ export function AdminProjectTable({ rows, addUrl, filterCustomerName, showAllUrl
         <div className="at-table-card">
           <div className="at-table-head" style={{ gridTemplateColumns: gridCols }}>
             <div></div>
-            <div className="at-th" onClick={() => toggleSort("title")}>Project <SortIcon col="title" /></div>
-            <div className="at-th" onClick={() => toggleSort("city")}>City <SortIcon col="city" /></div>
-            <div className="at-th" onClick={() => toggleSort("developer")}>Developer <SortIcon col="developer" /></div>
-            <div className="at-th" onClick={() => toggleSort("customer")}>Customer <SortIcon col="customer" /></div>
-            <div className="at-th" onClick={() => toggleSort("units")}>Units <SortIcon col="units" /></div>
-            <div className="at-th" onClick={() => toggleSort("status")}>Status <SortIcon col="status" /></div>
+            <div className="at-th" onClick={() => toggleSort("title")}>Project <SortIcon active={sortKey === "title"} dir={sortDir} /></div>
+            <div className="at-th" onClick={() => toggleSort("city")}>City <SortIcon active={sortKey === "city"} dir={sortDir} /></div>
+            <div className="at-th" onClick={() => toggleSort("developer")}>Developer <SortIcon active={sortKey === "developer"} dir={sortDir} /></div>
+            <div className="at-th" onClick={() => toggleSort("customer")}>Customer <SortIcon active={sortKey === "customer"} dir={sortDir} /></div>
+            <div className="at-th" onClick={() => toggleSort("units")}>Units <SortIcon active={sortKey === "units"} dir={sortDir} /></div>
+            <div className="at-th" onClick={() => toggleSort("status")}>Status <SortIcon active={sortKey === "status"} dir={sortDir} /></div>
             <div className="at-th">API</div>
             <div className="at-th">Actions</div>
           </div>

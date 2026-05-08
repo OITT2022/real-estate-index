@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ProjectForm } from "@/components/forms/project-form";
-import { ProjectImageManager } from "@/components/admin/project-image-manager";
+import { ImageManagerGeneric } from "@/components/admin/image-manager-generic";
 import { ProjectStructureEditor } from "@/components/admin/project-structure-editor";
 import { AddPropertyModal } from "@/components/admin/add-property-modal";
 import { ProjectWizard } from "@/components/admin/project-wizard";
@@ -63,7 +63,7 @@ export function CreateProjectFlow({ customers, userScope }: Props) {
 
         {/* Step 2: Media */}
         <div style={{ display: "grid", gap: 20 }}>
-          <ProjectImageManager projectId={createdId} images={[]} />
+          <ImageManagerGeneric entityType="project" entityId={createdId} images={[]} />
         </div>
 
         {/* Step 3: Structure */}

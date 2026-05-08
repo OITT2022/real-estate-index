@@ -8,20 +8,12 @@ import { propertyFormSchema, projectFormSchema, inquirySchema, apiClientFormSche
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { getSessionUser, canAccessCustomer, isCustomerManager } from "@/lib/scope";
+import { slugify } from "@/lib/slug";
+import { resolveCustomerId } from "@/lib/customer-scope";
 
 export type ActionResult =
   | { success: true; id?: string }
   | { success: false; error: string };
-
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
 
 // ── Property CRUD ──────────────────────────────────────────────
 
@@ -42,24 +34,8 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
   const { latitude, longitude, price, projectId, customerId, sold, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
-  // Resolve effective customerId: if project has a customer, inherit it; clear direct assignment
-  let resolvedCustomerId: string | null = customerId || null;
-
-  // Customer manager: force their customer
-  if (sessionUser && isCustomerManager(sessionUser)) {
-    resolvedCustomerId = sessionUser.customerId;
-  }
-
-  if (projectId) {
-    const project = await db.project.findUnique({ where: { id: projectId }, select: { customerId: true } });
-    // Scope check: customer manager can only use their own projects
-    if (sessionUser && isCustomerManager(sessionUser) && project?.customerId && project.customerId !== sessionUser.customerId) {
-      return { success: false, error: "You cannot use a project from another customer" };
-    }
-    if (project?.customerId) {
-      resolvedCustomerId = null; // inherited from project, don't store directly
-    }
-  }
+  const scope = await resolveCustomerId(sessionUser, customerId, projectId);
+  if (!scope.ok) return { success: false, error: scope.error };
 
   const property = await db.property.create({
     data: {
@@ -69,7 +45,7 @@ export async function createProperty(data: unknown): Promise<ActionResult> {
       price,
       sold,
       projectId: projectId || null,
-      customerId: resolvedCustomerId,
+      customerId: scope.customerId,
       sellerName: rest.sellerName ?? "",
       status: sold ? "SOLD" : rest.published ? "ACTIVE" : "DRAFT",
     },
@@ -99,22 +75,8 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
   const { latitude, longitude, price, projectId, customerId, sold, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
-  // Resolve effective customerId
-  let resolvedCustomerId: string | null = customerId || null;
-
-  if (sessionUser && isCustomerManager(sessionUser)) {
-    resolvedCustomerId = sessionUser.customerId;
-  }
-
-  if (projectId) {
-    const project = await db.project.findUnique({ where: { id: projectId }, select: { customerId: true } });
-    if (sessionUser && isCustomerManager(sessionUser) && project?.customerId && project.customerId !== sessionUser.customerId) {
-      return { success: false, error: "You cannot use a project from another customer" };
-    }
-    if (project?.customerId) {
-      resolvedCustomerId = null; // inherited from project
-    }
-  }
+  const scope = await resolveCustomerId(sessionUser, customerId, projectId);
+  if (!scope.ok) return { success: false, error: scope.error };
 
   await db.property.update({
     where: { id },
@@ -125,7 +87,7 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
       price,
       sold,
       projectId: projectId || null,
-      customerId: resolvedCustomerId,
+      customerId: scope.customerId,
       status: sold ? "SOLD" : rest.published ? "ACTIVE" : "DRAFT",
     },
   });
@@ -137,6 +99,16 @@ export async function updateProperty(id: string, data: unknown): Promise<ActionR
 }
 
 export async function deleteProperty(id: string): Promise<ActionResult> {
+  // Fetch image URLs before cascade so we can clean storage. FK cascade
+  // will drop PropertyImage rows, but the underlying blobs would orphan.
+  const images = await db.propertyImage.findMany({ where: { propertyId: id }, select: { url: true } });
+  for (const img of images) {
+    try {
+      await deleteImage(img.url);
+    } catch (err) {
+      console.error(`[deleteProperty] failed to delete blob ${img.url}`, err);
+    }
+  }
   await db.property.delete({ where: { id } });
   revalidatePath("/admin/properties");
   revalidatePath("/");
@@ -168,13 +140,11 @@ export async function createProject(data: unknown): Promise<ActionResult> {
   const { latitude, longitude, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
-  // Customer manager: force their customer
-  const resolvedCustomerId = sessionUser && isCustomerManager(sessionUser)
-    ? sessionUser.customerId
-    : customerId || null;
+  const scope = await resolveCustomerId(sessionUser, customerId, null);
+  if (!scope.ok) return { success: false, error: scope.error };
 
   const project = await db.project.create({
-    data: { ...rest, latitude, longitude, customerId: resolvedCustomerId, status: rest.published ? "ACTIVE" : "DRAFT" },
+    data: { ...rest, latitude, longitude, customerId: scope.customerId, status: rest.published ? "ACTIVE" : "DRAFT" },
   });
 
   revalidatePath("/admin/projects");
@@ -200,13 +170,12 @@ export async function updateProject(id: string, data: unknown): Promise<ActionRe
   const { latitude, longitude, customerId, ...rest } = parsed.data;
   rest.slug = slugify(rest.slug);
 
-  const resolvedCustomerId = sessionUser && isCustomerManager(sessionUser)
-    ? sessionUser.customerId
-    : customerId || null;
+  const scope = await resolveCustomerId(sessionUser, customerId, null);
+  if (!scope.ok) return { success: false, error: scope.error };
 
   await db.project.update({
     where: { id },
-    data: { ...rest, latitude, longitude, customerId: resolvedCustomerId, status: rest.published ? "ACTIVE" : "DRAFT" },
+    data: { ...rest, latitude, longitude, customerId: scope.customerId, status: rest.published ? "ACTIVE" : "DRAFT" },
   });
 
   // If project customer changed, clear direct customerId on properties that now inherit
@@ -225,6 +194,24 @@ export async function updateProject(id: string, data: unknown): Promise<ActionRe
 }
 
 export async function deleteProject(id: string): Promise<ActionResult> {
+  // Fetch all blob URLs before cascade so storage doesn't orphan.
+  const [images, documents, project] = await Promise.all([
+    db.projectImage.findMany({ where: { projectId: id }, select: { url: true } }),
+    db.projectDocument.findMany({ where: { projectId: id }, select: { url: true } }),
+    db.project.findUnique({ where: { id }, select: { environmentExrUrl: true } }),
+  ]);
+  const urls = [
+    ...images.map((i) => i.url),
+    ...documents.map((d) => d.url),
+    ...(project?.environmentExrUrl ? [project.environmentExrUrl] : []),
+  ];
+  for (const url of urls) {
+    try {
+      await deleteImage(url);
+    } catch (err) {
+      console.error(`[deleteProject] failed to delete blob ${url}`, err);
+    }
+  }
   await db.project.delete({ where: { id } });
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
@@ -265,88 +252,85 @@ export async function unlinkPropertyFromProject(propertyId: string): Promise<Act
   return { success: true };
 }
 
+// ── Image action helpers (shared between Property & Project images) ──
+// `model` is a Prisma delegate (db.propertyImage or db.projectImage). We use
+// `any` here intentionally — Prisma's generated delegate types are highly
+// specific per-model and the two delegates have structurally identical
+// methods for our use, so plumbing exact generics through provides no real
+// type safety while making the code dramatically more verbose.
+
+type ImageDelegate = {
+  findUnique: (args: { where: { id: string } }) => Promise<any>;
+  findFirst: (args: { where: Record<string, string>; orderBy: { sortOrder: "asc" } }) => Promise<{ id: string } | null>;
+  update: (args: { where: { id: string }; data: Record<string, unknown> }) => any;
+  updateMany: (args: { where: Record<string, string>; data: { isPrimary: boolean } }) => any;
+  delete: (args: { where: { id: string } }) => Promise<unknown>;
+};
+
+async function imageSetPrimary(model: ImageDelegate, imageId: string, entityField: string, paths: string[]): Promise<ActionResult> {
+  const image = await model.findUnique({ where: { id: imageId } });
+  if (!image) return { success: false, error: "Image not found" };
+  const entityId = image[entityField] as string;
+  await db.$transaction([
+    model.updateMany({ where: { [entityField]: entityId }, data: { isPrimary: false } }),
+    model.update({ where: { id: imageId }, data: { isPrimary: true } }),
+  ]);
+  for (const p of paths) revalidatePath(p.replace("[id]", entityId));
+  return { success: true };
+}
+
+async function imageReorder(model: ImageDelegate, entityId: string, orderedIds: string[], paths: string[]): Promise<ActionResult> {
+  await db.$transaction(
+    orderedIds.map((id, index) => model.update({ where: { id }, data: { sortOrder: index } }))
+  );
+  for (const p of paths) revalidatePath(p.replace("[id]", entityId));
+  return { success: true };
+}
+
+async function imageRemove(model: ImageDelegate, imageId: string, entityField: string, paths: string[]): Promise<ActionResult> {
+  const image = await model.findUnique({ where: { id: imageId } });
+  if (!image) return { success: false, error: "Image not found" };
+  const entityId = image[entityField] as string;
+  await deleteImage(image.url);
+  await model.delete({ where: { id: imageId } });
+  if (image.isPrimary) {
+    const next = await model.findFirst({ where: { [entityField]: entityId }, orderBy: { sortOrder: "asc" } });
+    if (next) await model.update({ where: { id: next.id }, data: { isPrimary: true } });
+  }
+  for (const p of paths) revalidatePath(p.replace("[id]", entityId));
+  return { success: true };
+}
+
 // ── Property Images ───────────────────────────────────────────
 
+const PROPERTY_IMAGE_PATHS = ["/admin/properties/[id]", "/"];
+
 export async function setImagePrimary(imageId: string): Promise<ActionResult> {
-  const image = await db.propertyImage.findUnique({ where: { id: imageId } });
-  if (!image) return { success: false, error: "Image not found" };
-
-  await db.$transaction([
-    db.propertyImage.updateMany({ where: { propertyId: image.propertyId }, data: { isPrimary: false } }),
-    db.propertyImage.update({ where: { id: imageId }, data: { isPrimary: true } }),
-  ]);
-
-  revalidatePath(`/admin/properties/${image.propertyId}`);
-  revalidatePath("/");
-  return { success: true };
+  return imageSetPrimary(db.propertyImage as unknown as ImageDelegate, imageId, "propertyId", PROPERTY_IMAGE_PATHS);
 }
 
 export async function reorderImages(propertyId: string, orderedIds: string[]): Promise<ActionResult> {
-  await db.$transaction(
-    orderedIds.map((id, index) => db.propertyImage.update({ where: { id }, data: { sortOrder: index } }))
-  );
-  revalidatePath(`/admin/properties/${propertyId}`);
-  revalidatePath("/");
-  return { success: true };
+  return imageReorder(db.propertyImage as unknown as ImageDelegate, propertyId, orderedIds, PROPERTY_IMAGE_PATHS);
 }
 
 export async function removeImage(imageId: string): Promise<ActionResult> {
-  const image = await db.propertyImage.findUnique({ where: { id: imageId } });
-  if (!image) return { success: false, error: "Image not found" };
-
-  await deleteImage(image.url);
-  await db.propertyImage.delete({ where: { id: imageId } });
-
-  if (image.isPrimary) {
-    const next = await db.propertyImage.findFirst({ where: { propertyId: image.propertyId }, orderBy: { sortOrder: "asc" } });
-    if (next) await db.propertyImage.update({ where: { id: next.id }, data: { isPrimary: true } });
-  }
-
-  revalidatePath(`/admin/properties/${image.propertyId}`);
-  revalidatePath("/");
-  return { success: true };
+  return imageRemove(db.propertyImage as unknown as ImageDelegate, imageId, "propertyId", PROPERTY_IMAGE_PATHS);
 }
 
 // ── Project Images ────────────────────────────────────────────
 
+const PROJECT_IMAGE_PATHS = ["/admin/projects/[id]", "/projects"];
+
 export async function setProjectImagePrimary(imageId: string): Promise<ActionResult> {
-  const image = await db.projectImage.findUnique({ where: { id: imageId } });
-  if (!image) return { success: false, error: "Image not found" };
-
-  await db.$transaction([
-    db.projectImage.updateMany({ where: { projectId: image.projectId }, data: { isPrimary: false } }),
-    db.projectImage.update({ where: { id: imageId }, data: { isPrimary: true } }),
-  ]);
-
-  revalidatePath(`/admin/projects/${image.projectId}`);
-  revalidatePath("/projects");
-  return { success: true };
+  return imageSetPrimary(db.projectImage as unknown as ImageDelegate, imageId, "projectId", PROJECT_IMAGE_PATHS);
 }
 
 export async function reorderProjectImages(projectId: string, orderedIds: string[]): Promise<ActionResult> {
-  await db.$transaction(
-    orderedIds.map((id, index) => db.projectImage.update({ where: { id }, data: { sortOrder: index } }))
-  );
-  revalidatePath(`/admin/projects/${projectId}`);
-  revalidatePath("/projects");
-  return { success: true };
+  return imageReorder(db.projectImage as unknown as ImageDelegate, projectId, orderedIds, PROJECT_IMAGE_PATHS);
 }
 
 export async function removeProjectImage(imageId: string): Promise<ActionResult> {
-  const image = await db.projectImage.findUnique({ where: { id: imageId } });
-  if (!image) return { success: false, error: "Image not found" };
-
-  await deleteImage(image.url);
-  await db.projectImage.delete({ where: { id: imageId } });
-
-  if (image.isPrimary) {
-    const next = await db.projectImage.findFirst({ where: { projectId: image.projectId }, orderBy: { sortOrder: "asc" } });
-    if (next) await db.projectImage.update({ where: { id: next.id }, data: { isPrimary: true } });
-  }
-
-  revalidatePath(`/admin/projects/${image.projectId}`);
-  revalidatePath("/projects");
-  return { success: true };
+  return imageRemove(db.projectImage as unknown as ImageDelegate, imageId, "projectId", PROJECT_IMAGE_PATHS);
 }
 
 // ── Project Environment EXR ───────────────────────────────────

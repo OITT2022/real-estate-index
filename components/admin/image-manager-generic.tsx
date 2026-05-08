@@ -2,15 +2,36 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { PropertyImage } from "@prisma/client";
-import { setImagePrimary, reorderImages, removeImage } from "@/lib/actions";
+import {
+  setImagePrimary,
+  reorderImages,
+  removeImage,
+  setProjectImagePrimary,
+  reorderProjectImages,
+  removeProjectImage,
+} from "@/lib/actions";
 
-type Props = {
-  propertyId: string;
-  images: PropertyImage[];
+export type ManagedImage = {
+  id: string;
+  url: string;
+  altText: string | null;
+  isPrimary: boolean;
+  sortOrder: number;
 };
 
-export function ImageManager({ propertyId, images: initial }: Props) {
+type Props = {
+  entityType: "property" | "project";
+  entityId: string;
+  images: ManagedImage[];
+  heading?: string;
+};
+
+const ACTIONS = {
+  property: { setPrimary: setImagePrimary, reorder: reorderImages, remove: removeImage, formField: "propertyId", defaultLabel: "Images" },
+  project: { setPrimary: setProjectImagePrimary, reorder: reorderProjectImages, remove: removeProjectImage, formField: "projectId", defaultLabel: "Project Images" },
+} as const;
+
+export function ImageManagerGeneric({ entityType, entityId, images: initial, heading }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState(initial);
@@ -20,14 +41,14 @@ export function ImageManager({ propertyId, images: initial }: Props) {
   useEffect(() => { setImages(initial); }, [initial]);
 
   const refresh = useCallback(() => router.refresh(), [router]);
+  const cfg = ACTIONS[entityType];
 
   async function handleUpload(files: FileList) {
     setUploading(true);
     for (const file of Array.from(files)) {
       const form = new FormData();
       form.set("file", file);
-      form.set("propertyId", propertyId);
-
+      form.set(cfg.formField, entityId);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       if (res.ok) {
         const img = await res.json();
@@ -39,20 +60,16 @@ export function ImageManager({ propertyId, images: initial }: Props) {
   }
 
   async function handleSetPrimary(imageId: string) {
-    await setImagePrimary(imageId);
-    setImages((prev) =>
-      prev.map((img) => ({ ...img, isPrimary: img.id === imageId }))
-    );
+    await cfg.setPrimary(imageId);
+    setImages((prev) => prev.map((img) => ({ ...img, isPrimary: img.id === imageId })));
   }
 
   async function handleRemove(imageId: string) {
-    await removeImage(imageId);
+    await cfg.remove(imageId);
     setImages((prev) => prev.filter((img) => img.id !== imageId));
   }
 
-  function handleDragStart(idx: number) {
-    setDragIdx(idx);
-  }
+  function handleDragStart(idx: number) { setDragIdx(idx); }
 
   async function handleDrop(targetIdx: number) {
     if (dragIdx === null || dragIdx === targetIdx) return;
@@ -61,18 +78,16 @@ export function ImageManager({ propertyId, images: initial }: Props) {
     reordered.splice(targetIdx, 0, moved);
     setImages(reordered);
     setDragIdx(null);
-
-    await reorderImages(
-      propertyId,
-      reordered.map((img) => img.id)
-    );
+    await cfg.reorder(entityId, reordered.map((img) => img.id));
   }
+
+  const label = heading ?? cfg.defaultLabel;
 
   return (
     <div className="card">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <div>
-          <p className="eyebrow">Images</p>
+          <p className="eyebrow">{label}</p>
           <p className="muted">{images.length} image{images.length !== 1 ? "s" : ""} — drag to reorder</p>
         </div>
         <button
@@ -93,9 +108,7 @@ export function ImageManager({ propertyId, images: initial }: Props) {
         />
       </div>
 
-      {images.length === 0 && (
-        <p className="muted">No images yet. Upload images to get started.</p>
-      )}
+      {images.length === 0 && <p className="muted">No images yet. Upload images to get started.</p>}
 
       <div className="image-grid">
         {images.map((img, idx) => (
@@ -111,13 +124,9 @@ export function ImageManager({ propertyId, images: initial }: Props) {
             {img.isPrimary && <span className="image-badge">Primary</span>}
             <div className="image-actions">
               {!img.isPrimary && (
-                <button type="button" onClick={() => handleSetPrimary(img.id)} title="Set as primary">
-                  ★
-                </button>
+                <button type="button" onClick={() => handleSetPrimary(img.id)} title="Set as primary">★</button>
               )}
-              <button type="button" onClick={() => handleRemove(img.id)} title="Delete">
-                ✕
-              </button>
+              <button type="button" onClick={() => handleRemove(img.id)} title="Delete">✕</button>
             </div>
           </div>
         ))}

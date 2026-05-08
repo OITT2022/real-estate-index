@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { projectFormSchema, type ProjectFormValues } from "@/lib/validations";
 import { createProject, updateProject } from "@/lib/actions";
+import { slugify } from "@/lib/slug";
 import { LocationPicker } from "@/components/map/location-picker";
 import type { Project } from "@prisma/client";
 
@@ -57,10 +58,6 @@ export function ProjectForm({ mode, project, customers, userScope, onCreated }: 
         }
       : { published: false, featured: false, customerId: userScope?.customerId ?? "" },
   });
-
-  function slugify(text: string) {
-    return text.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-  }
 
   const [autoSlug, setAutoSlug] = useState(mode === "create");
 

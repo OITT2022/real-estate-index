@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ProjectForm } from "@/components/forms/project-form";
-import { ProjectImageManager } from "@/components/admin/project-image-manager";
+import { ImageManagerGeneric } from "@/components/admin/image-manager-generic";
 import { ProjectPropertiesManager } from "@/components/admin/project-properties-manager";
 import { ProjectDocumentManager } from "@/components/admin/project-document-manager";
 import { ProjectStructureEditor } from "@/components/admin/project-structure-editor";
@@ -77,7 +77,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
 
           {/* Step 2: Media */}
           <div style={{ display: "grid", gap: 20 }}>
-            <ProjectImageManager projectId={project.id} images={project.images} />
+            <ImageManagerGeneric entityType="project" entityId={project.id} images={project.images} />
             <ImageBankPicker bankImages={bankImagesSimple} targetType="project" targetId={project.id} />
             <ProjectDocumentManager projectId={project.id} documents={project.documents} />
           </div>

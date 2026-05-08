@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import { propertyFormSchema, type PropertyFormValues } from "@/lib/validations";
 import { createProperty, updateProperty } from "@/lib/actions";
+import { slugify } from "@/lib/slug";
 import { LocationPicker } from "@/components/map/location-picker";
 import type { Property } from "@prisma/client";
 
@@ -100,16 +101,6 @@ export function PropertyForm({ mode, property, projects, customers, userScope, p
           customerId: userScope?.customerId ?? "",
         },
   });
-
-  function slugify(text: string) {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/[\s_]+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-  }
 
   const selectedProjectId = watch("projectId");
 

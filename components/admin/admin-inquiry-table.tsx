@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { Search, SlidersHorizontal, Plus, ChevronUp, ChevronDown, X, MessageSquare, Eye } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, X, MessageSquare, Eye } from "lucide-react";
+import { useTableSort, SortIcon } from "@/lib/use-table-sort";
 
 type Row = {
   id: string;
@@ -30,8 +31,6 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
   const [statusFilter, setStatusFilter] = useState("");
   const [customerFilter, setCustomerFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const customers = useMemo(() => [...new Set(rows.map((r) => r.customerName).filter(Boolean) as string[])].sort(), [rows]);
   const projects = useMemo(() => [...new Set(rows.map((r) => r.projectTitle).filter(Boolean) as string[])].sort(), [rows]);
@@ -51,30 +50,18 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
     });
   }, [rows, search, statusFilter, customerFilter, projectFilter]);
 
-  const sorted = useMemo(() => {
-    if (!sortKey) return filtered;
-    return [...filtered].sort((a, b) => {
-      let cmp = 0;
-      switch (sortKey) {
-        case "name": cmp = a.fullName.localeCompare(b.fullName); break;
-        case "email": cmp = a.email.localeCompare(b.email); break;
-        case "property": cmp = a.propertyTitle.localeCompare(b.propertyTitle); break;
-        case "status": cmp = a.status.localeCompare(b.status); break;
-        case "date": cmp = a.date.localeCompare(b.date); break;
-      }
-      return sortDir === "asc" ? cmp : -cmp;
-    });
-  }, [filtered, sortKey, sortDir]);
+  const { sorted, sortKey, sortDir, toggleSort } = useTableSort<Row, SortKey>(filtered, (a, b, key) => {
+    switch (key) {
+      case "name": return a.fullName.localeCompare(b.fullName);
+      case "email": return a.email.localeCompare(b.email);
+      case "property": return a.propertyTitle.localeCompare(b.propertyTitle);
+      case "status": return a.status.localeCompare(b.status);
+      case "date": return a.date.localeCompare(b.date);
+      default: return 0;
+    }
+  });
 
-  function toggleSort(key: SortKey) {
-    if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
-    else { setSortKey(key); setSortDir("asc"); }
-  }
   function clearFilters() { setSearch(""); setStatusFilter(""); setCustomerFilter(""); setProjectFilter(""); }
-  function SortIcon({ col }: { col: SortKey }) {
-    if (sortKey !== col) return null;
-    return sortDir === "asc" ? <ChevronUp size={14} style={{ marginLeft: 2, opacity: 0.7 }} /> : <ChevronDown size={14} style={{ marginLeft: 2, opacity: 0.7 }} />;
-  }
 
   const gridCols = "1.5fr 1.5fr 1.5fr 1fr 1fr 90px 1fr 70px";
 
@@ -120,13 +107,13 @@ export function AdminInquiryTable({ rows }: { rows: Row[] }) {
 
       <div className="at-table-card">
         <div className="at-table-head" style={{ gridTemplateColumns: gridCols }}>
-          <div className="at-th" onClick={() => toggleSort("name")}>Name <SortIcon col="name" /></div>
-          <div className="at-th" onClick={() => toggleSort("email")}>Email <SortIcon col="email" /></div>
-          <div className="at-th" onClick={() => toggleSort("property")}>Property <SortIcon col="property" /></div>
+          <div className="at-th" onClick={() => toggleSort("name")}>Name <SortIcon active={sortKey === "name"} dir={sortDir} /></div>
+          <div className="at-th" onClick={() => toggleSort("email")}>Email <SortIcon active={sortKey === "email"} dir={sortDir} /></div>
+          <div className="at-th" onClick={() => toggleSort("property")}>Property <SortIcon active={sortKey === "property"} dir={sortDir} /></div>
           <div className="at-th">Project</div>
           <div className="at-th">Customer</div>
-          <div className="at-th" onClick={() => toggleSort("status")}>Status <SortIcon col="status" /></div>
-          <div className="at-th" onClick={() => toggleSort("date")}>Date <SortIcon col="date" /></div>
+          <div className="at-th" onClick={() => toggleSort("status")}>Status <SortIcon active={sortKey === "status"} dir={sortDir} /></div>
+          <div className="at-th" onClick={() => toggleSort("date")}>Date <SortIcon active={sortKey === "date"} dir={sortDir} /></div>
           <div className="at-th">Action</div>
         </div>
 

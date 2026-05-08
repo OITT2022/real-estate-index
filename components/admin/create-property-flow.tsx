@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PropertyForm } from "@/components/forms/property-form";
-import { ImageManager } from "@/components/admin/image-manager";
+import { ImageManagerGeneric } from "@/components/admin/image-manager-generic";
 
 type UserScope = { customerId: string; customerName: string } | null;
 
@@ -30,7 +30,7 @@ export function CreatePropertyFlow({ projects, customers, userScope }: Props) {
             </a>.
           </p>
         </div>
-        <ImageManager propertyId={createdId} images={[]} />
+        <ImageManagerGeneric entityType="property" entityId={createdId} images={[]} />
       </div>
     );
   }

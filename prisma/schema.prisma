@@ -93,6 +93,7 @@ model Property {
   @@index([projectId])
   @@index([customerId])
   @@index([apiEnabled, published, status])
+  @@index([price])
 }
 
 model ImageBank {
@@ -216,6 +217,7 @@ model Inquiry {
   @@index([propertyId, createdAt])
   @@index([projectId])
   @@index([status])
+  @@index([status, createdAt(sort: Desc)])
 }
 
 model InquiryNote {

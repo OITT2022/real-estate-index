@@ -8,7 +8,11 @@
     "start": "next start",
     "seed": "tsx prisma/seed.ts",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "dev:test": "dotenv -e .env.test -- next dev -p 3100",
+    "test:e2e": "dotenv -e .env.test -- playwright test",
+    "test:e2e:ui": "dotenv -e .env.test -- playwright test --ui",
+    "test:e2e:seed": "dotenv -e .env.test -- tsx tests/e2e/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1024.0",
@@ -40,12 +44,14 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^22.13.10",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "dotenv-cli": "^11.0.0",
     "prisma": "^6.6.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
