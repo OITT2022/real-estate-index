@@ -136,9 +136,9 @@ export const profileFormSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
     phone: z.string().optional().or(z.literal("")),
-    phonePrefix: z
+    phoneCountry: z
       .string()
-      .regex(/^\d{1,4}$/, "Invalid country code")
+      .regex(/^[A-Z]{2}$/, "Invalid country")
       .optional()
       .or(z.literal("")),
     country: z
@@ -149,9 +149,9 @@ export const profileFormSchema = z
     timezone: z.string().optional().or(z.literal("")),
     profileImage: z.string().optional().or(z.literal("")),
   })
-  .refine((d) => !d.phone || !!d.phonePrefix, {
-    message: "Pick a country code for the phone number",
-    path: ["phonePrefix"],
+  .refine((d) => !d.phone || !!d.phoneCountry, {
+    message: "Pick a country for the phone number",
+    path: ["phoneCountry"],
   });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;

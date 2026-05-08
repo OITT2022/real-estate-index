@@ -1228,7 +1228,7 @@ export async function updateOwnProfile(data: unknown): Promise<ActionResult> {
     data: {
       name: parsed.data.name,
       phone: parsed.data.phone || null,
-      phonePrefix: parsed.data.phonePrefix || null,
+      phoneCountry: parsed.data.phoneCountry || null,
       country: parsed.data.country || null,
       timezone: parsed.data.timezone || null,
       profileImage: parsed.data.profileImage || null,

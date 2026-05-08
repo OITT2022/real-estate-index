@@ -7,6 +7,8 @@ export type CountryOption = {
   name: string;
   /** Calling code without the "+" (e.g. "357", "972", "1") */
   dialCode: string;
+  /** Lower-cased haystack for searching (name + code + dial) */
+  searchText: string;
 };
 
 const displayNames = new Intl.DisplayNames(["en"], { type: "region" });
@@ -24,7 +26,12 @@ export function listCountries(): CountryOption[] {
       continue;
     }
     const name = displayNames.of(code) ?? code;
-    out.push({ code, name, dialCode });
+    out.push({
+      code,
+      name,
+      dialCode,
+      searchText: `${name} ${code} +${dialCode}`.toLowerCase(),
+    });
   }
   out.sort((a, b) => a.name.localeCompare(b.name));
   cached = out;

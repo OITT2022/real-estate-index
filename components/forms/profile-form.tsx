@@ -4,16 +4,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import * as flagsByCode from "country-flag-icons/string/3x2";
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validations";
 import { updateOwnProfile } from "@/lib/actions";
 import type { CountryOption } from "@/lib/countries";
+import type { TimezoneOption } from "@/lib/timezones";
+import { SearchableSelect, type SearchableOption } from "@/components/ui/searchable-select";
 
 type ProfileUser = {
   id: string;
   name: string | null;
   email: string;
   phone: string | null;
-  phonePrefix: string | null;
+  phoneCountry: string | null;
   country: string | null;
   timezone: string | null;
   profileImage: string | null;
@@ -22,8 +25,23 @@ type ProfileUser = {
 type Props = {
   user: ProfileUser;
   countries: CountryOption[];
-  timezones: string[];
+  timezones: TimezoneOption[];
 };
+
+const FLAGS = flagsByCode as Record<string, string>;
+
+function Flag({ code, size = 18 }: { code: string; size?: number }) {
+  const svg = FLAGS[code];
+  if (!svg) return null;
+  return (
+    <span
+      className="ss-flag"
+      style={{ width: size * 1.5, height: size, lineHeight: 0 }}
+      aria-hidden
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+}
 
 export function ProfileForm({ user, countries, timezones }: Props) {
   const router = useRouter();
@@ -42,7 +60,7 @@ export function ProfileForm({ user, countries, timezones }: Props) {
     defaultValues: {
       name: user.name ?? "",
       phone: user.phone ?? "",
-      phonePrefix: user.phonePrefix ?? "",
+      phoneCountry: user.phoneCountry ?? "",
       country: user.country ?? "",
       timezone: user.timezone ?? "",
       profileImage: user.profileImage ?? "",
@@ -51,24 +69,29 @@ export function ProfileForm({ user, countries, timezones }: Props) {
 
   const profileImage = watch("profileImage");
   const country = watch("country");
-  const phonePrefix = watch("phonePrefix");
+  const phoneCountry = watch("phoneCountry");
 
-  // Deduplicated list of dial codes for the prefix dropdown.
-  const dialCodes = useMemo(() => {
-    const set = new Set<string>();
-    for (const c of countries) set.add(c.dialCode);
-    return [...set].sort((a, b) => Number(a) - Number(b));
+  const countryOptions: SearchableOption[] = useMemo(
+    () => countries.map((c) => ({ value: c.code, label: c.name, searchText: c.searchText })),
+    [countries],
+  );
+  const tzOptions: SearchableOption[] = useMemo(
+    () => timezones.map((t) => ({ value: t.value, label: t.label, searchText: `${t.label} ${t.value}`.toLowerCase() })),
+    [timezones],
+  );
+  const countriesByCode = useMemo(() => {
+    const m = new Map<string, CountryOption>();
+    for (const c of countries) m.set(c.code, c);
+    return m;
   }, [countries]);
 
+  const phoneCountryInfo = phoneCountry ? countriesByCode.get(phoneCountry) ?? null : null;
+
   function handleCountryChange(next: string) {
-    setValue("country", next);
-    if (!next) return;
-    const opt = countries.find((c) => c.code === next);
-    if (!opt) return;
-    // If the prefix is empty or matches some country's dial code already
-    // (i.e. user hasn't manually typed something exotic), update it.
-    const knownPrefix = !phonePrefix || dialCodes.includes(phonePrefix);
-    if (knownPrefix) setValue("phonePrefix", opt.dialCode);
+    setValue("country", next, { shouldValidate: true });
+    // Auto-fill the phone country if it's empty (don't override an existing
+    // explicit choice — user may live in CY but use an IL phone).
+    if (!phoneCountry) setValue("phoneCountry", next);
   }
 
   async function handleImageUpload(file: File) {
@@ -99,6 +122,40 @@ export function ProfileForm({ user, countries, timezones }: Props) {
     }
     setSuccess(true);
     router.refresh();
+  }
+
+  function renderCountryOption(opt: SearchableOption) {
+    const info = countriesByCode.get(opt.value);
+    return (
+      <span className="ss-row">
+        <Flag code={opt.value} />
+        <span className="ss-row-label">{opt.label}</span>
+        {info && <span className="ss-row-aux">+{info.dialCode}</span>}
+      </span>
+    );
+  }
+
+  function renderCountryTrigger(opt: SearchableOption | null) {
+    if (!opt) return <span className="ss-placeholder">Select country…</span>;
+    const info = countriesByCode.get(opt.value);
+    return (
+      <span className="ss-row">
+        <Flag code={opt.value} />
+        <span className="ss-row-label">{opt.label}</span>
+        {info && <span className="ss-row-aux">+{info.dialCode}</span>}
+      </span>
+    );
+  }
+
+  function renderPhonePrefixTrigger(opt: SearchableOption | null) {
+    if (!opt) return <span className="ss-placeholder">Code</span>;
+    const info = countriesByCode.get(opt.value);
+    return (
+      <span className="ss-row">
+        <Flag code={opt.value} />
+        {info && <span className="ss-row-aux ss-row-aux-strong">+{info.dialCode}</span>}
+      </span>
+    );
   }
 
   return (
@@ -211,20 +268,25 @@ export function ProfileForm({ user, countries, timezones }: Props) {
 
         <div>
           <label className="admin-label">Phone</label>
-          <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 8 }}>
-            <select
-              className="admin-input"
-              value={phonePrefix ?? ""}
-              onChange={(e) => setValue("phonePrefix", e.target.value)}
-            >
-              <option value="">Code…</option>
-              {dialCodes.map((d) => (
-                <option key={d} value={d}>+{d}</option>
-              ))}
-            </select>
-            <input type="tel" {...register("phone")} className="admin-input" placeholder="National number" />
+          <div className="phone-input-group">
+            <SearchableSelect
+              compact
+              options={countryOptions}
+              value={phoneCountry ?? ""}
+              onChange={(next) => setValue("phoneCountry", next, { shouldValidate: true })}
+              renderOption={renderCountryOption}
+              renderTrigger={renderPhonePrefixTrigger}
+              placeholder="Code"
+              className="phone-input-prefix"
+            />
+            <input
+              type="tel"
+              {...register("phone")}
+              className="admin-input phone-input-number"
+              placeholder={phoneCountryInfo ? `Phone number` : "Pick a country first"}
+            />
           </div>
-          {errors.phonePrefix && <p className="form-error">{errors.phonePrefix.message}</p>}
+          {errors.phoneCountry && <p className="form-error">{errors.phoneCountry.message}</p>}
         </div>
       </div>
 
@@ -233,27 +295,25 @@ export function ProfileForm({ user, countries, timezones }: Props) {
 
         <div>
           <label className="admin-label">Country</label>
-          <select
-            className="admin-input"
+          <SearchableSelect
+            options={countryOptions}
             value={country ?? ""}
-            onChange={(e) => handleCountryChange(e.target.value)}
-          >
-            <option value="">Select country…</option>
-            {countries.map((c) => (
-              <option key={c.code} value={c.code}>{c.name} (+{c.dialCode})</option>
-            ))}
-          </select>
+            onChange={handleCountryChange}
+            renderOption={renderCountryOption}
+            renderTrigger={renderCountryTrigger}
+            placeholder="Select country…"
+          />
           {errors.country && <p className="form-error">{errors.country.message}</p>}
         </div>
 
         <div>
           <label className="admin-label">Time zone</label>
-          <select className="admin-input" {...register("timezone")}>
-            <option value="">Select time zone…</option>
-            {timezones.map((tz) => (
-              <option key={tz} value={tz}>{tz}</option>
-            ))}
-          </select>
+          <SearchableSelect
+            options={tzOptions}
+            value={watch("timezone") ?? ""}
+            onChange={(next) => setValue("timezone", next, { shouldValidate: true })}
+            placeholder="Select time zone…"
+          />
         </div>
       </div>
 

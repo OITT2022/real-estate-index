@@ -18,7 +18,7 @@ export default async function AdminProfilePage() {
       name: true,
       email: true,
       phone: true,
-      phonePrefix: true,
+      phoneCountry: true,
       country: true,
       timezone: true,
       profileImage: true,

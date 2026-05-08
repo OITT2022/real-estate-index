@@ -29,6 +29,7 @@
     "@types/three": "^0.183.1",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
+    "country-flag-icons": "^1.6.17",
     "leaflet": "^1.9.4",
     "libphonenumber-js": "^1.12.43",
     "lucide-react": "^0.511.0",

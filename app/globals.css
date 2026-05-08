@@ -1751,6 +1751,177 @@ textarea.inquiry-input {
   color: var(--fg);
   letter-spacing: 0.01em;
 }
+
+/* ── Profile form: shared label class & unified phone input ──── */
+.admin-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: 0.01em;
+  margin-bottom: 6px;
+}
+
+.phone-input-group {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  overflow: visible; /* let the combobox popover escape */
+}
+.phone-input-group:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.phone-input-group .phone-input-prefix .ss-trigger {
+  border: none;
+  border-right: 1px solid var(--line);
+  border-radius: 10px 0 0 10px;
+  padding: 9px 12px;
+  background: transparent;
+  height: 100%;
+  min-width: 96px;
+}
+.phone-input-group .phone-input-prefix:focus-within .ss-trigger {
+  box-shadow: none;
+}
+.phone-input-group .admin-form .phone-input-number,
+.phone-input-group input.phone-input-number {
+  border: none !important;
+  border-radius: 0 10px 10px 0 !important;
+  background: transparent;
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+.phone-input-group input.phone-input-number:focus {
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* ── SearchableSelect (combobox with flag + search) ─────────── */
+.ss-wrap { position: relative; }
+.ss-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  border: 1.5px solid var(--line);
+  background: white;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--fg);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  text-align: left;
+  min-height: 42px;
+}
+.ss-trigger:hover { border-color: #cbd5e1; }
+.ss-trigger:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.ss-trigger-compact {
+  min-height: 0;
+  padding: 0 10px;
+}
+.ss-trigger-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.ss-chevron { color: var(--muted); flex-shrink: 0; }
+.ss-placeholder { color: #a0aec0; }
+
+.ss-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  z-index: 50;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 240px;
+  max-width: 360px;
+}
+.ss-search {
+  position: relative;
+  border-bottom: 1px solid var(--line-light);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+}
+.ss-search-icon { color: var(--muted); }
+.ss-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: 0.88rem;
+  background: transparent;
+  padding: 4px 0;
+  color: var(--fg);
+}
+.ss-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.ss-option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+}
+.ss-option-active { background: var(--accent-glow); }
+.ss-option-selected { color: var(--accent); font-weight: 600; }
+.ss-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.ss-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  width: 100%;
+}
+.ss-row-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ss-row-aux { color: var(--muted); font-size: 0.85rem; flex-shrink: 0; }
+.ss-row-aux-strong { color: var(--fg); font-weight: 600; }
+.ss-flag {
+  display: inline-block;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+}
+.ss-flag svg { width: 100%; height: 100%; display: block; }
+
 .checkbox-row {
   display: flex;
   flex-wrap: wrap;
