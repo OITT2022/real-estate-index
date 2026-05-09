@@ -8,37 +8,24 @@ import { ProjectWizard } from "@/components/admin/project-wizard";
 import { ImageBankPicker } from "@/components/admin/image-bank-picker";
 import { AddPropertyModal } from "@/components/admin/add-property-modal";
 import { Project3DPreview } from "@/components/admin/project-3d-preview";
-import { TranslationsCard } from "@/components/admin/translations-card";
 import { getProjectById, getAllProperties, getAllBankImages, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
 import { getSessionUser, getUserScope } from "@/lib/scope";
-import { getEntityTranslations } from "@/lib/translation/admin";
 import { transformProjectToInput } from "@/lib/building-3d/transform-project";
 import { generateSceneFromProject } from "@/lib/building-3d/generate-scene";
 
 export const dynamic = "force-dynamic";
 
-const PROJECT_TRANSLATABLE_FIELDS = [
-  { key: "title", label: "Title" },
-  { key: "shortDescription", label: "Short description", multiline: true },
-  { key: "description", label: "Description", multiline: true },
-  { key: "address", label: "Address" },
-  { key: "city", label: "City" },
-  { key: "metaTitle", label: "Meta title (SEO)" },
-  { key: "metaDescription", label: "Meta description (SEO)", multiline: true },
-];
-
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   await checkPageAccess("projects");
   const { id } = await params;
   const sessionUser = await getSessionUser();
-  const [project, allProperties, bankImages, customers, userScope, translations] = await Promise.all([
+  const [project, allProperties, bankImages, customers, userScope] = await Promise.all([
     getProjectById(id),
     getAllProperties(sessionUser ?? undefined),
     getAllBankImages(),
     getAllCustomersForSelect(),
     sessionUser ? getUserScope(sessionUser) : Promise.resolve(null),
-    getEntityTranslations("project", id),
   ]);
 
   if (!project) return notFound();
@@ -86,21 +73,6 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
               apiEnabled: project.apiEnabled, metaTitle: project.metaTitle,
               metaDescription: project.metaDescription, customerId: project.customerId,
             }))} customers={customers} userScope={userScope} />
-            <TranslationsCard
-              entityType="project"
-              entityId={project.id}
-              fields={PROJECT_TRANSLATABLE_FIELDS}
-              source={{
-                title: project.title ?? "",
-                shortDescription: project.shortDescription ?? "",
-                description: project.description ?? "",
-                address: project.address ?? "",
-                city: project.city ?? "",
-                metaTitle: project.metaTitle ?? "",
-                metaDescription: project.metaDescription ?? "",
-              }}
-              existing={translations}
-            />
           </div>
 
           {/* Step 2: Media */}

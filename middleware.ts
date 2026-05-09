@@ -1,68 +1,29 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
-import createIntlMiddleware from "next-intl/middleware";
-import { routing } from "@/i18n/routing";
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
 const FORCED_PATH = "/admin/change-password";
-const SIGN_IN_PATH = "/admin/login";
 
-const intlMiddleware = createIntlMiddleware(routing);
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token;
+    const path = req.nextUrl.pathname;
 
-const PUBLIC_ADMIN_PATHS = (path: string) =>
-  path === SIGN_IN_PATH ||
-  path.startsWith("/admin/forgot-password") ||
-  path.startsWith("/admin/reset-password");
-
-export default async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  try {
-    // ── Admin: auth-gated, never localized ──────────────────────────
-    if (pathname.startsWith("/admin")) {
-      if (PUBLIC_ADMIN_PATHS(pathname)) {
-        return NextResponse.next();
-      }
-
-      let token: Awaited<ReturnType<typeof getToken>> = null;
-      try {
-        token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-      } catch (err) {
-        console.error("[middleware] getToken failed", err);
-        // Force re-auth on token failures rather than 500ing the page.
-        const url = req.nextUrl.clone();
-        url.pathname = SIGN_IN_PATH;
-        url.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
-        return NextResponse.redirect(url);
-      }
-
-      if (!token) {
-        const url = req.nextUrl.clone();
-        url.pathname = SIGN_IN_PATH;
-        url.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
-        return NextResponse.redirect(url);
-      }
-
-      if (token.mustChangePassword && pathname !== FORCED_PATH) {
-        const url = req.nextUrl.clone();
-        url.pathname = FORCED_PATH;
-        url.search = "";
-        return NextResponse.redirect(url);
-      }
-
-      return NextResponse.next();
+    // If the user must change their password, lock them on the change page
+    // until they do. Hitting /admin/login while logged in stays allowed
+    // (so signOut redirects after change still work).
+    if (token?.mustChangePassword && path !== FORCED_PATH && path !== "/admin/login") {
+      const url = req.nextUrl.clone();
+      url.pathname = FORCED_PATH;
+      url.search = "";
+      return NextResponse.redirect(url);
     }
-
-    // ── Everything else: next-intl handles locale routing ───────────
-    return intlMiddleware(req);
-  } catch (err) {
-    // Never let the middleware itself 500 the request — the SSR layer
-    // will give a more useful error if the route handler throws.
-    console.error("[middleware] unhandled error", { pathname, err });
     return NextResponse.next();
-  }
-}
+  },
+  { pages: { signIn: "/admin/login" } },
+);
 
+// Matcher excludes login (auth handled by NextAuth) and the public
+// forgot/reset pages (must be reachable without a session).
 export const config = {
-  // Skip Next internals, API routes, and static files.
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  matcher: ["/admin/((?!login|forgot-password|reset-password).*)"],
 };

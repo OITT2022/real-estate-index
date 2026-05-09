@@ -12,7 +12,7 @@ import { BedDouble, Bath, Ruler, Building2, Layers, Car, Fence, Home, CheckCircl
 
 export const revalidate = 300;
 
-type Props = { params: Promise<{ locale: string; slug: string }> };
+type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -25,15 +25,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PropertyPage({ params }: Props) {
-  const { locale, slug } = await params;
-  const { setRequestLocale } = await import("next-intl/server");
-  setRequestLocale(locale);
-  const property = await getPropertyBySlug(slug, locale);
+  const { slug } = await params;
+  const property = await getPropertyBySlug(slug);
 
   if (!property) return notFound();
 
   const [related, mapSettings] = await Promise.all([
-    getRelatedProperties(property.slug, property.city, locale),
+    getRelatedProperties(property.slug, property.city),
     getMapSettings(),
   ]);
 

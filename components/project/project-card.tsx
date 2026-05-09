@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import type { Project, ProjectImage } from "@prisma/client";
 
 type ProjectWithImages = Project & {
@@ -8,7 +7,6 @@ type ProjectWithImages = Project & {
 };
 
 export function ProjectCard({ project }: { project: ProjectWithImages }) {
-  const t = useTranslations("project");
   const primaryImage = project.images.find((img) => img.isPrimary) ?? project.images[0];
 
   return (
@@ -24,8 +22,8 @@ export function ProjectCard({ project }: { project: ProjectWithImages }) {
           <h3>{project.title}</h3>
           <p className="muted">{project.developerName}</p>
           <div className="property-meta-row">
-            {project._count.properties > 0 && <span>{project._count.properties} {t("units")}</span>}
-            {project.totalUnits && <span>{project.totalUnits} {t("total")}</span>}
+            {project._count.properties > 0 && <span>{project._count.properties} units</span>}
+            {project.totalUnits && <span>{project.totalUnits} total</span>}
             {project.completionDate && <span>{project.completionDate}</span>}
           </div>
         </div>

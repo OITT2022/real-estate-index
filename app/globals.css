@@ -495,7 +495,7 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
 .property-card-badge {
   position: absolute;
   top: 14px;
-  inset-inline-start: 14px;
+  left: 14px;
   background: var(--accent);
   color: white;
   padding: 5px 14px;
@@ -583,7 +583,7 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
 .pg-view-photos {
   position: absolute;
   bottom: 20px;
-  inset-inline-end: 20px;
+  right: 20px;
   background: white;
   color: var(--text);
   border: none;
@@ -754,7 +754,7 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
 }
 .sp-feature strong {
   color: var(--text);
-  padding-inline-start: 26px;
+  padding-left: 26px;
 }
 
 /* ── Feature icons ───────────────────────────────────────────── */
@@ -809,7 +809,7 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
 .gallery-image { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-xl); }
 .gallery-thumb .gallery-image { border-radius: var(--radius-lg); }
 .gallery-count {
-  position: absolute; bottom: 14px; inset-inline-end: 14px;
+  position: absolute; bottom: 14px; right: 14px;
   background: rgba(0,0,0,0.6); color: white; padding: 6px 16px;
   border-radius: 999px; font-size: 0.85rem; font-weight: 500; backdrop-filter: blur(4px);
 }
@@ -881,7 +881,7 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
 }
 
 .map-explorer-side {
-  border-inline-end: 1px solid var(--line);
+  border-right: 1px solid var(--line);
   background: var(--surface);
   overflow: hidden;
   display: flex;
@@ -936,7 +936,7 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
 .map-side-card-image img { width: 100%; height: 100%; object-fit: cover; }
 .map-side-card-badge {
   position: absolute;
-  inset-inline-start: 6px;
+  left: 6px;
   top: 6px;
   background: rgba(0,0,0,0.65);
   color: #fff;
@@ -1056,7 +1056,7 @@ h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
   .map-explorer-canvas[data-mobile-hidden="true"] {
     display: none;
   }
-  .map-explorer-side { border-inline-end: none; }
+  .map-explorer-side { border-right: none; }
   .map-page-fullscreen { height: calc(100vh - 60px); }
 }
 
@@ -1843,8 +1843,8 @@ textarea.inquiry-input {
 .ss-popover {
   position: absolute;
   top: calc(100% + 4px);
-  inset-inline-start: 0;
-  inset-inline-end: 0;
+  left: 0;
+  right: 0;
   background: white;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -1921,107 +1921,6 @@ textarea.inquiry-input {
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
 }
 .ss-flag svg { width: 100%; height: 100%; display: block; }
-
-/* ── Language switcher in site header ─────────────────────── */
-.lang-switcher { display: inline-flex; align-items: center; }
-.lang-switcher .ss-trigger {
-  border: 1px solid var(--line);
-  background: var(--surface-alt);
-  border-radius: 999px;
-  padding: 6px 10px;
-  min-height: 0;
-  font-size: 0.8rem;
-}
-.lang-switcher .ss-trigger:hover { background: var(--surface); }
-.lang-switcher .ss-popover { inset-inline-end: 0; inset-inline-start: auto; min-width: 220px; }
-.lang-switcher[data-pending="true"] .ss-trigger { opacity: 0.6; }
-
-/* ── Admin translations card ─────────────────────────────── */
-.translations-icon { color: var(--accent); flex-shrink: 0; }
-.translations-tabs {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 8px;
-}
-.translations-tab {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 2px;
-  padding: 8px 14px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface-alt);
-  font-size: 0.88rem;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-.translations-tab:hover { border-color: var(--accent); }
-.translations-tab-active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
-}
-.translations-tab-active .muted { color: rgba(255,255,255,0.85); }
-.translations-fields {
-  display: grid;
-  gap: 16px;
-}
-.translations-field {
-  display: grid;
-  gap: 6px;
-  padding: 12px 14px;
-  border: 1px solid var(--line-light);
-  border-radius: 10px;
-  background: #fbfbfd;
-}
-.translations-field-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.translations-source {
-  margin: 0;
-  font-size: 0.82rem;
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 4.5em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-.translations-input {
-  width: 100%;
-  border: 1.5px solid var(--line);
-  background: white;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font: inherit;
-  font-size: 0.9rem;
-  color: var(--fg);
-  transition: border-color 0.15s, box-shadow 0.15s;
-  resize: vertical;
-}
-.translations-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-.translations-badge {
-  font-size: 0.7rem;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.translations-badge-manual { background: #dcfce7; color: #166534; }
-.translations-badge-auto   { background: #dbeafe; color: #1e40af; }
 
 .checkbox-row {
   display: flex;

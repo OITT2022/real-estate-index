@@ -1,5 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
@@ -16,11 +18,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // The actual lang/dir for public routes is updated client-side by
-  // <HtmlLangSetter /> inside app/[locale]/layout.tsx. Admin routes are
-  // English-only so the default here is correct for them.
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -28,7 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Providers>
+          <SiteHeader />
           {children}
+          <SiteFooter />
         </Providers>
       </body>
     </html>

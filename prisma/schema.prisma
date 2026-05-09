@@ -321,26 +321,6 @@ model Customer {
   @@index([companyName])
 }
 
-model Translation {
-  id         String   @id @default(cuid())
-  /// "property" | "project" | "site_setting" | "ui_string"
-  entityType String
-  /// FK id, settings key, or message-catalog dot-path
-  entityId   String
-  /// "title" | "description" | "value" | "address" | etc.
-  field      String
-  locale     String
-  value      String
-  /// "auto" (machine-translated) | "manual" (admin override)
-  source     String   @default("auto")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@unique([entityType, entityId, field, locale])
-  @@index([entityType, entityId, locale])
-  @@index([locale])
-}
-
 model SiteSetting {
   key       String   @id
   value     String

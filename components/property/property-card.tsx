@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import type { Property, PropertyImage } from "@prisma/client";
 
 type PropertyWithImages = Property & { images: PropertyImage[] };
 
 export function PropertyCard({ property }: { property: PropertyWithImages }) {
-  const t = useTranslations("property");
   const primaryImage = property.images.find((img) => img.isPrimary) ?? property.images[0];
 
   return (
@@ -27,9 +25,9 @@ export function PropertyCard({ property }: { property: PropertyWithImages }) {
           <h3>{property.title}</h3>
           <p className="muted">{property.address}</p>
           <div className="property-meta-row">
-            <span>{property.bedrooms ?? "-"} {t("beds")}</span>
-            <span>{property.bathrooms ?? "-"} {t("baths")}</span>
-            <span>{property.areaSqm ?? "-"} {t("sqm")}</span>
+            <span>{property.bedrooms ?? "-"} beds</span>
+            <span>{property.bathrooms ?? "-"} baths</span>
+            <span>{property.areaSqm ?? "-"} sqm</span>
           </div>
           <p className="price-line">&euro;{Number(property.price).toLocaleString()}</p>
         </div>

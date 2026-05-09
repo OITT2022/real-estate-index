@@ -1,33 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin, Mail, Phone } from "lucide-react";
-import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ContactForm } from "@/components/forms/contact-form";
 import { getContactContent } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ locale: string }> };
+export const metadata: Metadata = {
+  title: "Contact Us — Real Estate Index",
+  description: "Get in touch with our team. We are here to help you find your perfect property.",
+};
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "contact" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
-}
-
-export default async function ContactPage({ params }: Props) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  const t = await getTranslations("contact");
-  const tNav = await getTranslations("nav");
-  const c = await getContactContent(locale);
+export default async function ContactPage() {
+  const c = await getContactContent();
 
   return (
     <main>
       <div className="page-hero">
         <div className="container">
           <div className="page-hero-breadcrumb">
-            <Link href="/">{tNav("home")}</Link>
+            <Link href="/">Home</Link>
             <span>/</span>
             <span>{c.contact_title}</span>
           </div>
@@ -60,7 +52,7 @@ export default async function ContactPage({ params }: Props) {
                   <MapPin size={22} />
                 </div>
                 <div>
-                  <h4>{t("ourOffice")}</h4>
+                  <h4>Our Office</h4>
                   <p>{c.contact_office}</p>
                 </div>
               </div>
@@ -70,7 +62,7 @@ export default async function ContactPage({ params }: Props) {
                   <Mail size={22} />
                 </div>
                 <div>
-                  <h4>{t("emailUs")}</h4>
+                  <h4>Email Us</h4>
                   <p>{c.contact_email}</p>
                 </div>
               </div>
@@ -80,7 +72,7 @@ export default async function ContactPage({ params }: Props) {
                   <Phone size={22} />
                 </div>
                 <div>
-                  <h4>{t("callUs")}</h4>
+                  <h4>Call Us</h4>
                   <p>{c.contact_phone}</p>
                 </div>
               </div>

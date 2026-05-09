@@ -1,4 +1,3 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
 import { PropertyCard } from "@/components/property/property-card";
 import { ProjectCard } from "@/components/project/project-card";
 import { FilterBar } from "@/components/property/filter-bar";
@@ -16,15 +15,10 @@ import { getHomepageContent } from "@/lib/settings";
 export const dynamic = "force-dynamic";
 
 type Props = {
-  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function HomePage({ params: paramsPromise, searchParams }: Props) {
-  const { locale } = await paramsPromise;
-  setRequestLocale(locale);
-  const t = await getTranslations("home");
-
+export default async function HomePage({ searchParams }: Props) {
   const params = await searchParams;
 
   const city = typeof params.city === "string" ? params.city : undefined;
@@ -36,13 +30,13 @@ export default async function HomePage({ params: paramsPromise, searchParams }: 
   const hasFilters = city || propertyType || bedrooms || minPrice || maxPrice;
 
   const [properties, featured, projects, heroImages, cities, propertyTypes, homepage] = await Promise.all([
-    searchProperties({ city, propertyType, bedrooms, minPrice, maxPrice }, locale),
-    hasFilters ? Promise.resolve([]) : getFeaturedProperties(locale),
-    hasFilters ? Promise.resolve([]) : getPublishedProjects(locale),
+    searchProperties({ city, propertyType, bedrooms, minPrice, maxPrice }),
+    hasFilters ? Promise.resolve([]) : getFeaturedProperties(),
+    hasFilters ? Promise.resolve([]) : getPublishedProjects(),
     getActiveHeroImages(),
     getDistinctCities(),
     getDistinctPropertyTypes(),
-    getHomepageContent(locale),
+    getHomepageContent(),
   ]);
 
   return (
@@ -50,22 +44,24 @@ export default async function HomePage({ params: paramsPromise, searchParams }: 
       {/* ── Full-Width Hero ──────────────────────────────────── */}
       <HeroSlideshow images={heroImages}>
         <div className="hero-search-card">
-          <h1>{t("heroTitle")}</h1>
-          <p className="muted">{t("heroSubtitle")}</p>
+          <h1>Find Your Dream Property</h1>
+          <p className="muted">
+            Browse our curated collection of premium real estate listings across Cyprus.
+          </p>
           <FilterBar cities={cities} propertyTypes={propertyTypes} />
           <div className="hero-search-stats">
             <div className="hero-search-stat">
               <strong>{properties.length}</strong>
-              <span>{hasFilters ? t("statsMatching") : t("statsProperties")}</span>
+              <span>{hasFilters ? "Matching" : "Properties"}</span>
             </div>
             <div className="hero-search-stat">
               <strong>{cities.length}</strong>
-              <span>{t("statsCities")}</span>
+              <span>Cities</span>
             </div>
             {!hasFilters && featured.length > 0 && (
               <div className="hero-search-stat">
                 <strong>{featured.length}</strong>
-                <span>{t("statsFeatured")}</span>
+                <span>Featured</span>
               </div>
             )}
           </div>
@@ -107,9 +103,9 @@ export default async function HomePage({ params: paramsPromise, searchParams }: 
         <section className="section" style={{ paddingTop: 0 }}>
           <div className="container">
             <div className="section-header">
-              <p className="eyebrow">{t("featuredEyebrow")}</p>
-              <h2>{t("featuredHeading")}</h2>
-              <p>{t("featuredIntro")}</p>
+              <p className="eyebrow">Featured listings</p>
+              <h2>Handpicked Properties</h2>
+              <p>Our top selections, curated for quality and value.</p>
             </div>
             <div className="grid grid-3">
               {featured.map((property) => (
@@ -125,9 +121,9 @@ export default async function HomePage({ params: paramsPromise, searchParams }: 
         <section className="section" style={{ paddingTop: 0 }}>
           <div className="container">
             <div className="section-header">
-              <p className="eyebrow">{t("projectsEyebrow")}</p>
-              <h2>{t("projectsHeading")}</h2>
-              <p>{t("projectsIntro")}</p>
+              <p className="eyebrow">Development projects</p>
+              <h2>New Developments</h2>
+              <p>Explore exciting real estate developments in progress.</p>
             </div>
             <div className="grid grid-3">
               {projects.map((project) => (
@@ -142,8 +138,8 @@ export default async function HomePage({ params: paramsPromise, searchParams }: 
       <section className="section" style={{ paddingTop: hasFilters ? undefined : 0 }}>
         <div className="container">
           <div className="section-header">
-            <p className="eyebrow">{hasFilters ? t("searchEyebrow") : t("allEyebrow")}</p>
-            <h2>{hasFilters ? t("searchHeading") : t("allHeading")}</h2>
+            <p className="eyebrow">{hasFilters ? "Search results" : "All properties"}</p>
+            <h2>{hasFilters ? "Properties Matching Your Search" : "Explore All Listings"}</h2>
           </div>
           {properties.length > 0 ? (
             <div className="grid grid-3">
@@ -153,7 +149,9 @@ export default async function HomePage({ params: paramsPromise, searchParams }: 
             </div>
           ) : (
             <p className="muted" style={{ textAlign: "center" }}>
-              {hasFilters ? t("noMatches") : t("noProperties")}
+              {hasFilters
+                ? "No properties match your filters. Try adjusting your search."
+                : "No properties available yet."}
             </p>
           )}
         </div>

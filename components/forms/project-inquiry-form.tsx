@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
 import { inquirySchema, type InquiryFormValues } from "@/lib/validations";
 import { createInquiry } from "@/lib/actions";
 
@@ -13,7 +12,6 @@ type Props = {
 };
 
 export function ProjectInquiryForm({ projectId, projectTitle }: Props) {
-  const t = useTranslations("inquiry");
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -41,8 +39,8 @@ export function ProjectInquiryForm({ projectId, projectTitle }: Props) {
       <div className="inquiry-card">
         <div className="inquiry-success">
           <div className="inquiry-success-icon">&#10003;</div>
-          <h3>{t("successHeading")}</h3>
-          <p>{t("successProjectBody", { title: projectTitle })}</p>
+          <h3>Message sent!</h3>
+          <p>Your inquiry about <strong>{projectTitle}</strong> has been delivered. We will contact you soon.</p>
         </div>
       </div>
     );
@@ -54,8 +52,8 @@ export function ProjectInquiryForm({ projectId, projectTitle }: Props) {
       <div className="inquiry-header">
         <div className="inquiry-icon">&#9993;</div>
         <div>
-          <h3 style={{ margin: 0 }}>{t("headingProject")}</h3>
-          <p className="muted" style={{ margin: "4px 0 0" }}>{t("subtitleProject", { title: projectTitle })}</p>
+          <h3 style={{ margin: 0 }}>Interested in this project?</h3>
+          <p className="muted" style={{ margin: "4px 0 0" }}>Get in touch about {projectTitle}</p>
         </div>
       </div>
 
@@ -64,21 +62,21 @@ export function ProjectInquiryForm({ projectId, projectTitle }: Props) {
       <div className="inquiry-fields">
         <div className="inquiry-row">
           <label className="inquiry-label">
-            <input {...register("fullName")} placeholder={t("fullName")} className="inquiry-input" />
+            <input {...register("fullName")} placeholder="Full name *" className="inquiry-input" />
             {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
           </label>
           <label className="inquiry-label">
-            <input {...register("email")} type="email" placeholder={t("email")} className="inquiry-input" />
+            <input {...register("email")} type="email" placeholder="Email address *" className="inquiry-input" />
             {errors.email && <span className="field-error">{errors.email.message}</span>}
           </label>
         </div>
         <label className="inquiry-label">
-          <input {...register("phone")} placeholder={t("phone")} className="inquiry-input" />
+          <input {...register("phone")} placeholder="Phone number (optional)" className="inquiry-input" />
         </label>
         <label className="inquiry-label">
           <textarea
             {...register("message")}
-            placeholder={t("messageProjectPlaceholder", { title: projectTitle })}
+            placeholder={`Hi, I'm interested in ${projectTitle} and would like to know more...`}
             rows={4}
             className="inquiry-input"
           />
@@ -87,7 +85,7 @@ export function ProjectInquiryForm({ projectId, projectTitle }: Props) {
       </div>
 
       <button type="submit" className="inquiry-submit" disabled={isSubmitting}>
-        {isSubmitting ? t("sending") : t("send")}
+        {isSubmitting ? "Sending..." : "Send Message"}
       </button>
     </form>
   );
