@@ -1,8 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { Providers } from "@/components/providers";
-import { routing, RTL_LOCALES, type Locale } from "@/i18n/routing";
 
 export const metadata: Metadata = {
   title: "Real Estate Index",
@@ -17,19 +15,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // next-intl middleware writes NEXT_LOCALE on the locale routes; admin and
-  // other non-localized routes get the default. Reading the cookie keeps the
-  // root layout valid for both branches without needing per-segment params.
-  const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value as Locale | undefined;
-  const locale: Locale = cookieLocale && (routing.locales as readonly string[]).includes(cookieLocale)
-    ? cookieLocale
-    : routing.defaultLocale;
-  const dir = RTL_LOCALES.has(locale) ? "rtl" : "ltr";
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // The actual lang/dir for public routes is updated client-side by
+  // <HtmlLangSetter /> inside app/[locale]/layout.tsx. Admin routes are
+  // English-only so the default here is correct for them.
   return (
-    <html lang={locale} dir={dir}>
+    <html lang="en" dir="ltr">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

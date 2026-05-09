@@ -4,7 +4,8 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { routing } from "@/i18n/routing";
+import { HtmlLangSetter } from "@/components/layout/html-lang-setter";
+import { routing, RTL_LOCALES, type Locale } from "@/i18n/routing";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -40,8 +41,11 @@ export default async function LocaleLayout({
   // Enables static rendering inside this segment.
   setRequestLocale(locale);
 
+  const dir = RTL_LOCALES.has(locale as Locale) ? "rtl" : "ltr";
+
   return (
     <NextIntlClientProvider>
+      <HtmlLangSetter locale={locale} dir={dir} />
       <SiteHeader />
       {children}
       <SiteFooter />
