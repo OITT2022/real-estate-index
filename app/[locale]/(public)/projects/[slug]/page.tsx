@@ -29,7 +29,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const { locale, slug } = await params;
   const { setRequestLocale } = await import("next-intl/server");
   setRequestLocale(locale);
-  const project = await getProjectBySlug(slug);
+  const project = await getProjectBySlug(slug, locale);
 
   if (!project) return notFound();
 

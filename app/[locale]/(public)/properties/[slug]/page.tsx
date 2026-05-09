@@ -28,12 +28,12 @@ export default async function PropertyPage({ params }: Props) {
   const { locale, slug } = await params;
   const { setRequestLocale } = await import("next-intl/server");
   setRequestLocale(locale);
-  const property = await getPropertyBySlug(slug);
+  const property = await getPropertyBySlug(slug, locale);
 
   if (!property) return notFound();
 
   const [related, mapSettings] = await Promise.all([
-    getRelatedProperties(property.slug, property.city),
+    getRelatedProperties(property.slug, property.city, locale),
     getMapSettings(),
   ]);
 

@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { translateList } from "@/lib/translation/get";
 
 export const MAP_TILE_LAYERS = {
   osm: {
@@ -128,7 +129,45 @@ export const ALL_PAGE_DEFAULTS: Record<string, string> = {
   ...HOMEPAGE_DEFAULTS,
 };
 
-export async function getAboutContent(): Promise<AboutContent> {
+/**
+ * Translates a flat string→string content map (e.g. AboutContent). Each
+ * key becomes its own Translation row with entityType="site_setting" and
+ * entityId=key, so admin overrides apply at the same key granularity.
+ */
+async function translateContentMap<T extends Record<string, string>>(
+  content: T,
+  locale: string,
+  excludeKeys: ReadonlySet<string> = new Set(),
+): Promise<T> {
+  // translateList expects a list of objects keyed by `id`; reshape one
+  // entity-per-key, then fold the result back into a flat object.
+  const rows = Object.entries(content)
+    .filter(([k]) => !excludeKeys.has(k))
+    .map(([key, value]) => ({ id: key, value }));
+  const translated = await translateList(rows, {
+    entityType: "site_setting",
+    fields: ["value"],
+  }, locale);
+
+  const out = { ...content };
+  for (const r of translated) (out as Record<string, string>)[r.id] = r.value;
+  return out;
+}
+
+// Stat values that are computed at runtime — never translated.
+const ABOUT_NON_TRANSLATABLE = new Set<string>([
+  "about_image",
+  "about_stat1_value",
+  "about_stat2_value",
+  "about_stat3_value",
+]);
+const CONTACT_NON_TRANSLATABLE = new Set<string>([
+  "contact_image",
+  "contact_email",
+  "contact_phone",
+]);
+
+export async function getAboutContent(locale?: string): Promise<AboutContent> {
   const [settings, propertyCount, distinctCities] = await Promise.all([
     db.siteSetting.findMany({ where: { key: { in: [...ABOUT_KEYS] } } }),
     db.property.count({ where: { published: true, status: "ACTIVE" } }),
@@ -147,27 +186,30 @@ export async function getAboutContent(): Promise<AboutContent> {
   // ("Happy Clients") has no DB source and stays admin-editable.
   result.about_stat1_value = String(propertyCount);
   result.about_stat2_value = String(distinctCities.length);
-  return result;
+  if (!locale) return result;
+  return translateContentMap(result, locale, ABOUT_NON_TRANSLATABLE);
 }
 
-export async function getContactContent(): Promise<ContactContent> {
+export async function getContactContent(locale?: string): Promise<ContactContent> {
   const settings = await db.siteSetting.findMany({ where: { key: { in: [...CONTACT_KEYS] } } });
   const map = new Map(settings.map((s) => [s.key, s.value]));
   const result = { ...CONTACT_DEFAULTS };
   for (const key of CONTACT_KEYS) {
     if (map.has(key)) (result as Record<string, string>)[key] = map.get(key)!;
   }
-  return result;
+  if (!locale) return result;
+  return translateContentMap(result, locale, CONTACT_NON_TRANSLATABLE);
 }
 
-export async function getHomepageContent(): Promise<HomepageContent> {
+export async function getHomepageContent(locale?: string): Promise<HomepageContent> {
   const settings = await db.siteSetting.findMany({ where: { key: { in: [...HOMEPAGE_KEYS] } } });
   const map = new Map(settings.map((s) => [s.key, s.value]));
   const result = { ...HOMEPAGE_DEFAULTS };
   for (const key of HOMEPAGE_KEYS) {
     if (map.has(key)) (result as Record<string, string>)[key] = map.get(key)!;
   }
-  return result;
+  if (!locale) return result;
+  return translateContentMap(result, locale);
 }
 
 export async function getMapSettings() {

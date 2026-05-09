@@ -23,7 +23,7 @@ export default async function ProjectsPage({ params }: Props) {
   const t = await getTranslations("projects");
   const tNav = await getTranslations("nav");
 
-  const projects = await getPublishedProjects();
+  const projects = await getPublishedProjects(locale);
 
   return (
     <main>

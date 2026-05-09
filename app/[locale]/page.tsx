@@ -36,13 +36,13 @@ export default async function HomePage({ params: paramsPromise, searchParams }: 
   const hasFilters = city || propertyType || bedrooms || minPrice || maxPrice;
 
   const [properties, featured, projects, heroImages, cities, propertyTypes, homepage] = await Promise.all([
-    searchProperties({ city, propertyType, bedrooms, minPrice, maxPrice }),
-    hasFilters ? Promise.resolve([]) : getFeaturedProperties(),
-    hasFilters ? Promise.resolve([]) : getPublishedProjects(),
+    searchProperties({ city, propertyType, bedrooms, minPrice, maxPrice }, locale),
+    hasFilters ? Promise.resolve([]) : getFeaturedProperties(locale),
+    hasFilters ? Promise.resolve([]) : getPublishedProjects(locale),
     getActiveHeroImages(),
     getDistinctCities(),
     getDistinctPropertyTypes(),
-    getHomepageContent(),
+    getHomepageContent(locale),
   ]);
 
   return (

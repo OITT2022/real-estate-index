@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import type { SessionUser } from "@/lib/scope";
 import { customerScope, propertyCustomerScope } from "@/lib/scope";
+import { getTranslatedFields, translateList } from "@/lib/translation/get";
 
 const propertyInclude = { images: { orderBy: { sortOrder: "asc" as const } } };
 const projectInclude = {
@@ -8,35 +9,76 @@ const projectInclude = {
   _count: { select: { properties: true } },
 };
 
+const PROPERTY_TRANSLATABLE_FIELDS = [
+  "title",
+  "description",
+  "shortDescription",
+  "address",
+  "city",
+  "neighborhood",
+  "metaTitle",
+  "metaDescription",
+] as const;
+
+const PROJECT_TRANSLATABLE_FIELDS = [
+  "title",
+  "description",
+  "shortDescription",
+  "address",
+  "city",
+  "metaTitle",
+  "metaDescription",
+] as const;
+
 // ── Properties ─────────────────────────────────────────────────
 
-export async function getPublishedProperties() {
-  return db.property.findMany({
+export async function getPublishedProperties(locale?: string) {
+  const rows = await db.property.findMany({
     where: { published: true, status: "ACTIVE" },
     include: propertyInclude,
     orderBy: { createdAt: "desc" },
   });
+  if (!locale) return rows;
+  return translateList(rows, { entityType: "property", fields: PROPERTY_TRANSLATABLE_FIELDS }, locale);
 }
 
-export async function getFeaturedProperties() {
-  return db.property.findMany({
+export async function getFeaturedProperties(locale?: string) {
+  const rows = await db.property.findMany({
     where: { published: true, status: "ACTIVE", featured: true },
     include: propertyInclude,
     orderBy: { createdAt: "desc" },
   });
+  if (!locale) return rows;
+  return translateList(rows, { entityType: "property", fields: PROPERTY_TRANSLATABLE_FIELDS }, locale);
 }
 
-export async function getPropertyBySlug(slug: string) {
-  return db.property.findFirst({
+export async function getPropertyBySlug(slug: string, locale?: string) {
+  const row = await db.property.findFirst({
     where: { slug, published: true, status: "ACTIVE" },
     include: {
       ...propertyInclude,
-      project: { select: { title: true, slug: true } },
+      project: { select: { id: true, title: true, slug: true } },
     },
   });
+  if (!row || !locale) return row;
+  const translated = await getTranslatedFields(row, {
+    entityType: "property",
+    entityId: row.id,
+    fields: PROPERTY_TRANSLATABLE_FIELDS,
+  }, locale);
+  // Translate the embedded project title too if present.
+  if (translated.project && row.project) {
+    const tProject = await getTranslatedFields(row.project, {
+      entityType: "project",
+      entityId: row.project.id,
+      fields: ["title"],
+    }, locale);
+    return { ...translated, project: { title: tProject.title, slug: row.project.slug } };
+  }
+  return translated;
 }
 
-export async function getRelatedProperties(slug: string, city?: string) {
+export async function getRelatedProperties(slug: string, city?: string, locale?: string) {
   // First try same city
   const sameCity = city
     ? await db.property.findMany({
@@ -47,18 +89,20 @@ export async function getRelatedProperties(slug: string, city?: string) {
       })
     : [];
 
-  if (sameCity.length >= 3) return sameCity;
+  let result = sameCity;
+  if (sameCity.length < 3) {
+    const excludeSlugs = [slug, ...sameCity.map((p) => p.slug)];
+    const others = await db.property.findMany({
+      where: { slug: { notIn: excludeSlugs }, published: true, status: "ACTIVE" },
+      include: propertyInclude,
+      take: 3 - sameCity.length,
+      orderBy: { createdAt: "desc" },
+    });
+    result = [...sameCity, ...others];
+  }
 
-  // Fill remaining slots with other properties
-  const excludeSlugs = [slug, ...sameCity.map((p) => p.slug)];
-  const others = await db.property.findMany({
-    where: { slug: { notIn: excludeSlugs }, published: true, status: "ACTIVE" },
-    include: propertyInclude,
-    take: 3 - sameCity.length,
-    orderBy: { createdAt: "desc" },
-  });
-
-  return [...sameCity, ...others];
+  if (!locale) return result;
+  return translateList(result, { entityType: "property", fields: PROPERTY_TRANSLATABLE_FIELDS }, locale);
 }
 
 export type SearchFilters = {
@@ -69,7 +113,7 @@ export type SearchFilters = {
   maxPrice?: number;
 };
 
-export async function searchProperties(filters: SearchFilters) {
+export async function searchProperties(filters: SearchFilters, locale?: string) {
   const where: Record<string, unknown> = { published: true, status: "ACTIVE" };
 
   if (filters.city) {
@@ -88,11 +132,13 @@ export async function searchProperties(filters: SearchFilters) {
     };
   }
 
-  return db.property.findMany({
+  const rows = await db.property.findMany({
     where,
     include: propertyInclude,
     orderBy: { createdAt: "desc" },
   });
+  if (!locale) return rows;
+  return translateList(rows, { entityType: "property", fields: PROPERTY_TRANSLATABLE_FIELDS }, locale);
 }
 
 // ── Map page ───────────────────────────────────────────────────
@@ -135,7 +181,7 @@ export type MapPageData = {
   properties: MapPropertyPoint[];
 };
 
-export async function getMapPageData(filters: SearchFilters): Promise<MapPageData> {
+export async function getMapPageData(filters: SearchFilters, locale?: string): Promise<MapPageData> {
   // Standalone properties: published + ACTIVE + no parent project + filters
   const propWhere: Record<string, unknown> = {
     published: true,
@@ -248,7 +294,14 @@ export async function getMapPageData(filters: SearchFilters): Promise<MapPageDat
     image: p.images[0] ?? null,
   }));
 
-  return { projects, properties };
+  if (!locale) return { projects, properties };
+
+  // Map markers only need title/address/city translated.
+  const [translatedProperties, translatedProjects] = await Promise.all([
+    translateList(properties, { entityType: "property", fields: ["title", "address", "city"] }, locale),
+    translateList(projects, { entityType: "project", fields: ["title", "address", "city"] }, locale),
+  ]);
+  return { projects: translatedProjects, properties: translatedProperties };
 }
 
 export async function getDistinctCities() {
@@ -303,16 +356,18 @@ export async function getPropertyById(id: string) {
 
 // ── Projects ───────────────────────────────────────────────────
 
-export async function getPublishedProjects() {
-  return db.project.findMany({
+export async function getPublishedProjects(locale?: string) {
+  const rows = await db.project.findMany({
     where: { published: true, status: "ACTIVE" },
     include: projectInclude,
     orderBy: { createdAt: "desc" },
   });
+  if (!locale) return rows;
+  return translateList(rows, { entityType: "project", fields: PROJECT_TRANSLATABLE_FIELDS }, locale);
 }
 
-export async function getProjectBySlug(slug: string) {
-  return db.project.findFirst({
+export async function getProjectBySlug(slug: string, locale?: string) {
+  const row = await db.project.findFirst({
     where: { slug, published: true, status: "ACTIVE" },
     include: {
       images: { orderBy: { sortOrder: "asc" } },
@@ -335,6 +390,18 @@ export async function getProjectBySlug(slug: string) {
       },
     },
   });
+  if (!row || !locale) return row;
+  const translatedProject = await getTranslatedFields(row, {
+    entityType: "project",
+    entityId: row.id,
+    fields: PROJECT_TRANSLATABLE_FIELDS,
+  }, locale);
+  const translatedProperties = await translateList(
+    row.properties,
+    { entityType: "property", fields: PROPERTY_TRANSLATABLE_FIELDS },
+    locale,
+  );
+  return { ...translatedProject, properties: translatedProperties };
 }
 
 export async function getAllProjects(user?: SessionUser, customerId?: string) {

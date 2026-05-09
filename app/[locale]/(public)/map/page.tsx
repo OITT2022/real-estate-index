@@ -19,7 +19,7 @@ export default async function MapPage({ params }: Props) {
   setRequestLocale(locale);
 
   const [{ projects, properties }, mapSettings] = await Promise.all([
-    getMapPageData({}),
+    getMapPageData({}, locale),
     getMapSettings(),
   ]);
 

@@ -115,6 +115,74 @@ function isSupportedLocale(locale: string): boolean {
 }
 
 /**
+ * Translate a list of entities of the same type in a single DB roundtrip.
+ * For each row we read `idField` (defaults to "id") to scope the lookup,
+ * then replace each translatable field with its cached translation.
+ *
+ * Cache misses for any (row, field) combination return source text and
+ * enqueue a single batched translation job.
+ */
+export async function translateList<T extends Record<string, unknown>>(
+  rows: T[],
+  args: {
+    entityType: EntityType;
+    fields: readonly (keyof T & string)[];
+    idField?: keyof T & string;
+  },
+  locale: string,
+): Promise<T[]> {
+  if (rows.length === 0 || locale === SOURCE_LOCALE || !isSupportedLocale(locale)) return rows;
+
+  const idField = args.idField ?? "id";
+  const ids: string[] = [];
+  for (const r of rows) {
+    const v = r[idField as keyof T];
+    if (typeof v === "string") ids.push(v);
+  }
+  if (ids.length === 0) return rows;
+
+  let cached: { entityId: string; field: string; value: string }[] = [];
+  try {
+    cached = await db.translation.findMany({
+      where: {
+        entityType: args.entityType,
+        locale,
+        entityId: { in: ids },
+        field: { in: [...args.fields] },
+      },
+      select: { entityId: true, field: true, value: true },
+    });
+  } catch (err) {
+    console.error("[translation] list lookup failed:", err);
+    return rows;
+  }
+
+  const cacheMap = new Map<string, string>();
+  for (const c of cached) cacheMap.set(`${c.entityId}::${c.field}`, c.value);
+
+  const missing: FieldRequest[] = [];
+  const next = rows.map((row) => {
+    const id = row[idField] as string | undefined;
+    if (!id) return row;
+    const out: Record<string, unknown> = { ...row };
+    for (const field of args.fields) {
+      const sourceText = row[field];
+      if (typeof sourceText !== "string" || !sourceText) continue;
+      const cachedValue = cacheMap.get(`${id}::${field}`);
+      if (cachedValue !== undefined) {
+        out[field] = cachedValue;
+      } else {
+        missing.push({ entityType: args.entityType, entityId: id, field, sourceText });
+      }
+    }
+    return out as T;
+  });
+
+  if (missing.length > 0) scheduleTranslate(missing, locale);
+  return next;
+}
+
+/**
  * Fire-and-forget. Uses Next.js `after()` so the response is sent before
  * we hit the translation API, then writes one row per (field, locale).
  *
