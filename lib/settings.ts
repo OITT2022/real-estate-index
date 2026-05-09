@@ -130,28 +130,29 @@ export const ALL_PAGE_DEFAULTS: Record<string, string> = {
 };
 
 /**
- * Translates a flat string→string content map (e.g. AboutContent). Each
- * key becomes its own Translation row with entityType="site_setting" and
- * entityId=key, so admin overrides apply at the same key granularity.
+ * Translates a flat string→string content map (e.g. AboutContent) by
+ * treating the whole page as one entity — each key in the map becomes
+ * a translatable *field* on that entity. The Translation row shape is
+ * `(entityType: "site_setting", entityId: pageName, field: key, locale)`.
+ * This lets the admin override card group all keys for a page under
+ * a single tabbed editor.
  */
 async function translateContentMap<T extends Record<string, string>>(
   content: T,
+  pageName: string,
   locale: string,
   excludeKeys: ReadonlySet<string> = new Set(),
 ): Promise<T> {
-  // translateList expects a list of objects keyed by `id`; reshape one
-  // entity-per-key, then fold the result back into a flat object.
-  const rows = Object.entries(content)
-    .filter(([k]) => !excludeKeys.has(k))
-    .map(([key, value]) => ({ id: key, value }));
-  const translated = await translateList(rows, {
-    entityType: "site_setting",
-    fields: ["value"],
-  }, locale);
-
-  const out = { ...content };
-  for (const r of translated) (out as Record<string, string>)[r.id] = r.value;
-  return out;
+  const fields = (Object.keys(content) as (keyof T & string)[]).filter((k) => !excludeKeys.has(k));
+  const wrapper = { id: pageName, ...content };
+  const [translated] = await translateList(
+    [wrapper as { id: string } & T],
+    { entityType: "site_setting", fields },
+    locale,
+  );
+  if (!translated) return content;
+  const { id: _ignore, ...rest } = translated;
+  return rest as unknown as T;
 }
 
 // Stat values that are computed at runtime — never translated.
@@ -187,7 +188,7 @@ export async function getAboutContent(locale?: string): Promise<AboutContent> {
   result.about_stat1_value = String(propertyCount);
   result.about_stat2_value = String(distinctCities.length);
   if (!locale) return result;
-  return translateContentMap(result, locale, ABOUT_NON_TRANSLATABLE);
+  return translateContentMap(result, "about", locale, ABOUT_NON_TRANSLATABLE);
 }
 
 export async function getContactContent(locale?: string): Promise<ContactContent> {
@@ -198,7 +199,7 @@ export async function getContactContent(locale?: string): Promise<ContactContent
     if (map.has(key)) (result as Record<string, string>)[key] = map.get(key)!;
   }
   if (!locale) return result;
-  return translateContentMap(result, locale, CONTACT_NON_TRANSLATABLE);
+  return translateContentMap(result, "contact", locale, CONTACT_NON_TRANSLATABLE);
 }
 
 export async function getHomepageContent(locale?: string): Promise<HomepageContent> {
@@ -209,7 +210,7 @@ export async function getHomepageContent(locale?: string): Promise<HomepageConte
     if (map.has(key)) (result as Record<string, string>)[key] = map.get(key)!;
   }
   if (!locale) return result;
-  return translateContentMap(result, locale);
+  return translateContentMap(result, "homepage", locale);
 }
 
 export async function getMapSettings() {

@@ -1936,6 +1936,93 @@ textarea.inquiry-input {
 .lang-switcher .ss-popover { right: 0; left: auto; min-width: 220px; }
 .lang-switcher[data-pending="true"] .ss-trigger { opacity: 0.6; }
 
+/* ── Admin translations card ─────────────────────────────── */
+.translations-icon { color: var(--accent); flex-shrink: 0; }
+.translations-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+.translations-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 2px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-alt);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.translations-tab:hover { border-color: var(--accent); }
+.translations-tab-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.translations-tab-active .muted { color: rgba(255,255,255,0.85); }
+.translations-fields {
+  display: grid;
+  gap: 16px;
+}
+.translations-field {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-light);
+  border-radius: 10px;
+  background: #fbfbfd;
+}
+.translations-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.translations-source {
+  margin: 0;
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 4.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.translations-input {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  background: white;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--fg);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  resize: vertical;
+}
+.translations-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.translations-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.translations-badge-manual { background: #dcfce7; color: #166534; }
+.translations-badge-auto   { background: #dbeafe; color: #1e40af; }
+
 .checkbox-row {
   display: flex;
   flex-wrap: wrap;
