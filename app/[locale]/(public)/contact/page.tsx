@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin, Mail, Phone } from "lucide-react";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ContactForm } from "@/components/forms/contact-form";
 import { getContactContent } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Contact Us — Real Estate Index",
-  description: "Get in touch with our team. We are here to help you find your perfect property.",
-};
+type Props = { params: Promise<{ locale: string }> };
 
-export default async function ContactPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "contact" });
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
+
+export default async function ContactPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("contact");
+  const tNav = await getTranslations("nav");
   const c = await getContactContent();
 
   return (
@@ -19,7 +27,7 @@ export default async function ContactPage() {
       <div className="page-hero">
         <div className="container">
           <div className="page-hero-breadcrumb">
-            <Link href="/">Home</Link>
+            <Link href="/">{tNav("home")}</Link>
             <span>/</span>
             <span>{c.contact_title}</span>
           </div>
@@ -52,7 +60,7 @@ export default async function ContactPage() {
                   <MapPin size={22} />
                 </div>
                 <div>
-                  <h4>Our Office</h4>
+                  <h4>{t("ourOffice")}</h4>
                   <p>{c.contact_office}</p>
                 </div>
               </div>
@@ -62,7 +70,7 @@ export default async function ContactPage() {
                   <Mail size={22} />
                 </div>
                 <div>
-                  <h4>Email Us</h4>
+                  <h4>{t("emailUs")}</h4>
                   <p>{c.contact_email}</p>
                 </div>
               </div>
@@ -72,7 +80,7 @@ export default async function ContactPage() {
                   <Phone size={22} />
                 </div>
                 <div>
-                  <h4>Call Us</h4>
+                  <h4>{t("callUs")}</h4>
                   <p>{c.contact_phone}</p>
                 </div>
               </div>

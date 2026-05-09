@@ -1,10 +1,14 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { withAuth, type NextRequestWithAuth } from "next-auth/middleware";
+import createIntlMiddleware from "next-intl/middleware";
+import { routing } from "@/i18n/routing";
 
 const FORCED_PATH = "/admin/change-password";
 
-export default withAuth(
-  function middleware(req) {
+const intlMiddleware = createIntlMiddleware(routing);
+
+const adminAuthMiddleware = withAuth(
+  function middleware(req: NextRequestWithAuth) {
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
@@ -22,8 +26,28 @@ export default withAuth(
   { pages: { signIn: "/admin/login" } },
 );
 
-// Matcher excludes login (auth handled by NextAuth) and the public
-// forgot/reset pages (must be reachable without a session).
+export default function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Admin routes go through NextAuth, never through next-intl.
+  if (pathname.startsWith("/admin")) {
+    // Login + public auth pages bypass auth check entirely.
+    if (
+      pathname === "/admin/login" ||
+      pathname.startsWith("/admin/forgot-password") ||
+      pathname.startsWith("/admin/reset-password")
+    ) {
+      return NextResponse.next();
+    }
+    // withAuth expects to be called as a function — let TS see the cast.
+    return (adminAuthMiddleware as unknown as (r: NextRequest) => Response | Promise<Response>)(req);
+  }
+
+  // Everything else: next-intl handles locale routing.
+  return intlMiddleware(req);
+}
+
 export const config = {
-  matcher: ["/admin/((?!login|forgot-password|reset-password).*)"],
+  // Skip Next internals, API routes, and static files.
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };

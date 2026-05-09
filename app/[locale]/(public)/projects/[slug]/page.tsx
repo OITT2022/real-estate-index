@@ -13,7 +13,7 @@ import { Building2, Calendar, MapPin, Users, FileText } from "lucide-react";
 
 export const revalidate = 300;
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = { params: Promise<{ locale: string; slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -26,7 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProjectDetailPage({ params }: Props) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  const { setRequestLocale } = await import("next-intl/server");
+  setRequestLocale(locale);
   const project = await getProjectBySlug(slug);
 
   if (!project) return notFound();

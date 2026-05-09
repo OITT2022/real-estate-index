@@ -1,16 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ProjectCard } from "@/components/project/project-card";
 import { getPublishedProjects } from "@/lib/site-data";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Projects — Real Estate Index",
-  description: "Browse our real estate development projects.",
-};
+type Props = { params: Promise<{ locale: string }> };
 
-export default async function ProjectsPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return {
+    title: t("projectsTitle"),
+    description: t("projectsDescription"),
+  };
+}
+
+export default async function ProjectsPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("projects");
+  const tNav = await getTranslations("nav");
+
   const projects = await getPublishedProjects();
 
   return (
@@ -18,12 +30,12 @@ export default async function ProjectsPage() {
       <div className="page-hero">
         <div className="container">
           <div className="page-hero-breadcrumb">
-            <Link href="/">Home</Link>
+            <Link href="/">{tNav("home")}</Link>
             <span>/</span>
-            <span>Projects</span>
+            <span>{tNav("projects")}</span>
           </div>
-          <h1>Development Projects</h1>
-          <p>Explore our curated selection of real estate developments.</p>
+          <h1>{t("pageTitle")}</h1>
+          <p>{t("pageIntro")}</p>
         </div>
       </div>
 
@@ -36,7 +48,7 @@ export default async function ProjectsPage() {
               ))}
             </div>
           ) : (
-            <p className="muted" style={{ textAlign: "center" }}>No projects available yet.</p>
+            <p className="muted" style={{ textAlign: "center" }}>{t("empty")}</p>
           )}
         </div>
       </section>

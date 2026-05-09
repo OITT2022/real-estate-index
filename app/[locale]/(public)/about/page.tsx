@@ -1,15 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getAboutContent } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "About Us — Real Estate Index",
-  description: "Learn more about Real Estate Index, your trusted platform for premium property listings.",
-};
+type Props = { params: Promise<{ locale: string }> };
 
-export default async function AboutPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "about" });
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
+
+export default async function AboutPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const tNav = await getTranslations("nav");
   const c = await getAboutContent();
 
   return (
@@ -17,7 +24,7 @@ export default async function AboutPage() {
       <div className="page-hero">
         <div className="container">
           <div className="page-hero-breadcrumb">
-            <Link href="/">Home</Link>
+            <Link href="/">{tNav("home")}</Link>
             <span>/</span>
             <span>{c.about_title}</span>
           </div>

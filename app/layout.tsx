@@ -1,8 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { cookies } from "next/headers";
 import { Providers } from "@/components/providers";
+import { routing, RTL_LOCALES, type Locale } from "@/i18n/routing";
 
 export const metadata: Metadata = {
   title: "Real Estate Index",
@@ -17,9 +17,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // next-intl middleware writes NEXT_LOCALE on the locale routes; admin and
+  // other non-localized routes get the default. Reading the cookie keeps the
+  // root layout valid for both branches without needing per-segment params.
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value as Locale | undefined;
+  const locale: Locale = cookieLocale && (routing.locales as readonly string[]).includes(cookieLocale)
+    ? cookieLocale
+    : routing.defaultLocale;
+  const dir = RTL_LOCALES.has(locale) ? "rtl" : "ltr";
+
   return (
-    <html lang="en">
+    <html lang={locale} dir={dir}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -27,9 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Providers>
-          <SiteHeader />
           {children}
-          <SiteFooter />
         </Providers>
       </body>
     </html>
