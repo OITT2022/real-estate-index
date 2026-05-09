@@ -3,7 +3,11 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        # `npm install` (not `npm ci`) so the @swc/helpers override resolves.
+        # next pins it 0.5.15; next-intl's @swc/core peer-deps >=0.5.17.
+        # `npm ci` rejects the deduped 0.5.21 from the override; `npm install`
+        # accepts it.
+        - npm install --no-audit --no-fund
         - npx prisma generate
         - npx prisma migrate deploy || echo "Migration skipped (may need manual run)"
         - |
