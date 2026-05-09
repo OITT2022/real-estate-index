@@ -8,6 +8,7 @@
     "start": "next start",
     "seed": "tsx prisma/seed.ts",
     "find-orphans": "tsx scripts/find-orphans.ts",
+    "translate:ui": "dotenv -e .env -- tsx scripts/translate-ui-catalogs.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "dev:test": "dotenv -e .env.test -- next dev -p 3100",
