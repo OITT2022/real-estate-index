@@ -16,37 +16,50 @@ const PUBLIC_ADMIN_PATHS = (path: string) =>
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ── Admin: auth-gated, never localized ──────────────────────────
-  if (pathname.startsWith("/admin")) {
-    if (PUBLIC_ADMIN_PATHS(pathname)) {
+  try {
+    // ── Admin: auth-gated, never localized ──────────────────────────
+    if (pathname.startsWith("/admin")) {
+      if (PUBLIC_ADMIN_PATHS(pathname)) {
+        return NextResponse.next();
+      }
+
+      let token: Awaited<ReturnType<typeof getToken>> = null;
+      try {
+        token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+      } catch (err) {
+        console.error("[middleware] getToken failed", err);
+        // Force re-auth on token failures rather than 500ing the page.
+        const url = req.nextUrl.clone();
+        url.pathname = SIGN_IN_PATH;
+        url.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
+        return NextResponse.redirect(url);
+      }
+
+      if (!token) {
+        const url = req.nextUrl.clone();
+        url.pathname = SIGN_IN_PATH;
+        url.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
+        return NextResponse.redirect(url);
+      }
+
+      if (token.mustChangePassword && pathname !== FORCED_PATH) {
+        const url = req.nextUrl.clone();
+        url.pathname = FORCED_PATH;
+        url.search = "";
+        return NextResponse.redirect(url);
+      }
+
       return NextResponse.next();
     }
 
-    const token = await getToken({
-      req,
-      secret: process.env.NEXTAUTH_SECRET,
-    });
-
-    if (!token) {
-      const url = req.nextUrl.clone();
-      url.pathname = SIGN_IN_PATH;
-      url.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
-      return NextResponse.redirect(url);
-    }
-
-    // Force first-time password change before any other admin page renders.
-    if (token.mustChangePassword && pathname !== FORCED_PATH) {
-      const url = req.nextUrl.clone();
-      url.pathname = FORCED_PATH;
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
-
+    // ── Everything else: next-intl handles locale routing ───────────
+    return intlMiddleware(req);
+  } catch (err) {
+    // Never let the middleware itself 500 the request — the SSR layer
+    // will give a more useful error if the route handler throws.
+    console.error("[middleware] unhandled error", { pathname, err });
     return NextResponse.next();
   }
-
-  // ── Everything else: next-intl handles locale routing ───────────
-  return intlMiddleware(req);
 }
 
 export const config = {
