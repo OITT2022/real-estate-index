@@ -3,15 +3,19 @@
 import { useRouter } from "next/navigation";
 import { deleteProject } from "@/lib/actions";
 
-type Props = { projectId: string; published: boolean };
+type Props = { projectId: string; published: boolean; redirectTo?: string };
 
-export function ProjectActions({ projectId }: Props) {
+export function ProjectActions({ projectId, redirectTo }: Props) {
   const router = useRouter();
 
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this project?")) return;
     await deleteProject(projectId);
-    router.refresh();
+    if (redirectTo) {
+      router.push(redirectTo);
+    } else {
+      router.refresh();
+    }
   }
 
   return (

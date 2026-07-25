@@ -8,9 +8,10 @@ import { ProjectWizard } from "@/components/admin/project-wizard";
 import { ImageBankPicker } from "@/components/admin/image-bank-picker";
 import { AddPropertyModal } from "@/components/admin/add-property-modal";
 import { Project3DPreview } from "@/components/admin/project-3d-preview";
+import { ProjectActions } from "@/components/admin/project-actions";
 import { getProjectById, getAllProperties, getAllBankImages, getAllCustomersForSelect } from "@/lib/site-data";
 import { checkPageAccess } from "@/lib/check-access";
-import { getSessionUser, getUserScope } from "@/lib/scope";
+import { getSessionUser, getUserScope, canAccessCustomer } from "@/lib/scope";
 import { transformProjectToInput } from "@/lib/building-3d/transform-project";
 import { generateSceneFromProject } from "@/lib/building-3d/generate-scene";
 
@@ -29,6 +30,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   ]);
 
   if (!project) return notFound();
+  if (sessionUser && !canAccessCustomer(sessionUser, project.customerId)) return notFound();
 
   // Generate 3D scene from project structure
   const projectInput = transformProjectToInput(project);
@@ -57,6 +59,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           <h1 className="at-page-title">Edit Project</h1>
           <p className="at-page-subtitle">{project.title}</p>
         </div>
+        <ProjectActions projectId={project.id} published={project.published} redirectTo="/admin/projects" />
       </div>
 
         <ProjectWizard>

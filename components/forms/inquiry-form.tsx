@@ -62,18 +62,22 @@ export function InquiryForm({ propertyId, propertyTitle }: InquiryFormProps) {
       <div className="inquiry-fields">
         <div className="inquiry-row">
           <label className="inquiry-label">
-            <input {...register("fullName")} placeholder="Full name *" className="inquiry-input" />
+            <span>Full name</span>
+            <input {...register("fullName")} placeholder="Your name" className="inquiry-input" />
             {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
           </label>
           <label className="inquiry-label">
-            <input {...register("email")} type="email" placeholder="Email address *" className="inquiry-input" />
+            <span>Email address</span>
+            <input {...register("email")} type="email" placeholder="Your email" className="inquiry-input" />
             {errors.email && <span className="field-error">{errors.email.message}</span>}
           </label>
         </div>
         <label className="inquiry-label">
-          <input {...register("phone")} placeholder="Phone number (optional)" className="inquiry-input" />
+          <span>Phone number</span>
+          <input {...register("phone")} placeholder="Optional" className="inquiry-input" />
         </label>
         <label className="inquiry-label">
+          <span>Message</span>
           <textarea {...register("message")} placeholder="Hi, I'm interested in this property and would like to know more..." rows={4} className="inquiry-input" />
           {errors.message && <span className="field-error">{errors.message.message}</span>}
         </label>

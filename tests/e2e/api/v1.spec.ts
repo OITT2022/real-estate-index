@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import crypto from "node:crypto";
+import bcrypt from "bcryptjs";
 import { testDb } from "../helpers/db";
 
 test.describe("Public API v1", () => {
@@ -20,7 +21,7 @@ test.describe("Public API v1", () => {
     // Provision a fresh client with a known token, then make the call.
     const db = testDb();
     const tokenPlain = `at_${crypto.randomBytes(16).toString("hex")}`;
-    const tokenHash = crypto.createHash("sha256").update(tokenPlain).digest("hex");
+    const tokenHash = await bcrypt.hash(tokenPlain, 10);
     const client = await db.apiClient.create({
       data: {
         name: "Spec runtime client",

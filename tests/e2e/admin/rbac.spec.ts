@@ -34,14 +34,16 @@ test.describe("Customer-manager scope enforcement", () => {
 
     await loginAsCustomerManager(page);
     const res = await page.goto(`/admin/properties/${otherProp.id}`);
+    const status = res?.status();
 
-    // Either 403/404 OR a redirect away from the edit screen
-    if (res) {
-      expect([200, 302, 403, 404]).toContain(res.status());
+    // Either 403/404 (same URL, rejected in place) OR a redirect away from the edit screen.
+    if (status !== undefined && [403, 404].includes(status)) {
+      // Rejected in place — sufficient on its own, no redirect required.
+    } else {
+      expect(status === undefined || [200, 302].includes(status)).toBeTruthy();
+      const url = page.url();
+      expect(url.includes(otherProp.id) && url.includes("/admin/properties/")).toBeFalsy();
     }
-    // Body must not show another customer's data fields editable
-    const url = page.url();
-    expect(url.includes(otherProp.id) && url.includes("/admin/properties/")).toBeFalsy();
 
     await db.$disconnect();
   });

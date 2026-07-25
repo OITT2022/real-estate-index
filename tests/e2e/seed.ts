@@ -217,7 +217,7 @@ export async function seedTestFixtures() {
   await db.apiClient.create({
     data: {
       name: "Test API — all data",
-      tokenHash: crypto.createHash("sha256").update(apiTokenAll).digest("hex"),
+      tokenHash: await bcrypt.hash(apiTokenAll, 10),
       tokenPrefix: apiTokenAll.slice(0, 8),
       scopeType: "all",
       allowedPropertyFields: ["title", "slug", "price", "city"],
@@ -231,7 +231,7 @@ export async function seedTestFixtures() {
   await db.apiClient.create({
     data: {
       name: "Test API — customer A only",
-      tokenHash: crypto.createHash("sha256").update(apiTokenCustomer).digest("hex"),
+      tokenHash: await bcrypt.hash(apiTokenCustomer, 10),
       tokenPrefix: apiTokenCustomer.slice(0, 8),
       scopeType: "customer",
       customerId: custA.id,
@@ -252,7 +252,7 @@ export async function seedTestFixtures() {
       { key: "about_title", value: "About Us — Test" },
       { key: "about_text1", value: "Seed about content paragraph 1" },
       { key: "contact_title", value: "Contact — Test" },
-      { key: "contact_office_email", value: "office@test.local" },
+      { key: "contact_email", value: "office@test.local" },
     ],
   });
 

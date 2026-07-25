@@ -39,6 +39,9 @@ export default async function HomePage({ searchParams }: Props) {
     getHomepageContent(),
   ]);
 
+  const featuredIds = new Set(featured.map((p) => p.id));
+  const gridProperties = hasFilters ? properties : properties.filter((p) => !featuredIds.has(p.id));
+
   return (
     <main>
       {/* ── Full-Width Hero ──────────────────────────────────── */}
@@ -141,9 +144,9 @@ export default async function HomePage({ searchParams }: Props) {
             <p className="eyebrow">{hasFilters ? "Search results" : "All properties"}</p>
             <h2>{hasFilters ? "Properties Matching Your Search" : "Explore All Listings"}</h2>
           </div>
-          {properties.length > 0 ? (
+          {gridProperties.length > 0 ? (
             <div className="grid grid-3">
-              {properties.map((property) => (
+              {gridProperties.map((property) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
             </div>

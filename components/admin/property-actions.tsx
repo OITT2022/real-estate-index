@@ -6,15 +6,20 @@ import { deleteProperty } from "@/lib/actions";
 type Props = {
   propertyId: string;
   published: boolean;
+  redirectTo?: string;
 };
 
-export function PropertyActions({ propertyId }: Props) {
+export function PropertyActions({ propertyId, redirectTo }: Props) {
   const router = useRouter();
 
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this property?")) return;
     await deleteProperty(propertyId);
-    router.refresh();
+    if (redirectTo) {
+      router.push(redirectTo);
+    } else {
+      router.refresh();
+    }
   }
 
   return (
