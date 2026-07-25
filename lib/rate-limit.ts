@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 /**
  * Simple in-memory sliding-window rate limiter for server actions.
  *
- * Single-instance only — fine for AWS Amplify with one container, breaks if
+ * Single-instance only — fine for a single-container deploy, breaks if
  * the app scales horizontally. When that day arrives, replace the `buckets`
  * Map with an Upstash Ratelimit client; the call sites stay unchanged.
  */

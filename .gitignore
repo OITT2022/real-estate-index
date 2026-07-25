@@ -8,3 +8,6 @@ public/uploads/
 dist/
 .env*.local
 .env.production
+.env.digitalocean
+.env.aws-source
+.env.cloudflare

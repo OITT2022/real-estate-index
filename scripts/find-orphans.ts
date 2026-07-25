@@ -34,6 +34,9 @@ function looksLikeUploadedBlob(url: string): boolean {
   if (!url) return false;
   if (url.startsWith("/uploads/")) return true;
   if (url.includes(".s3.") && url.includes(".amazonaws.com/uploads/")) return true;
+  // DO Spaces (or any other S3-compatible endpoint): https://<bucket>.<endpoint>/uploads/...
+  const endpoint = process.env.S3_ENDPOINT?.replace(/^https?:\/\//, "");
+  if (endpoint && url.includes(`.${endpoint}/uploads/`)) return true;
   return false;
 }
 
@@ -112,7 +115,9 @@ function deleteCommand(url: string, backend: "local" | "s3"): string {
       // u.pathname starts with `/`, e.g. "/uploads/abc.jpg"
       const key = u.pathname.replace(/^\//, "");
       const bucket = u.hostname.split(".")[0];
-      return `aws s3 rm s3://${bucket}/${key}`;
+      const endpoint = process.env.S3_ENDPOINT;
+      const endpointFlag = endpoint ? ` --endpoint-url ${endpoint}` : "";
+      return `aws s3 rm s3://${bucket}/${key}${endpointFlag}`;
     } catch {
       return `# unparseable URL: ${url}`;
     }
@@ -140,7 +145,7 @@ async function main() {
   const now = new Date().toISOString().replace("T", " ").slice(0, 16);
   lines.push(`# Orphan Report — ${now}`);
   lines.push("");
-  lines.push(`Storage backend: **${backend}**${backend === "local" ? " (./public/uploads)" : ` (s3://${process.env.S3_BUCKET ?? "aradre-assets"}/uploads/)`}`);
+  lines.push(`Storage backend: **${backend}**${backend === "local" ? " (./public/uploads)" : ` (s3://${process.env.S3_BUCKET ?? "aradre-assets"}/uploads/${process.env.S3_ENDPOINT ? ` via ${process.env.S3_ENDPOINT}` : " on AWS S3"})`}`);
   lines.push(`Files in storage: **${storageUrls.length}**`);
   lines.push(`Blob URLs referenced in DB: **${dbBlobUrls.size}**`);
   lines.push("");

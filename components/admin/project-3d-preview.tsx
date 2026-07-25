@@ -88,7 +88,7 @@ export function Project3DPreview({ sceneSpec, projectId, savedExrUrl }: Props) {
   };
 
   // Environment map upload handler (.exr / .hdr)
-  // Uses presigned S3 URL for large files (bypasses Amplify 5MB limit)
+  // Uses presigned S3 URL for large files (bypasses the server's regular body-size limit)
   // Falls back to regular upload for local dev
   const handleExrUpload = async (file: File) => {
     const ext = file.name.toLowerCase().split(".").pop();

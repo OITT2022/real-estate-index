@@ -9,7 +9,7 @@ import { getS3PublicUrl } from "@/lib/storage";
 /**
  * POST /api/upload/presign
  * Returns a presigned S3 URL for direct client-side upload.
- * Used for large files (HDR/EXR) that exceed Amplify's 5MB body limit.
+ * Used for large files (HDR/EXR) that exceed the server's regular request body-size limit.
  */
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);

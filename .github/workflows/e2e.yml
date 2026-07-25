@@ -1,11 +1,9 @@
-# Rename this file to e2e.yml to enable in CI.
-# Provided as a starting point — review env vars and DB credentials before
-# enabling.
 name: E2E
 
 on:
   push:
-    branches: [master]
+    # TODO: drop migrate/digitalocean once it's merged into master and retired.
+    branches: [master, migrate/digitalocean]
   pull_request:
 
 jobs:

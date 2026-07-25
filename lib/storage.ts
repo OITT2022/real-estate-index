@@ -19,9 +19,14 @@ export interface StorageProvider {
 
 // ── Local filesystem provider ──
 
+function localUploadSubdir(): string {
+  return process.env.LOCAL_UPLOAD_DIR?.replace(/^\.\//, "").replace(/^public\//, "") ?? "uploads";
+}
+
 class LocalStorageProvider implements StorageProvider {
   async upload(file: File): Promise<string> {
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    const subdir = localUploadSubdir();
+    const uploadsDir = path.join(process.cwd(), "public", subdir);
     await fs.mkdir(uploadsDir, { recursive: true });
 
     const ext = path.extname(file.name) || ".jpg";
@@ -31,21 +36,23 @@ class LocalStorageProvider implements StorageProvider {
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filepath, buffer);
 
-    return `/uploads/${filename}`;
+    return `/${subdir}/${filename}`;
   }
 
   async delete(url: string): Promise<void> {
-    if (url.startsWith("/uploads/")) {
+    const subdir = localUploadSubdir();
+    if (url.startsWith(`/${subdir}/`)) {
       const filepath = path.join(process.cwd(), "public", url);
       await fs.unlink(filepath).catch(() => {});
     }
   }
 
   async list(): Promise<string[]> {
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    const subdir = localUploadSubdir();
+    const uploadsDir = path.join(process.cwd(), "public", subdir);
     try {
       const entries = await fs.readdir(uploadsDir, { withFileTypes: true });
-      return entries.filter((e) => e.isFile()).map((e) => `/uploads/${e.name}`);
+      return entries.filter((e) => e.isFile()).map((e) => `/${subdir}/${e.name}`);
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
       throw err;

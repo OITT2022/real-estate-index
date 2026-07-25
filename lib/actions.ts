@@ -1038,13 +1038,21 @@ export async function submitContactForm(data: unknown): Promise<ActionResult> {
   if (!parsed.success) return { success: false, error: parsed.error.errors[0]?.message ?? "Invalid input" };
 
   const { name, email, subject, message } = parsed.data;
+  const notifyEmail = process.env.RESEND_TO_EMAIL ?? "avi@aradre.com";
+  const emailSubject = `[Contact Form] ${subject}`;
+  const body = `New contact form submission:\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`;
 
   const { sendEmail } = await import("@/lib/email");
-  const result = await sendEmail(
-    process.env.RESEND_TO_EMAIL ?? "avi@aradre.com",
-    `[Contact Form] ${subject}`,
-    `New contact form submission:\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`,
-  );
+  const result = await sendEmail(notifyEmail, emailSubject, body);
+
+  await db.emailLog.create({
+    data: {
+      inquiryId: null,
+      subject: emailSubject,
+      body: result.success ? body : `[FAILED: ${result.error ?? "unknown"}]\n\n${body}`,
+      sentTo: notifyEmail,
+    },
+  }).catch((err) => console.error("[submitContactForm] EmailLog write failed", err));
 
   if (!result.success) return { success: false, error: result.error ?? "Failed to send email" };
   return { success: true };

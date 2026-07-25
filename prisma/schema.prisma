@@ -262,12 +262,12 @@ model Appointment {
 
 model EmailLog {
   id         String   @id @default(cuid())
-  inquiryId  String
+  inquiryId  String?
   subject    String
   body       String
   sentTo     String
   sentAt     DateTime @default(now())
-  inquiry    Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  inquiry    Inquiry? @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
 
   @@index([inquiryId, sentAt])
 }
