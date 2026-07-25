@@ -54,6 +54,9 @@ class LocalStorageProvider implements StorageProvider {
 }
 
 // ── S3 provider ──
+//
+// Also used against DigitalOcean Spaces (S3-compatible): set S3_ENDPOINT to
+// e.g. https://fra1.digitaloceanspaces.com. Leave it unset to talk to AWS S3.
 
 import {
   S3Client,
@@ -61,6 +64,19 @@ import {
   DeleteObjectCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
+
+function resolveS3Endpoint(): { endpoint?: string; forcePathStyle?: boolean } {
+  const endpoint = process.env.S3_ENDPOINT;
+  return endpoint ? { endpoint, forcePathStyle: false } : {};
+}
+
+export function getS3PublicUrl(bucket: string, region: string, key: string): string {
+  const endpoint = process.env.S3_ENDPOINT;
+  if (endpoint) {
+    return `https://${bucket}.${endpoint.replace(/^https?:\/\//, "")}/${key}`;
+  }
+  return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+}
 
 class S3StorageProvider implements StorageProvider {
   private bucket: string;
@@ -79,6 +95,7 @@ class S3StorageProvider implements StorageProvider {
     const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
     this._client = new S3Client({
       region: this.region,
+      ...resolveS3Endpoint(),
       ...(accessKeyId && secretAccessKey
         ? { credentials: { accessKeyId, secretAccessKey } }
         : {}),
@@ -97,10 +114,11 @@ class S3StorageProvider implements StorageProvider {
         Key: key,
         Body: buffer,
         ContentType: file.type || "application/octet-stream",
+        ACL: "public-read",
       })
     );
 
-    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
+    return getS3PublicUrl(this.bucket, this.region, key);
   }
 
   async delete(url: string): Promise<void> {
@@ -127,7 +145,7 @@ class S3StorageProvider implements StorageProvider {
       );
       for (const obj of res.Contents ?? []) {
         if (obj.Key) {
-          out.push(`https://${this.bucket}.s3.${this.region}.amazonaws.com/${obj.Key}`);
+          out.push(getS3PublicUrl(this.bucket, this.region, obj.Key));
         }
       }
       continuationToken = res.IsTruncated ? res.NextContinuationToken : undefined;

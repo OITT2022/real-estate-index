@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { db } from "@/lib/db";
+import { getS3PublicUrl } from "@/lib/storage";
 
 /**
  * POST /api/upload/presign
@@ -41,13 +42,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "S3 not configured, use regular upload" }, { status: 400 });
   }
 
+  const endpoint = process.env.S3_ENDPOINT;
   const client = new S3Client({
     region,
     credentials: { accessKeyId, secretAccessKey },
+    ...(endpoint ? { endpoint, forcePathStyle: false } : {}),
   });
 
   const key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
+  // No ACL here: it would become a signed header the client's PUT must also send exactly,
+  // and the client currently only sends Content-Type. Set ACL after upload if this needs to be public.
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
@@ -55,7 +60,7 @@ export async function POST(req: NextRequest) {
   });
 
   const presignedUrl = await getSignedUrl(client, command, { expiresIn: 300 });
-  const finalUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  const finalUrl = getS3PublicUrl(bucket, region, key);
 
   // Save the URL to the project now — the client will upload directly to S3
   await db.project.update({
